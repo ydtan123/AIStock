@@ -1,0 +1,309 @@
+import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import date, datetime, timedelta
+from typing import Optional
+
+import yaml
+from pathlib import Path
+from sqlalchemy import text
+from sqlalchemy.dialects.mysql import insert
+
+from database import get_session, get_engine
+from fetcher.base import FetcherBase
+from ingestion.indicators import compute_indicators
+from ingestion.symbols import refresh_symbols
+from models import DailyPrice, PipelineRun, Stock, StockIndicator, StockSnapshot
+
+logger = logging.getLogger(__name__)
+
+DEFAULT_START = date(2000, 1, 1)
+MAX_WORKERS = 10
+
+
+def _load_config() -> dict:
+    config_path = Path(__file__).parent.parent / "config.yaml"
+    with open(config_path) as f:
+        return yaml.safe_load(f)
+
+
+def _get_max_price_date(session, stock_id: int) -> Optional[date]:
+    result = session.execute(
+        text("SELECT MAX(date) FROM daily_prices WHERE stock_id = :sid"),
+        {"sid": stock_id},
+    ).scalar()
+    return result
+
+
+def _fetch_and_store_prices(fetcher: FetcherBase, stock: Stock) -> tuple[int, Optional[date]]:
+    """Fetch incremental prices for one stock. Returns (rows_inserted, new_max_date)."""
+    session = get_session()
+    try:
+        max_date = _get_max_price_date(session, stock.id)
+        start = (max_date + timedelta(days=1)) if max_date else DEFAULT_START
+        end = date.today()
+
+        if start > end:
+            return 0, max_date
+
+        df = fetcher.get_daily(stock.symbol, start, end)
+        if df.empty:
+            return 0, max_date
+
+        count = 0
+        for _, row in df.iterrows():
+            stmt = insert(DailyPrice).values(
+                stock_id=stock.id,
+                date=row["date"],
+                open=row.get("open"),
+                high=row.get("high"),
+                low=row.get("low"),
+                close=row.get("close"),
+                adj_close=row.get("adj_close"),
+                volume=row.get("volume"),
+                dividend_amount=row.get("dividend_amount"),
+                split_coefficient=row.get("split_coefficient"),
+            ).on_duplicate_key_update(
+                open=row.get("open"),
+                high=row.get("high"),
+                low=row.get("low"),
+                close=row.get("close"),
+                adj_close=row.get("adj_close"),
+                volume=row.get("volume"),
+                dividend_amount=row.get("dividend_amount"),
+                split_coefficient=row.get("split_coefficient"),
+            )
+            session.execute(stmt)
+            count += 1
+
+        session.commit()
+        return count, df["date"].max()
+    except Exception as e:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+
+def _upsert_fundamentals(fetcher: FetcherBase, stock: Stock, force: bool = False) -> bool:
+    """Fetch and upsert OVERVIEW data. Skips if last_updated < refresh_days ago."""
+    config = _load_config()
+    refresh_days = config.get("scheduler", {}).get("overview_refresh_days", 7)
+
+    session = get_session()
+    try:
+        existing = session.query(StockIndicator).filter_by(stock_id=stock.id).first()
+        if not force and existing and existing.last_updated:
+            age = (datetime.utcnow() - existing.last_updated).days
+            if age < refresh_days:
+                return False
+
+        data = fetcher.get_overview(stock.symbol)
+        if not data:
+            return False
+
+        # Update stock metadata fields
+        session.query(Stock).filter_by(id=stock.id).update({
+            "name": data.get("name") or stock.name,
+            "asset_type": data.get("asset_type") or stock.asset_type,
+            "exchange": data.get("exchange") or stock.exchange,
+            "currency": data.get("currency") or stock.currency,
+            "country": data.get("country") or stock.country,
+            "sector": data.get("sector") or stock.sector,
+            "industry": data.get("industry") or stock.industry,
+            "description": data.get("description") or stock.description,
+            "cik": data.get("cik") or stock.cik,
+            "official_site": data.get("official_site") or stock.official_site,
+            "address": data.get("address") or stock.address,
+            "fiscal_year_end": data.get("fiscal_year_end") or stock.fiscal_year_end,
+            "shares_outstanding": data.get("shares_outstanding") or stock.shares_outstanding,
+            "shares_float": data.get("shares_float") or stock.shares_float,
+        })
+
+        indicator_fields = {
+            k: v for k, v in data.items()
+            if k not in {"symbol", "name", "asset_type", "exchange", "currency", "country",
+                         "sector", "industry", "description", "cik", "official_site",
+                         "address", "fiscal_year_end", "shares_outstanding", "shares_float"}
+        }
+        indicator_fields["stock_id"] = stock.id
+        indicator_fields["last_updated"] = datetime.utcnow()
+
+        stmt = insert(StockIndicator).values(**indicator_fields).on_duplicate_key_update(
+            **{k: v for k, v in indicator_fields.items() if k != "stock_id"}
+        )
+        session.execute(stmt)
+        session.commit()
+        return True
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+
+def _refresh_snapshots():
+    """Bulk refresh stock_snapshots from latest values across all active stocks."""
+    engine = get_engine()
+    sql = """
+    REPLACE INTO stock_snapshots (
+        stock_id, latest_date, close, volume,
+        pe_ratio, market_cap, roe_ttm, dividend_yield, beta,
+        rsi_14, macd, sma_20, sma_50,
+        sector, exchange, updated_at
+    )
+    SELECT
+        s.id,
+        dp.date,
+        dp.close,
+        dp.volume,
+        si.pe_ratio,
+        si.market_cap,
+        si.roe_ttm,
+        si.dividend_yield,
+        si.beta,
+        JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.RSI_14')) + 0,
+        JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.MACD_12_26_9')) + 0,
+        JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.SMA_20')) + 0,
+        JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.SMA_50')) + 0,
+        s.sector,
+        s.exchange,
+        NOW()
+    FROM stocks s
+    JOIN (
+        SELECT stock_id, MAX(date) AS max_date
+        FROM daily_prices
+        GROUP BY stock_id
+    ) latest ON latest.stock_id = s.id
+    JOIN daily_prices dp ON dp.stock_id = s.id AND dp.date = latest.max_date
+    LEFT JOIN stock_indicators si ON si.stock_id = s.id
+    LEFT JOIN (
+        SELECT stock_id, MAX(date) AS max_date
+        FROM technical_indicators
+        GROUP BY stock_id
+    ) latest_ti ON latest_ti.stock_id = s.id
+    LEFT JOIN technical_indicators ti ON ti.stock_id = s.id AND ti.date = latest_ti.max_date
+    WHERE s.is_active = 1
+    """
+    with engine.connect() as conn:
+        conn.execute(text(sql))
+        conn.commit()
+    logger.info("Snapshots refreshed.")
+
+
+def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool) -> dict:
+    result = {"symbol": stock.symbol, "prices": 0, "fundamentals": False, "indicators": 0, "error": None}
+    try:
+        prices_inserted, new_max_date = _fetch_and_store_prices(fetcher, stock)
+        result["prices"] = prices_inserted
+
+        _upsert_fundamentals(fetcher, stock, force=force)
+        result["fundamentals"] = True
+
+        since = new_max_date - timedelta(days=300) if new_max_date else None
+        result["indicators"] = compute_indicators(stock.id, since_date=since)
+
+        # Update checkpoint
+        session = get_session()
+        try:
+            session.query(Stock).filter_by(id=stock.id).update({"last_price_fetch": datetime.utcnow()})
+            session.commit()
+        finally:
+            session.close()
+
+    except Exception as e:
+        result["error"] = str(e)
+        logger.error("Error processing %s: %s", stock.symbol, e)
+    return result
+
+
+def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
+    """Run the 5-step daily pipeline. Returns summary dict."""
+    session = get_session()
+    run = PipelineRun(started_at=datetime.utcnow(), status="running")
+    session.add(run)
+    session.commit()
+    run_id = run.id
+    session.close()
+
+    summary = {"processed": 0, "errors": 0, "symbols": []}
+
+    try:
+        session = get_session()
+        stocks = session.query(Stock).filter(Stock.is_active == True).all()
+        session.close()
+        logger.info("Pipeline starting: %d active symbols", len(stocks))
+
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+            futures = {pool.submit(_process_symbol, fetcher, s, force): s for s in stocks}
+            for future in as_completed(futures):
+                result = future.result()
+                summary["processed"] += 1
+                if result["error"]:
+                    summary["errors"] += 1
+                summary["symbols"].append(result)
+
+        _refresh_snapshots()
+
+    except Exception as e:
+        logger.error("Pipeline failed: %s", e)
+        summary["errors"] += 1
+    finally:
+        session = get_session()
+        try:
+            session.query(PipelineRun).filter_by(id=run_id).update({
+                "finished_at": datetime.utcnow(),
+                "symbols_processed": summary["processed"],
+                "errors_count": summary["errors"],
+                "status": "completed" if summary["errors"] == 0 else "completed_with_errors",
+            })
+            session.commit()
+        finally:
+            session.close()
+
+    logger.info("Pipeline done. Processed=%d Errors=%d", summary["processed"], summary["errors"])
+    return summary
+
+
+def run_bootstrap(fetcher: FetcherBase, auto_activate_criteria: Optional[dict] = None):
+    """First-time setup: fetch OVERVIEW for all symbols, optionally auto-activate."""
+    session = get_session()
+    stocks = session.query(Stock).all()
+    session.close()
+
+    logger.info("Bootstrap: fetching OVERVIEW for %d symbols", len(stocks))
+    errors = 0
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+        futures = {pool.submit(_upsert_fundamentals, fetcher, s, True): s for s in stocks}
+        for i, future in enumerate(as_completed(futures), 1):
+            try:
+                future.result()
+            except Exception as e:
+                logger.error("Bootstrap error: %s", e)
+                errors += 1
+            if i % 100 == 0:
+                logger.info("Bootstrap progress: %d/%d", i, len(stocks))
+
+    logger.info("Bootstrap complete. Errors=%d", errors)
+
+    if auto_activate_criteria:
+        _auto_activate(auto_activate_criteria)
+
+
+def _auto_activate(criteria: dict):
+    session = get_session()
+    try:
+        q = session.query(Stock).join(StockIndicator, Stock.id == StockIndicator.stock_id)
+        if "min_market_cap" in criteria:
+            q = q.filter(StockIndicator.market_cap >= criteria["min_market_cap"])
+        if "exchanges" in criteria:
+            q = q.filter(Stock.exchange.in_(criteria["exchanges"]))
+        stocks = q.all()
+        now = datetime.utcnow()
+        for s in stocks:
+            s.is_active = True
+            s.activated_at = now
+        session.commit()
+        logger.info("Auto-activated %d stocks", len(stocks))
+    finally:
+        session.close()

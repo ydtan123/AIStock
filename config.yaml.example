@@ -1,0 +1,25 @@
+# Stock Data Management System — Configuration
+# Copy to config.yaml and fill in real values. config.yaml is gitignored.
+
+source: alpha_vantage  # alpha_vantage | yahoo
+
+alpha_vantage:
+  api_key: "YOUR_ALPHA_VANTAGE_API_KEY"
+
+database:
+  url: "mysql+pymysql://stockdb:password@localhost/stockdb"
+
+scheduler:
+  daily_run_time: "18:00"       # 24h local time — set Mac timezone to America/New_York
+  overview_refresh_days: 7      # re-fetch OVERVIEW this many days after last update
+  timezone: "America/New_York"
+
+# Optional: auto-activate stocks on bootstrap matching these criteria.
+# Leave empty to activate manually via the Manager tab.
+default_activation_criteria:
+  min_market_cap: 500000000     # $500M minimum market cap
+  exchanges:                    # limit to these exchanges
+    - NASDAQ
+    - NYSE
+
+log_dir: "logs"                 # relative to project root, or absolute path

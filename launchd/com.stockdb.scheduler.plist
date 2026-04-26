@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.stockdb.scheduler</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/YOUR_USERNAME/PROD/AIStock/venv/bin/python</string>
+        <string>/Users/YOUR_USERNAME/PROD/AIStock/scheduler.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/YOUR_USERNAME/PROD/AIStock</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/YOUR_USERNAME/PROD/AIStock/logs/scheduler.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/YOUR_USERNAME/PROD/AIStock/logs/scheduler.log</string>
+
+    <!-- Start at login and keep alive so APScheduler runs continuously -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+</dict>
+</plist>
