@@ -1,4 +1,6 @@
 import logging
+import random
+import time
 from datetime import datetime, date
 
 import pandas as pd
@@ -10,8 +12,8 @@ from models import DailyPrice, Stock, TechnicalIndicator
 
 logger = logging.getLogger(__name__)
 
-_STRATEGY = ta.Strategy(
-    name="all",
+_STRATEGY = ta.Study(
+    name="core",
     ta=[{"kind": "sma", "length": 20}, {"kind": "sma", "length": 50}, {"kind": "sma", "length": 200},
         {"kind": "ema", "length": 12}, {"kind": "ema", "length": 26},
         {"kind": "rsi", "length": 14},
@@ -58,31 +60,53 @@ def compute_indicators(stock_id: int, since_date: date | None = None) -> int:
             "volume": float(r.volume or 0),
         } for r in rows])
         df.set_index("date", inplace=True)
-        df.ta.strategy(_STRATEGY)
+        df.ta.study(_STRATEGY)
 
-        # Only process dates newer than since_date
         if since_date:
             df = df[df.index >= since_date]
 
         if df.empty:
             return 0
 
-        count = 0
+        values = []
         for row_date, row in df.iterrows():
-            indicators = {k: (None if pd.isna(v) else round(float(v), 6)) for k, v in row.items()}
-            stmt = insert(TechnicalIndicator).values(
-                stock_id=stock_id,
-                date=row_date,
-                indicators=indicators,
-                computed_at=datetime.utcnow(),
-            ).on_duplicate_key_update(
-                indicators=indicators,
-                computed_at=datetime.utcnow(),
-            )
-            session.execute(stmt)
-            count += 1
+            indicators = {}
+            for k, v in row.items():
+                val = float(v)
+                if pd.isna(val) or val == float('inf') or val == float('-inf'):
+                    val = None
+                else:
+                    val = round(val, 6)
+                indicators[k] = val
+            values.append({
+                "stock_id": stock_id,
+                "date": row_date,
+                "indicators": indicators,
+                "computed_at": datetime.utcnow(),
+            })
 
-        session.commit()
+        count = 0
+        batch_size = 100
+        for i in range(0, len(values), batch_size):
+            batch = values[i:i + batch_size]
+            for attempt in range(5):
+                try:
+                    for v in batch:
+                        stmt = insert(TechnicalIndicator).values(**v).on_duplicate_key_update(
+                            indicators=v["indicators"],
+                            computed_at=v["computed_at"],
+                        )
+                        session.execute(stmt)
+                    session.commit()
+                    count += len(batch)
+                    break
+                except Exception as e:
+                    session.rollback()
+                    if attempt < 4 and "1213" in str(e):
+                        time.sleep(0.1 * (attempt + 1) + random.uniform(0, 0.1))
+                        continue
+                    raise
+
         return count
     except Exception:
         session.rollback()

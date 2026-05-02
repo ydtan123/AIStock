@@ -1,14 +1,12 @@
-import json
 from datetime import date, datetime, timedelta
 
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
-from sqlalchemy import text
 
-from database import get_engine, get_session
-from models import Stock, DailyPrice, StockIndicator, StockSnapshot, TechnicalIndicator
+from display import fmt_market_cap, nan_safe
+from repository import ScreenCriteria, StockFilters, StockRepository
 
 st.set_page_config(page_title="StockDB", page_icon="📈", layout="wide")
 
@@ -30,73 +28,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ── helpers ──────────────────────────────────────────────────────────────────
-
-def _fmt_market_cap(val) -> str:
-    if val is None:
-        return "—"
-    val = int(val)
-    if val >= 1_000_000_000_000:
-        return f"${val/1_000_000_000_000:.2f}T"
-    if val >= 1_000_000_000:
-        return f"${val/1_000_000_000:.2f}B"
-    if val >= 1_000_000:
-        return f"${val/1_000_000:.1f}M"
-    return f"${val:,}"
-
-
-def _get_stock(symbol: str) -> Stock | None:
-    session = get_session()
-    try:
-        return session.query(Stock).filter_by(symbol=symbol.upper()).first()
-    finally:
-        session.close()
-
-
-def _get_prices(stock_id: int, start: date, end: date) -> pd.DataFrame:
-    session = get_session()
-    try:
-        rows = (
-            session.query(DailyPrice)
-            .filter(DailyPrice.stock_id == stock_id, DailyPrice.date >= start, DailyPrice.date <= end)
-            .order_by(DailyPrice.date)
-            .all()
-        )
-        return pd.DataFrame([{
-            "date": r.date, "open": r.open, "high": r.high, "low": r.low,
-            "close": r.close, "adj_close": r.adj_close, "volume": r.volume,
-        } for r in rows])
-    finally:
-        session.close()
-
-
-def _get_indicator(stock_id: int) -> StockIndicator | None:
-    session = get_session()
-    try:
-        return session.query(StockIndicator).filter_by(stock_id=stock_id).first()
-    finally:
-        session.close()
-
-
-def _get_tech_indicators(stock_id: int, start: date, end: date) -> pd.DataFrame:
-    session = get_session()
-    try:
-        rows = (
-            session.query(TechnicalIndicator)
-            .filter(TechnicalIndicator.stock_id == stock_id,
-                    TechnicalIndicator.date >= start, TechnicalIndicator.date <= end)
-            .order_by(TechnicalIndicator.date)
-            .all()
-        )
-        records = []
-        for r in rows:
-            d = {"date": r.date}
-            if r.indicators:
-                d.update(r.indicators)
-            records.append(d)
-        return pd.DataFrame(records)
-    finally:
-        session.close()
+repo = StockRepository()
 
 
 # ── tab 1: Lookup ─────────────────────────────────────────────────────────────
@@ -110,7 +42,7 @@ def tab_lookup():
         start_date = st.date_input("Start date", value=date.today() - timedelta(days=365))
         end_date = st.date_input("End date", value=date.today())
 
-        stock = _get_stock(symbol)
+        stock = repo.find_stock(symbol)
         if stock:
             status_color = "#16a34a" if stock.is_active else "#dc2626"
             status_label = "Active" if stock.is_active else "Inactive"
@@ -130,8 +62,8 @@ def tab_lookup():
             st.warning(f"No data for {symbol}. Run bootstrap first.")
             return
 
-        ind = _get_indicator(stock.id)
-        prices_df = _get_prices(stock.id, start_date, end_date)
+        ind = repo.get_indicator(stock.id)
+        prices_df = repo.get_prices(stock.id, start_date, end_date)
 
         # Metric cards
         last_close = float(prices_df["close"].iloc[-1]) if not prices_df.empty else None
@@ -148,7 +80,7 @@ def tab_lookup():
             pe = f"{float(ind.pe_ratio):.1f}" if ind and ind.pe_ratio else "—"
             st.markdown(f'<div class="metric-card"><div class="metric-label">PE RATIO</div><div class="metric-value" style="color:#d97706">{pe}</div><div class="metric-sub" style="color:#94a3b8">trailing</div></div>', unsafe_allow_html=True)
         with c3:
-            mc = _fmt_market_cap(ind.market_cap if ind else None)
+            mc = fmt_market_cap(ind.market_cap if ind else None)
             st.markdown(f'<div class="metric-card"><div class="metric-label">MKT CAP</div><div class="metric-value" style="color:#7c3aed">{mc}</div><div class="metric-sub" style="color:#94a3b8">USD</div></div>', unsafe_allow_html=True)
         with c4:
             vol_str = f"{volume/1_000_000:.1f}M" if volume and volume >= 1_000_000 else (f"{volume:,}" if volume else "—")
@@ -216,13 +148,13 @@ def tab_technical():
         show_atr = st.checkbox("ATR (14)", value=False)
 
     with col_main:
-        stock = _get_stock(symbol)
+        stock = repo.find_stock(symbol)
         if not stock:
             st.warning(f"Symbol {symbol} not found.")
             return
 
-        prices_df = _get_prices(stock.id, start_date, end_date)
-        tech_df = _get_tech_indicators(stock.id, start_date, end_date)
+        prices_df = repo.get_prices(stock.id, start_date, end_date)
+        tech_df = repo.get_tech_indicators(stock.id, start_date, end_date)
 
         if prices_df.empty:
             st.info("No price data in selected range.")
@@ -305,12 +237,8 @@ def tab_screener():
             max_beta = st.number_input("Max Beta", min_value=0.0, value=3.0, step=0.1)
             min_div_yield = st.number_input("Min Div Yield (%)", min_value=0.0, value=0.0, step=0.5)
 
-        session = get_session()
-        try:
-            sectors = ["All"] + [r[0] for r in session.execute(text("SELECT DISTINCT sector FROM stock_snapshots WHERE sector IS NOT NULL ORDER BY sector")).fetchall()]
-            exchanges = ["Both", "NASDAQ", "NYSE"]
-        finally:
-            session.close()
+        sectors = ["All"] + repo.get_sectors("stock_snapshots")
+        exchanges = ["Both", "NASDAQ", "NYSE"]
 
         c5, c6 = st.columns(2)
         with c5:
@@ -321,50 +249,28 @@ def tab_screener():
         submitted = st.form_submit_button("Run Screen", type="primary")
 
     if submitted:
-        session = get_session()
-        try:
-            q = """
-            SELECT s.symbol, s.name, ss.market_cap, ss.pe_ratio, ss.roe_ttm,
-                   ss.rsi_14, ss.beta, ss.dividend_yield, ss.sector, ss.exchange
-            FROM stock_snapshots ss
-            JOIN stocks s ON s.id = ss.stock_id
-            WHERE ss.market_cap >= :min_mc
-              AND (ss.pe_ratio IS NULL OR (ss.pe_ratio >= :min_pe AND ss.pe_ratio <= :max_pe))
-              AND (ss.roe_ttm IS NULL OR ss.roe_ttm >= :min_roe)
-              AND (ss.rsi_14 IS NULL OR (ss.rsi_14 >= :min_rsi AND ss.rsi_14 <= :max_rsi))
-              AND (ss.beta IS NULL OR ss.beta <= :max_beta)
-              AND (ss.dividend_yield IS NULL OR ss.dividend_yield >= :min_div)
-            """
-            params = {
-                "min_mc": int(min_mktcap * 1_000_000_000),
-                "min_pe": min_pe, "max_pe": max_pe,
-                "min_roe": min_roe / 100,
-                "min_rsi": min_rsi, "max_rsi": max_rsi,
-                "max_beta": max_beta,
-                "min_div": min_div_yield / 100,
-            }
-            if sector != "All":
-                q += " AND ss.sector = :sector"
-                params["sector"] = sector
-            if exchange != "Both":
-                q += " AND ss.exchange = :exchange"
-                params["exchange"] = exchange
-            q += " ORDER BY ss.market_cap DESC LIMIT 500"
+        criteria = ScreenCriteria(
+            min_market_cap=int(min_mktcap * 1_000_000_000),
+            min_pe=min_pe,
+            max_pe=max_pe,
+            min_roe=min_roe / 100 if min_roe else None,
+            min_rsi=min_rsi if min_rsi else None,
+            max_rsi=max_rsi if max_rsi else None,
+            max_beta=max_beta if max_beta else None,
+            min_div_yield=min_div_yield / 100 if min_div_yield else None,
+            sector=sector if sector != "All" else None,
+            exchange=exchange if exchange != "Both" else None,
+        )
+        df = repo.screen_stocks(criteria)
 
-            rows = session.execute(text(q), params).fetchall()
-        finally:
-            session.close()
-
-        if not rows:
+        if df.empty:
             st.info("No results. Try widening filters.")
             return
-
-        df = pd.DataFrame(rows, columns=["Symbol", "Name", "Market Cap", "PE", "ROE %", "RSI", "Beta", "Div Yield %", "Sector", "Exchange"])
-        df["Market Cap"] = df["Market Cap"].apply(_fmt_market_cap)
-        df["ROE %"] = df["ROE %"].apply(lambda x: f"{float(x)*100:.1f}%" if x else "—")
-        df["Div Yield %"] = df["Div Yield %"].apply(lambda x: f"{float(x)*100:.2f}%" if x else "—")
+        df["Market Cap"] = df["Market Cap"].apply(fmt_market_cap)
+        df["ROE %"] = df["ROE %"].apply(nan_safe(lambda x: f"{float(x)*100:.1f}%"))
+        df["Div Yield %"] = df["Div Yield %"].apply(nan_safe(lambda x: f"{float(x)*100:.2f}%"))
         for col in ["PE", "RSI", "Beta"]:
-            df[col] = df[col].apply(lambda x: f"{float(x):.2f}" if x else "—")
+            df[col] = df[col].apply(nan_safe(lambda x: f"{float(x):.2f}"))
 
         st.caption(f"{len(df)} results")
         col_export, _ = st.columns([1, 5])
@@ -378,19 +284,13 @@ def tab_screener():
 def tab_manager():
     st.markdown('<div class="tab-header">STOCK MANAGER</div>', unsafe_allow_html=True)
 
-    session = get_session()
-    try:
-        total = session.query(Stock).count()
-        active = session.query(Stock).filter_by(is_active=True).count()
-        inactive = total - active
-        sectors = ["All"] + [r[0] for r in session.execute(text("SELECT DISTINCT sector FROM stocks WHERE sector IS NOT NULL ORDER BY sector")).fetchall()]
-    finally:
-        session.close()
+    summary = repo.count_summary()
+    sectors = ["All"] + repo.get_sectors("stocks")
 
     c1, c2, c3 = st.columns(3)
-    c1.metric("Total Listed", total)
-    c2.metric("Active", active)
-    c3.metric("Inactive", inactive)
+    c1.metric("Total Listed", summary["total"])
+    c2.metric("Active", summary["active"])
+    c3.metric("Inactive", summary["inactive"])
 
     st.markdown("---")
     st.markdown("**Filter & Bulk Actions**")
@@ -412,85 +312,41 @@ def tab_manager():
         btn_apply = st.form_submit_button("Apply Filters", type="primary")
 
     if btn_apply or "manager_results" not in st.session_state:
-        session = get_session()
-        try:
-            q = """
-            SELECT s.id, s.symbol, s.name, si.market_cap, s.sector, si.pe_ratio,
-                   si.roe_ttm, si.beta, s.is_active, s.exchange
-            FROM stocks s
-            LEFT JOIN stock_indicators si ON si.stock_id = s.id
-            WHERE 1=1
-            """
-            params = {}
-            if f_exchange != "Both":
-                q += " AND s.exchange = :exchange"
-                params["exchange"] = f_exchange
-            if f_sector != "All":
-                q += " AND s.sector = :sector"
-                params["sector"] = f_sector
-            if f_min_mc > 0:
-                q += " AND si.market_cap >= :min_mc"
-                params["min_mc"] = int(f_min_mc * 1_000_000_000)
-            if f_max_pe < 999:
-                q += " AND si.pe_ratio <= :max_pe"
-                params["max_pe"] = f_max_pe
-            if f_min_roe > -200:
-                q += " AND si.roe_ttm >= :min_roe"
-                params["min_roe"] = f_min_roe / 100
-            if f_max_beta < 10:
-                q += " AND si.beta <= :max_beta"
-                params["max_beta"] = f_max_beta
-            if f_status == "Active":
-                q += " AND s.is_active = 1"
-            elif f_status == "Inactive":
-                q += " AND s.is_active = 0"
-            q += " ORDER BY si.market_cap DESC LIMIT 500"
+        filters = StockFilters(
+            exchange=f_exchange if f_exchange != "Both" else None,
+            sector=f_sector if f_sector != "All" else None,
+            min_market_cap=f_min_mc,
+            max_pe=f_max_pe,
+            min_roe=f_min_roe,
+            max_beta=f_max_beta,
+            status=f_status,
+        )
+        df = repo.list_stocks(filters)
+        st.session_state["manager_results"] = df
+        st.session_state["manager_ids"] = df["id"].tolist()
 
-            rows = session.execute(text(q), params).fetchall()
-            st.session_state["manager_results"] = rows
-            st.session_state["manager_ids"] = [r[0] for r in rows]
-        finally:
-            session.close()
-
-    rows = st.session_state.get("manager_results", [])
+    df = st.session_state.get("manager_results", pd.DataFrame())
     ids = st.session_state.get("manager_ids", [])
 
-    if rows:
-        st.caption(f"{len(rows)} stocks match filters")
+    if not df.empty:
+        st.caption(f"{len(df)} stocks match filters")
         col_act, col_deact, _ = st.columns([1, 1, 4])
         with col_act:
             if st.button("✅ Activate All Filtered"):
-                _bulk_set_active(ids, True)
+                repo.bulk_set_active(ids, True)
                 st.success(f"Activated {len(ids)} stocks.")
                 st.rerun()
         with col_deact:
             if st.button("❌ Deactivate All Filtered"):
-                _bulk_set_active(ids, False)
+                repo.bulk_set_active(ids, False)
                 st.success(f"Deactivated {len(ids)} stocks.")
                 st.rerun()
-
-        df = pd.DataFrame(rows, columns=["id", "Symbol", "Name", "Mkt Cap", "Sector", "PE", "ROE %", "Beta", "Active", "Exchange"])
-        df["Mkt Cap"] = df["Mkt Cap"].apply(_fmt_market_cap)
-        df["ROE %"] = df["ROE %"].apply(lambda x: f"{float(x)*100:.1f}%" if x else "—")
-        df["PE"] = df["PE"].apply(lambda x: f"{float(x):.1f}" if x else "—")
-        df["Beta"] = df["Beta"].apply(lambda x: f"{float(x):.2f}" if x else "—")
+        df["Mkt Cap"] = df["Mkt Cap"].apply(fmt_market_cap)
+        df["ROE %"] = df["ROE %"].apply(nan_safe(lambda x: f"{float(x)*100:.1f}%"))
+        df["PE"] = df["PE"].apply(nan_safe(lambda x: f"{float(x):.1f}"))
+        df["Beta"] = df["Beta"].apply(nan_safe(lambda x: f"{float(x):.2f}"))
         df["Active"] = df["Active"].apply(lambda x: "● Active" if x else "○ Inactive")
         st.dataframe(df.drop(columns=["id"]), use_container_width=True, hide_index=True)
-
-
-def _bulk_set_active(ids: list[int], active: bool):
-    if not ids:
-        return
-    session = get_session()
-    try:
-        now = datetime.utcnow() if active else None
-        session.execute(
-            text("UPDATE stocks SET is_active=:a, activated_at=:t WHERE id IN :ids"),
-            {"a": active, "t": now, "ids": tuple(ids)},
-        )
-        session.commit()
-    finally:
-        session.close()
 
 
 # ── main ──────────────────────────────────────────────────────────────────────

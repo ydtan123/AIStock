@@ -1,4 +1,5 @@
 import logging
+import math
 from datetime import datetime
 
 from sqlalchemy.dialects.mysql import insert
@@ -8,6 +9,18 @@ from fetcher.base import FetcherBase
 from models import Stock
 
 logger = logging.getLogger(__name__)
+
+
+def _clean(val):
+    """Convert NaN/float NaN to None for MySQL compatibility."""
+    if val is None:
+        return None
+    try:
+        if math.isnan(float(val)):
+            return None
+    except (TypeError, ValueError):
+        pass
+    return val
 
 
 def refresh_symbols(fetcher: FetcherBase) -> int:
@@ -20,16 +33,19 @@ def refresh_symbols(fetcher: FetcherBase) -> int:
     try:
         count = 0
         for _, row in df.iterrows():
+            name = _clean(row.get("name"))
+            asset_type = _clean(row.get("asset_type"))
+            exchange = _clean(row.get("exchange"))
             stmt = insert(Stock).values(
                 symbol=row["symbol"],
-                name=row.get("name"),
-                asset_type=row.get("asset_type"),
-                exchange=row.get("exchange"),
+                name=name,
+                asset_type=asset_type,
+                exchange=exchange,
                 is_active=False,
             ).on_duplicate_key_update(
-                name=row.get("name"),
-                asset_type=row.get("asset_type"),
-                exchange=row.get("exchange"),
+                name=name,
+                asset_type=asset_type,
+                exchange=exchange,
             )
             session.execute(stmt)
             count += 1

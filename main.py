@@ -3,8 +3,8 @@ import logging
 import sys
 from datetime import date, datetime
 
-import yaml
-from pathlib import Path
+from config import load_config
+from fetcher import create_fetcher
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,35 +14,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def _load_config() -> dict:
-    config_path = Path(__file__).parent / "config.yaml"
-    if not config_path.exists():
-        logger.error("config.yaml not found. Copy config.yaml.example to config.yaml and fill in values.")
-        sys.exit(1)
-    with open(config_path) as f:
-        return yaml.safe_load(f)
-
-
-def _get_fetcher(config: dict):
-    source = config.get("source", "alpha_vantage")
-    if source == "alpha_vantage":
-        from fetcher.alpha_vantage import AlphaVantageFetcher
-        return AlphaVantageFetcher(api_key=config["alpha_vantage"]["api_key"])
-    elif source == "yahoo":
-        from fetcher.yahoo import YahooFetcher
-        return YahooFetcher()
-    else:
-        raise ValueError(f"Unknown source: {source}")
-
-
 def cmd_init_db(args):
     from database import init_db
     init_db()
 
 
 def cmd_bootstrap(args):
-    config = _load_config()
-    fetcher = _get_fetcher(config)
+    config = load_config()
+    fetcher = create_fetcher(config)
 
     from database import get_session
     from ingestion.symbols import refresh_symbols
@@ -59,8 +38,8 @@ def cmd_bootstrap(args):
 
 
 def cmd_run(args):
-    config = _load_config()
-    fetcher = _get_fetcher(config)
+    config = load_config()
+    fetcher = create_fetcher(config)
 
     from database import get_session
     from ingestion.pipeline import run_daily_pipeline

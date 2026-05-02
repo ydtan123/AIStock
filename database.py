@@ -1,24 +1,26 @@
-import yaml
-from pathlib import Path
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
+
+from config import load_config
 from models import Base
 
+_url: str | None = None
 _engine = None
 _SessionFactory = None
 
 
-def _load_config() -> dict:
-    config_path = Path(__file__).parent / "config.yaml"
-    with open(config_path) as f:
-        return yaml.safe_load(f)
+def configure(url: str):
+    """Override the database URL for tests. Resets cached engine and session factory."""
+    global _url, _engine, _SessionFactory
+    _url = url
+    _engine = None
+    _SessionFactory = None
 
 
 def get_engine():
     global _engine
     if _engine is None:
-        config = _load_config()
-        url = config["database"]["url"]
+        url = _url or load_config()["database"]["url"]
         _engine = create_engine(url, pool_pre_ping=True, pool_recycle=3600)
     return _engine
 

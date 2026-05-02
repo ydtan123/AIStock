@@ -41,7 +41,18 @@ cd AIStock
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+# pandas-ta is installed separately without numba (numba doesn't support Python 3.14)
+pip install pandas-ta==0.4.71b0 --no-deps
 mkdir -p logs
+
+# Create numba stub so pandas-ta imports work on Python 3.14
+python3 - << 'STUB'
+import site, os
+stub_dir = os.path.join(site.getsitepackages()[0], "numba")
+os.makedirs(stub_dir, exist_ok=True)
+with open(os.path.join(stub_dir, "__init__.py"), "w") as f:
+    f.write("""def njit(*a,**kw):\n    return a[0] if a and callable(a[0]) else (lambda fn: fn)\njit=njit\nprange=range\n""")
+STUB
 ```
 
 ### 4. Configure

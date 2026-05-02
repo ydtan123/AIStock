@@ -1,13 +1,14 @@
 import logging
+import random
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta
 from typing import Optional
 
-import yaml
-from pathlib import Path
 from sqlalchemy import text
 from sqlalchemy.dialects.mysql import insert
 
+from config import load_config
 from database import get_session, get_engine
 from fetcher.base import FetcherBase
 from ingestion.indicators import compute_indicators
@@ -16,14 +17,8 @@ from models import DailyPrice, PipelineRun, Stock, StockIndicator, StockSnapshot
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_START = date(2000, 1, 1)
-MAX_WORKERS = 10
-
-
-def _load_config() -> dict:
-    config_path = Path(__file__).parent.parent / "config.yaml"
-    with open(config_path) as f:
-        return yaml.safe_load(f)
+DEFAULT_START = date(2010, 1, 1)
+MAX_WORKERS = 5
 
 
 def _get_max_price_date(session, stock_id: int) -> Optional[date]:
@@ -49,33 +44,49 @@ def _fetch_and_store_prices(fetcher: FetcherBase, stock: Stock) -> tuple[int, Op
         if df.empty:
             return 0, max_date
 
-        count = 0
+        values = []
         for _, row in df.iterrows():
-            stmt = insert(DailyPrice).values(
-                stock_id=stock.id,
-                date=row["date"],
-                open=row.get("open"),
-                high=row.get("high"),
-                low=row.get("low"),
-                close=row.get("close"),
-                adj_close=row.get("adj_close"),
-                volume=row.get("volume"),
-                dividend_amount=row.get("dividend_amount"),
-                split_coefficient=row.get("split_coefficient"),
-            ).on_duplicate_key_update(
-                open=row.get("open"),
-                high=row.get("high"),
-                low=row.get("low"),
-                close=row.get("close"),
-                adj_close=row.get("adj_close"),
-                volume=row.get("volume"),
-                dividend_amount=row.get("dividend_amount"),
-                split_coefficient=row.get("split_coefficient"),
-            )
-            session.execute(stmt)
-            count += 1
+            values.append({
+                "stock_id": stock.id,
+                "date": row["date"],
+                "open": row.get("open"),
+                "high": row.get("high"),
+                "low": row.get("low"),
+                "close": row.get("close"),
+                "adj_close": row.get("adj_close"),
+                "volume": row.get("volume"),
+                "dividend_amount": row.get("dividend_amount"),
+                "split_coefficient": row.get("split_coefficient"),
+            })
 
-        session.commit()
+        count = 0
+        batch_size = 100
+        for i in range(0, len(values), batch_size):
+            batch = values[i:i + batch_size]
+            for attempt in range(5):
+                try:
+                    for v in batch:
+                        stmt = insert(DailyPrice).values(**v).on_duplicate_key_update(
+                            open=v["open"],
+                            high=v["high"],
+                            low=v["low"],
+                            close=v["close"],
+                            adj_close=v["adj_close"],
+                            volume=v["volume"],
+                            dividend_amount=v["dividend_amount"],
+                            split_coefficient=v["split_coefficient"],
+                        )
+                        session.execute(stmt)
+                    session.commit()
+                    count += len(batch)
+                    break
+                except Exception as e:
+                    session.rollback()
+                    if attempt < 4 and "1213" in str(e):
+                        time.sleep(0.1 * (attempt + 1) + random.uniform(0, 0.1))
+                        continue
+                    raise
+
         return count, df["date"].max()
     except Exception as e:
         session.rollback()
@@ -86,7 +97,7 @@ def _fetch_and_store_prices(fetcher: FetcherBase, stock: Stock) -> tuple[int, Op
 
 def _upsert_fundamentals(fetcher: FetcherBase, stock: Stock, force: bool = False) -> bool:
     """Fetch and upsert OVERVIEW data. Skips if last_updated < refresh_days ago."""
-    config = _load_config()
+    config = load_config()
     refresh_days = config.get("scheduler", {}).get("overview_refresh_days", 7)
 
     session = get_session()
@@ -131,8 +142,18 @@ def _upsert_fundamentals(fetcher: FetcherBase, stock: Stock, force: bool = False
         stmt = insert(StockIndicator).values(**indicator_fields).on_duplicate_key_update(
             **{k: v for k, v in indicator_fields.items() if k != "stock_id"}
         )
-        session.execute(stmt)
-        session.commit()
+        # Retry on deadlock (1213) — common with concurrent upserts
+        for attempt in range(3):
+            try:
+                session.execute(stmt)
+                session.commit()
+                break
+            except Exception as e:
+                session.rollback()
+                if attempt < 2 and "1213" in str(e):
+                    time.sleep(0.1 * (attempt + 1) + random.uniform(0, 0.05))
+                    continue
+                raise
         return True
     except Exception:
         session.rollback()
@@ -190,6 +211,15 @@ def _refresh_snapshots():
     logger.info("Snapshots refreshed.")
 
 
+def _update_checkpoint(stock_id: int):
+    session = get_session()
+    try:
+        session.query(Stock).filter_by(id=stock_id).update({"last_price_fetch": datetime.utcnow()})
+        session.commit()
+    finally:
+        session.close()
+
+
 def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool) -> dict:
     result = {"symbol": stock.symbol, "prices": 0, "fundamentals": False, "indicators": 0, "error": None}
     try:
@@ -202,13 +232,7 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool) -> dict:
         since = new_max_date - timedelta(days=300) if new_max_date else None
         result["indicators"] = compute_indicators(stock.id, since_date=since)
 
-        # Update checkpoint
-        session = get_session()
-        try:
-            session.query(Stock).filter_by(id=stock.id).update({"last_price_fetch": datetime.utcnow()})
-            session.commit()
-        finally:
-            session.close()
+        _update_checkpoint(stock.id)
 
     except Exception as e:
         result["error"] = str(e)

@@ -55,9 +55,10 @@ class AlphaVantageFetcher(FetcherBase):
                     return resp.text
                 data = resp.json()
                 if "Note" in data or "Information" in data:
-                    # Rate limit message from AV
-                    logger.warning("AV rate limit message: %s", data.get("Note") or data.get("Information"))
-                    time.sleep(60)
+                    msg = data.get("Note") or data.get("Information") or ""
+                    wait = 15 * (attempt + 1)  # 15s, 30s, 45s — stagger retries
+                    logger.warning("AV rate limit (attempt %d), waiting %ds: %s", attempt + 1, wait, msg[:80])
+                    time.sleep(wait)
                     continue
                 return data
             except requests.HTTPError as e:
@@ -165,6 +166,8 @@ class AlphaVantageFetcher(FetcherBase):
         df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
         df = df[df["status"] == "Active"]
         df = df[df["exchange"].isin(["NYSE", "NASDAQ"])]
+        df = df[df["symbol"].str.len() <= 20]
+        df = df[~df["symbol"].str.contains(":", na=False)]
         return df[["symbol", "name", "exchange", "assettype"]].rename(
             columns={"assettype": "asset_type"}
         )

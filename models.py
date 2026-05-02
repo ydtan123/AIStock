@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from sqlalchemy import (
-    BigInteger, Boolean, Column, Date, DateTime, ForeignKey,
+    BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey,
     Index, Integer, SmallInteger, String, Text, UniqueConstraint
 )
 from sqlalchemy.dialects.mysql import DECIMAL, JSON
@@ -82,10 +82,10 @@ class StockIndicator(Base):
     eps: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 4))
     diluted_eps_ttm: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 4))
     revenue_per_share_ttm: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 4))
-    profit_margin: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 6))
-    operating_margin_ttm: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 6))
-    roa_ttm: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 6))
-    roe_ttm: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 6))
+    profit_margin: Mapped[Optional[float]] = mapped_column(Float)
+    operating_margin_ttm: Mapped[Optional[float]] = mapped_column(Float)
+    roa_ttm: Mapped[Optional[float]] = mapped_column(Float)
+    roe_ttm: Mapped[Optional[float]] = mapped_column(Float)
     revenue_ttm: Mapped[Optional[int]] = mapped_column(BigInteger)
     gross_profit_ttm: Mapped[Optional[int]] = mapped_column(BigInteger)
     qtr_earnings_growth_yoy: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 6))
@@ -107,8 +107,8 @@ class StockIndicator(Base):
     week_52_low: Mapped[Optional[float]] = mapped_column(DECIMAL(14, 4))
     ma_50_day: Mapped[Optional[float]] = mapped_column(DECIMAL(14, 4))
     ma_200_day: Mapped[Optional[float]] = mapped_column(DECIMAL(14, 4))
-    pct_insiders: Mapped[Optional[float]] = mapped_column(DECIMAL(8, 4))
-    pct_institutions: Mapped[Optional[float]] = mapped_column(DECIMAL(8, 4))
+    pct_insiders: Mapped[Optional[float]] = mapped_column(Float)
+    pct_institutions: Mapped[Optional[float]] = mapped_column(Float)
     dividend_date: Mapped[Optional[datetime]] = mapped_column(Date)
     ex_dividend_date: Mapped[Optional[datetime]] = mapped_column(Date)
     last_updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
@@ -142,11 +142,11 @@ class StockSnapshot(Base):
     volume: Mapped[Optional[int]] = mapped_column(BigInteger)
     pe_ratio: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 4))
     market_cap: Mapped[Optional[int]] = mapped_column(BigInteger)
-    roe_ttm: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 6))
-    dividend_yield: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 6))
-    beta: Mapped[Optional[float]] = mapped_column(DECIMAL(8, 4))
-    rsi_14: Mapped[Optional[float]] = mapped_column(DECIMAL(8, 4))
-    macd: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 6))
+    roe_ttm: Mapped[Optional[float]] = mapped_column(Float)
+    dividend_yield: Mapped[Optional[float]] = mapped_column(Float)
+    beta: Mapped[Optional[float]] = mapped_column(Float)
+    rsi_14: Mapped[Optional[float]] = mapped_column(Float)
+    macd: Mapped[Optional[float]] = mapped_column(Float)
     sma_20: Mapped[Optional[float]] = mapped_column(DECIMAL(14, 4))
     sma_50: Mapped[Optional[float]] = mapped_column(DECIMAL(14, 4))
     sector: Mapped[Optional[str]] = mapped_column(String(100))
@@ -174,4 +174,4 @@ class PipelineRun(Base):
     finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
     symbols_processed: Mapped[int] = mapped_column(Integer, default=0)
     errors_count: Mapped[int] = mapped_column(Integer, default=0)
-    status: Mapped[str] = mapped_column(String(20), default="running")
+    status: Mapped[str] = mapped_column(String(30), default="running")

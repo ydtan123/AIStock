@@ -25,3 +25,8 @@ logs/
 
 # MySQL
 *.sql.bak
+# MCP config (contains credentials)
+.mcp.json
+
+# Added by code-review-graph
+.code-review-graph/
