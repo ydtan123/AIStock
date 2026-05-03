@@ -217,3 +217,24 @@ class StockRepository:
             return [r[0] for r in session.execute(text(q)).fetchall()]
         finally:
             session.close()
+
+    def get_predictions(self, min_prob: float = 0.0, limit: int = 200) -> pd.DataFrame:
+        session = self._get_session()
+        try:
+            q = """
+            SELECT s.symbol, s.name, sp.probability, sp.input_end_date,
+                   ss.close, ss.market_cap, ss.sector
+            FROM stock_predictions sp
+            JOIN stocks s ON s.id = sp.stock_id
+            LEFT JOIN stock_snapshots ss ON ss.stock_id = sp.stock_id
+            WHERE sp.probability >= :min_p
+            ORDER BY sp.probability DESC
+            LIMIT :lim
+            """
+            rows = session.execute(text(q), {"min_p": min_prob, "lim": limit}).fetchall()
+            return pd.DataFrame(rows, columns=[
+                "Symbol", "Name", "Probability", "Input End", "Close",
+                "Market Cap", "Sector",
+            ])
+        finally:
+            session.close()

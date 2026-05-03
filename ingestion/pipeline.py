@@ -220,6 +220,32 @@ def _update_checkpoint(stock_id: int):
         session.close()
 
 
+def _needs_full_backfill(stock_id: int) -> bool:
+    """True if stock has no indicators or earliest indicator is far from earliest price."""
+    session = get_session()
+    try:
+        row = session.execute(text("""
+            SELECT MIN(ti.date)
+            FROM technical_indicators ti
+            WHERE ti.stock_id = :sid
+        """), {"sid": stock_id}).first()
+        first_ind = row[0] if row else None
+
+        if first_ind is None:
+            return True
+
+        first_px = session.execute(text("""
+            SELECT MIN(date) FROM daily_prices WHERE stock_id = :sid
+        """), {"sid": stock_id}).scalar()
+
+        if first_px is None:
+            return False
+
+        return (first_ind - first_px).days > 365
+    finally:
+        session.close()
+
+
 def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool) -> dict:
     result = {"symbol": stock.symbol, "prices": 0, "fundamentals": False, "indicators": 0, "error": None}
     try:
@@ -229,7 +255,10 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool) -> dict:
         _upsert_fundamentals(fetcher, stock, force=force)
         result["fundamentals"] = True
 
-        since = new_max_date - timedelta(days=300) if new_max_date else None
+        if _needs_full_backfill(stock.id):
+            since = None
+        else:
+            since = new_max_date - timedelta(days=300) if new_max_date else None
         result["indicators"] = compute_indicators(stock.id, since_date=since)
 
         _update_checkpoint(stock.id)

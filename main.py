@@ -77,6 +77,30 @@ def cmd_run(args):
         logger.info("Pipeline summary: processed=%d errors=%d", summary["processed"], summary["errors"])
 
 
+def cmd_train(args):
+    logger.info("Training model...")
+    from model.train import train
+    metrics = train()
+    logger.info("Metrics: %s", metrics)
+
+
+def cmd_predict(args):
+    if args.symbols:
+        from model.inference import predict_stocks
+        from display import print_predictions
+        results = predict_stocks(args.symbols, top_n=args.top_n)
+        print_predictions(results)
+    else:
+        from model.inference import run_batch_inference
+        summary = run_batch_inference()
+        logger.info("Inference: %s", summary)
+
+
+def cmd_report(args):
+    from model.train import data_quality_report
+    data_quality_report()
+
+
 def main():
     parser = argparse.ArgumentParser(description="StockDB — Stock Data Management CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -91,6 +115,22 @@ def main():
     run_p.add_argument("--start", type=lambda s: date.fromisoformat(s), default=None, help="Override start date (YYYY-MM-DD)")
     run_p.add_argument("--end", type=lambda s: date.fromisoformat(s), default=None, help="Override end date (YYYY-MM-DD)")
 
+    sub.add_parser("train", help="Train XGBoost growth prediction model")
+
+    predict_p = sub.add_parser(
+        "predict",
+        help="Score stocks. With symbols: show SHAP attribution. Without: batch score all active stocks.",
+    )
+    predict_p.add_argument(
+        "symbols", nargs="*", metavar="SYMBOL",
+        help="Symbols to score (e.g. AAPL MSFT). Omit to score all active stocks.",
+    )
+    predict_p.add_argument(
+        "--top-n", type=int, default=5, dest="top_n",
+        help="Number of top positive/negative SHAP features to show (default: 5)",
+    )
+    sub.add_parser("report", help="Data quality report: coverage, gaps, counts")
+
     args = parser.parse_args()
 
     if args.command == "init-db":
@@ -99,6 +139,12 @@ def main():
         cmd_bootstrap(args)
     elif args.command == "run":
         cmd_run(args)
+    elif args.command == "train":
+        cmd_train(args)
+    elif args.command == "predict":
+        cmd_predict(args)
+    elif args.command == "report":
+        cmd_report(args)
 
 
 if __name__ == "__main__":

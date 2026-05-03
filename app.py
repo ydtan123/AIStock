@@ -8,6 +8,7 @@ from plotly.subplots import make_subplots
 from display import fmt_market_cap, nan_safe
 from repository import ScreenCriteria, StockFilters, StockRepository
 
+
 st.set_page_config(page_title="StockDB", page_icon="📈", layout="wide")
 
 st.markdown("""
@@ -349,11 +350,43 @@ def tab_manager():
         st.dataframe(df.drop(columns=["id"]), use_container_width=True, hide_index=True)
 
 
+# ── tab 5: Predictions ────────────────────────────────────────────────────────
+
+def tab_predictions():
+    st.markdown('<div class="tab-header">PREDICTIONS</div>', unsafe_allow_html=True)
+
+    c1, c2, c3 = st.columns([1, 1, 3])
+    with c1:
+        min_p = st.slider("Min Probability", 0.0, 1.0, 0.5, 0.05)
+    with c2:
+        limit = st.selectbox("Show", [50, 100, 200], index=1)
+
+    df = repo.get_predictions(min_prob=min_p, limit=limit)
+
+    if df.empty:
+        st.info("No predictions yet. Run inference first: `python main.py predict`")
+        return
+
+    st.caption(f"{len(df)} predictions above {min_p:.0%}")
+
+    col_export, _ = st.columns([1, 5])
+    with col_export:
+        st.download_button("Export CSV", df.to_csv(index=False), "predictions.csv", "text/csv")
+
+    df["Probability"] = df["Probability"].apply(lambda x: f"{float(x)*100:.1f}%")
+    df["Market Cap"] = df["Market Cap"].apply(fmt_market_cap)
+    df["Close"] = df["Close"].apply(nan_safe(lambda x: f"${float(x):.2f}"))
+
+    st.dataframe(df.drop(columns=["Input End"]), use_container_width=True, hide_index=True)
+
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def main():
     st.markdown('<h2 style="color:#1e293b;margin-bottom:0">📈 StockDB</h2>', unsafe_allow_html=True)
-    tab1, tab2, tab3, tab4 = st.tabs(["Lookup", "Technical Analysis", "Screener", "Manager"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "Lookup", "Technical Analysis", "Screener", "Manager", "Predictions",
+    ])
     with tab1:
         tab_lookup()
     with tab2:
@@ -362,6 +395,8 @@ def main():
         tab_screener()
     with tab4:
         tab_manager()
+    with tab5:
+        tab_predictions()
 
 
 if __name__ == "__main__":
