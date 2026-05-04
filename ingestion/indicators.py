@@ -1,16 +1,21 @@
 import logging
 import random
 import time
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 import pandas as pd
 import pandas_ta as ta
+from sqlalchemy import text
 from sqlalchemy.dialects.mysql import insert
 
-from database import get_session
-from models import DailyPrice, Stock, TechnicalIndicator
+from database import get_session, get_engine
+from models import TechnicalIndicator
 
 logger = logging.getLogger(__name__)
+
+# SMA_200 is the longest lookback; load this many extra days before since_date
+# to ensure warm-up rows are available (extra buffer for weekends/holidays)
+_LOOKBACK_DAYS = 260
 
 _STRATEGY = ta.Study(
     name="core",
@@ -39,64 +44,83 @@ _STRATEGY = ta.Study(
 
 
 def compute_indicators(stock_id: int, since_date: date | None = None) -> int:
-    """Compute technical indicators for a stock from stored OHLCV data. Returns rows written."""
+    """Compute technical indicators from stored OHLCV data. Returns rows written.
+
+    Loads only the minimum price history needed: if since_date is set, fetches
+    since_date - _LOOKBACK_DAYS for indicator warm-up, computes over that window,
+    then writes only rows >= since_date. Full-history load only happens when
+    since_date is None (initial backfill).
+    """
+    engine = get_engine()
+    load_from = (since_date - timedelta(days=_LOOKBACK_DAYS)) if since_date else None
+
+    with engine.connect() as conn:
+        if load_from:
+            rows = conn.execute(
+                text(
+                    "SELECT date, open, high, low, close, volume "
+                    "FROM daily_prices WHERE stock_id = :sid AND date >= :from_dt "
+                    "ORDER BY date"
+                ),
+                {"sid": stock_id, "from_dt": load_from},
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                text(
+                    "SELECT date, open, high, low, close, volume "
+                    "FROM daily_prices WHERE stock_id = :sid ORDER BY date"
+                ),
+                {"sid": stock_id},
+            ).fetchall()
+
+    if not rows:
+        return 0
+
+    df = pd.DataFrame(rows, columns=["date", "open", "high", "low", "close", "volume"])
+    df["open"] = df["open"].astype(float).fillna(0.0)
+    df["high"] = df["high"].astype(float).fillna(0.0)
+    df["low"] = df["low"].astype(float).fillna(0.0)
+    df["close"] = df["close"].astype(float).fillna(0.0)
+    df["volume"] = df["volume"].astype(float).fillna(0.0)
+    df.set_index("date", inplace=True)
+
+    df.ta.study(_STRATEGY)
+
+    if since_date:
+        df = df[df.index >= since_date]
+
+    if df.empty:
+        return 0
+
+    now = datetime.utcnow()
+    values = []
+    for row_date, row in df.iterrows():
+        indicators = {}
+        for k, v in row.items():
+            val = float(v)
+            indicators[k] = None if (pd.isna(val) or val == float("inf") or val == float("-inf")) else round(val, 6)
+        values.append({
+            "stock_id": stock_id,
+            "date": row_date,
+            "indicators": indicators,
+            "computed_at": now,
+        })
+
+    count = 0
+    batch_size = 200
     session = get_session()
     try:
-        query = (
-            session.query(DailyPrice)
-            .filter(DailyPrice.stock_id == stock_id)
-            .order_by(DailyPrice.date)
-        )
-        rows = query.all()
-        if not rows:
-            return 0
-
-        df = pd.DataFrame([{
-            "date": r.date,
-            "open": float(r.open or 0),
-            "high": float(r.high or 0),
-            "low": float(r.low or 0),
-            "close": float(r.close or 0),
-            "volume": float(r.volume or 0),
-        } for r in rows])
-        df.set_index("date", inplace=True)
-        df.ta.study(_STRATEGY)
-
-        if since_date:
-            df = df[df.index >= since_date]
-
-        if df.empty:
-            return 0
-
-        values = []
-        for row_date, row in df.iterrows():
-            indicators = {}
-            for k, v in row.items():
-                val = float(v)
-                if pd.isna(val) or val == float('inf') or val == float('-inf'):
-                    val = None
-                else:
-                    val = round(val, 6)
-                indicators[k] = val
-            values.append({
-                "stock_id": stock_id,
-                "date": row_date,
-                "indicators": indicators,
-                "computed_at": datetime.utcnow(),
-            })
-
-        count = 0
-        batch_size = 100
         for i in range(0, len(values), batch_size):
             batch = values[i:i + batch_size]
             for attempt in range(5):
                 try:
-                    for v in batch:
-                        stmt = insert(TechnicalIndicator).values(**v).on_duplicate_key_update(
-                            indicators=v["indicators"],
-                            computed_at=v["computed_at"],
-                        )
-                        session.execute(stmt)
+                    # Single multi-row INSERT ... ON DUPLICATE KEY UPDATE per batch
+                    stmt = insert(TechnicalIndicator).values(batch)
+                    stmt = stmt.on_duplicate_key_update(
+                        indicators=stmt.inserted.indicators,
+                        computed_at=stmt.inserted.computed_at,
+                    )
+                    session.execute(stmt)
                     session.commit()
                     count += len(batch)
                     break
@@ -106,10 +130,7 @@ def compute_indicators(stock_id: int, since_date: date | None = None) -> int:
                         time.sleep(0.1 * (attempt + 1) + random.uniform(0, 0.1))
                         continue
                     raise
-
-        return count
-    except Exception:
-        session.rollback()
-        raise
     finally:
         session.close()
+
+    return count

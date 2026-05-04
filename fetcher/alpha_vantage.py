@@ -1,7 +1,7 @@
 import io
 import time
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Optional
 
 import pandas as pd
@@ -46,10 +46,12 @@ class AlphaVantageFetcher(FetcherBase):
 
     def _get(self, params: dict, retries: int = MAX_RETRIES) -> dict | str:
         params["apikey"] = self._api_key
+        # full history responses can be large; give them more time
+        timeout = 60 if params.get("outputsize") == "full" else 30
         for attempt in range(retries):
             default_limiter.acquire()
             try:
-                resp = requests.get(BASE_URL, params=params, timeout=30)
+                resp = requests.get(BASE_URL, params=params, timeout=timeout)
                 resp.raise_for_status()
                 if params.get("datatype") == "csv":
                     return resp.text
@@ -61,6 +63,10 @@ class AlphaVantageFetcher(FetcherBase):
                     time.sleep(wait)
                     continue
                 return data
+            except requests.Timeout:
+                wait = 5 * (2 ** attempt)  # 5s, 10s, 20s
+                logger.warning("Timeout for %s (attempt %d), retry in %ds", params.get("symbol", "?"), attempt + 1, wait)
+                time.sleep(wait)
             except requests.HTTPError as e:
                 if e.response.status_code < 500:
                     raise
@@ -70,10 +76,14 @@ class AlphaVantageFetcher(FetcherBase):
         raise RuntimeError(f"Failed after {retries} retries: {params}")
 
     def get_daily(self, symbol: str, start: date, end: date) -> pd.DataFrame:
+        # compact = last 100 trading days (~5 months); use it when start is recent
+        # to avoid downloading the full 20-year history for incremental updates
+        cutoff = date.today() - timedelta(days=90)
+        outputsize = "compact" if start >= cutoff else "full"
         data = self._get({
             "function": "TIME_SERIES_DAILY_ADJUSTED",
             "symbol": symbol,
-            "outputsize": "full",
+            "outputsize": outputsize,
         })
         ts = data.get("Time Series (Daily)", {})
         rows = []

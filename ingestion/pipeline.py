@@ -182,10 +182,10 @@ def _refresh_snapshots():
         si.roe_ttm,
         si.dividend_yield,
         si.beta,
-        JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.RSI_14')) + 0,
-        JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.MACD_12_26_9')) + 0,
-        JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.SMA_20')) + 0,
-        JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.SMA_50')) + 0,
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.RSI_14')), 'null') + 0,
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.MACD_12_26_9')), 'null') + 0,
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.SMA_20')), 'null') + 0,
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(ti.indicators, '$.SMA_50')), 'null') + 0,
         s.sector,
         s.exchange,
         NOW()
@@ -252,16 +252,31 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool) -> dict:
         prices_inserted, new_max_date = _fetch_and_store_prices(fetcher, stock)
         result["prices"] = prices_inserted
 
-        _upsert_fundamentals(fetcher, stock, force=force)
-        result["fundamentals"] = True
+        refreshed = _upsert_fundamentals(fetcher, stock, force=force)
+        result["fundamentals"] = refreshed
 
         if _needs_full_backfill(stock.id):
+            # No indicators at all, or large gap — full recompute
             since = None
+        elif prices_inserted > 0 and new_max_date:
+            # New prices: compute only for the newly added date(s)
+            # compute_indicators loads _LOOKBACK_DAYS warmup automatically
+            since = new_max_date
         else:
-            since = new_max_date - timedelta(days=300) if new_max_date else None
+            # No new prices, indicators already up to date
+            result["indicators"] = 0
+            _update_checkpoint(stock.id)
+            logger.info("%-6s  prices=0  indicators=skipped  overview=%s",
+                        stock.symbol, "refreshed" if refreshed else "skipped")
+            return result
         result["indicators"] = compute_indicators(stock.id, since_date=since)
 
         _update_checkpoint(stock.id)
+        logger.info(
+            "%-6s  prices=%-4d  indicators=%-4d  overview=%s",
+            stock.symbol, prices_inserted, result["indicators"],
+            "refreshed" if refreshed else "skipped",
+        )
 
     except Exception as e:
         result["error"] = str(e)
@@ -286,6 +301,7 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
         session.close()
         logger.info("Pipeline starting: %d active symbols", len(stocks))
 
+        total = len(stocks)
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
             futures = {pool.submit(_process_symbol, fetcher, s, force): s for s in stocks}
             for future in as_completed(futures):
@@ -294,6 +310,11 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
                 if result["error"]:
                     summary["errors"] += 1
                 summary["symbols"].append(result)
+                if summary["processed"] % 50 == 0 or summary["processed"] == total:
+                    logger.info(
+                        "Progress: %d/%d  errors=%d",
+                        summary["processed"], total, summary["errors"],
+                    )
 
         _refresh_snapshots()
 
