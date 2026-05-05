@@ -13,7 +13,7 @@ from database import get_session, get_engine
 from fetcher.base import FetcherBase
 from ingestion.indicators import compute_indicators
 from ingestion.symbols import refresh_symbols
-from models import DailyPrice, PipelineRun, Stock, StockIndicator, StockSnapshot
+from models import DailyPrice, PipelineRun, Stock, StockIndicator, StockPrediction, StockSnapshot
 
 logger = logging.getLogger(__name__)
 
@@ -246,7 +246,28 @@ def _needs_full_backfill(stock_id: int) -> bool:
         session.close()
 
 
-def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool) -> dict:
+def _upsert_prediction(stock_id: int, probability: float, input_end_date) -> None:
+    row = {
+        "stock_id": stock_id,
+        "probability": round(probability, 6),
+        "input_end_date": input_end_date,
+        "predicted_at": datetime.utcnow(),
+    }
+    session = get_session()
+    try:
+        stmt = insert(StockPrediction).values(**row).on_duplicate_key_update(
+            probability=row["probability"],
+            input_end_date=row["input_end_date"],
+            predicted_at=row["predicted_at"],
+        )
+        session.execute(stmt)
+        session.commit()
+    finally:
+        session.close()
+
+
+def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
+                    booster=None, feature_cols=None) -> dict:
     result = {"symbol": stock.symbol, "prices": 0, "fundamentals": False, "indicators": 0, "error": None}
     try:
         prices_inserted, new_max_date = _fetch_and_store_prices(fetcher, stock)
@@ -256,26 +277,29 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool) -> dict:
         result["fundamentals"] = refreshed
 
         if _needs_full_backfill(stock.id):
-            # No indicators at all, or large gap — full recompute
-            since = None
+            result["indicators"] = compute_indicators(stock.id, since_date=None)
         elif prices_inserted > 0 and new_max_date:
             # New prices: compute only for the newly added date(s)
             # compute_indicators loads _LOOKBACK_DAYS warmup automatically
-            since = new_max_date
-        else:
-            # No new prices, indicators already up to date
-            result["indicators"] = 0
-            _update_checkpoint(stock.id)
-            logger.info("%-6s  prices=0  indicators=skipped  overview=%s",
-                        stock.symbol, "refreshed" if refreshed else "skipped")
-            return result
-        result["indicators"] = compute_indicators(stock.id, since_date=since)
+            result["indicators"] = compute_indicators(stock.id, since_date=new_max_date)
+        # else: no new prices — skip indicator compute, result["indicators"] stays 0
+
+        # Predict with latest features regardless of whether new prices arrived
+        if booster is not None and feature_cols is not None:
+            from model.inference import _build_inference_features, _align_features
+            feat = _build_inference_features(stock.id, stock.symbol)
+            if feat is not None:
+                dmatrix = _align_features(feat["features"], feature_cols)
+                prob = float(booster.predict(dmatrix)[0])
+                _upsert_prediction(stock.id, prob, feat["input_end_date"])
+                result["probability"] = round(prob, 4)
 
         _update_checkpoint(stock.id)
         logger.info(
-            "%-6s  prices=%-4d  indicators=%-4d  overview=%s",
+            "%-6s  prices=%-4d  indicators=%-4d  overview=%-9s  prob=%s",
             stock.symbol, prices_inserted, result["indicators"],
             "refreshed" if refreshed else "skipped",
+            f"{result.get('probability', '-'):.4f}" if "probability" in result else "-",
         )
 
     except Exception as e:
@@ -297,13 +321,33 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
 
     try:
         session = get_session()
-        stocks = session.query(Stock).filter(Stock.is_active == True).all()
+        stocks = (
+            session.query(Stock)
+            .outerjoin(StockPrediction, Stock.id == StockPrediction.stock_id)
+            .outerjoin(StockIndicator, Stock.id == StockIndicator.stock_id)
+            .filter(Stock.is_active == True)
+            .order_by(
+                StockPrediction.probability.desc().nullslast(),
+                StockIndicator.market_cap.desc().nullslast(),
+            )
+            .all()
+        )
         session.close()
         logger.info("Pipeline starting: %d active symbols", len(stocks))
 
+        # Load model once; workers share read-only booster (thread-safe)
+        from model.train import load_model, load_feature_columns
+        booster = load_model()
+        feature_cols = load_feature_columns() if booster is not None else None
+        if booster is None:
+            logger.warning("No trained model found — predict step will be skipped")
+
         total = len(stocks)
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
-            futures = {pool.submit(_process_symbol, fetcher, s, force): s for s in stocks}
+            futures = {
+                pool.submit(_process_symbol, fetcher, s, force, booster, feature_cols): s
+                for s in stocks
+            }
             for future in as_completed(futures):
                 result = future.result()
                 summary["processed"] += 1

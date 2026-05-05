@@ -238,3 +238,31 @@ class StockRepository:
             ])
         finally:
             session.close()
+
+    def get_all_predictions(self, sector: Optional[str] = None, search: str = "") -> pd.DataFrame:
+        session = self._get_session()
+        try:
+            where = "WHERE sp.probability IS NOT NULL"
+            params: dict = {}
+            if sector:
+                where += " AND ss.sector = :sector"
+                params["sector"] = sector
+            if search:
+                where += " AND (s.symbol LIKE :search OR s.name LIKE :search)"
+                params["search"] = f"%{search}%"
+            q = f"""
+            SELECT s.symbol, s.name, sp.probability, sp.input_end_date, sp.predicted_at,
+                   ss.close, ss.market_cap, ss.sector, ss.rsi_14
+            FROM stock_predictions sp
+            JOIN stocks s ON s.id = sp.stock_id
+            LEFT JOIN stock_snapshots ss ON ss.stock_id = sp.stock_id
+            {where}
+            ORDER BY sp.probability DESC
+            """
+            rows = session.execute(text(q), params).fetchall()
+            return pd.DataFrame(rows, columns=[
+                "Symbol", "Name", "Probability", "Input End", "Predicted At",
+                "Close", "Market Cap", "Sector", "RSI",
+            ])
+        finally:
+            session.close()

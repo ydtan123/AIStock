@@ -9,6 +9,19 @@ from display import fmt_market_cap, nan_safe
 from repository import ScreenCriteria, StockFilters, StockRepository
 
 
+@st.cache_resource
+def _load_model_cached():
+    from model.train import load_model, load_feature_columns
+    return load_model(), load_feature_columns()
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def _get_shap(symbol: str, _input_end_date) -> dict | None:
+    from model.inference import predict_stocks
+    results = predict_stocks([symbol], top_n=8)
+    return results[0] if results and "error" not in results[0] else None
+
+
 st.set_page_config(page_title="StockDB", page_icon="📈", layout="wide")
 
 st.markdown("""
@@ -352,32 +365,121 @@ def tab_manager():
 
 # ── tab 5: Predictions ────────────────────────────────────────────────────────
 
+def _prob_bar(p: float) -> str:
+    filled = int(p * 20)
+    color = "#16a34a" if p >= 0.65 else ("#d97706" if p >= 0.45 else "#dc2626")
+    bar = "█" * filled + "░" * (20 - filled)
+    return f'<span style="color:{color};font-family:monospace">{bar}</span> {p*100:.1f}%'
+
+
+def _shap_chart(items: list[dict], color: str, title: str):
+    if not items:
+        return
+    labels = [i["feature"] for i in items]
+    values = [abs(i["contribution"]) for i in items]
+    fig = go.Figure(go.Bar(
+        x=values, y=labels, orientation="h",
+        marker_color=color,
+        text=[f"{'+' if color=='#16a34a' else '-'}{v:.4f}" for v in values],
+        textposition="outside",
+    ))
+    fig.update_layout(
+        title=dict(text=title, font=dict(size=12, color="#334155")),
+        height=max(180, len(items) * 32 + 60),
+        margin=dict(l=0, r=60, t=36, b=0),
+        plot_bgcolor="#f8fafc", paper_bgcolor="#ffffff",
+        xaxis=dict(visible=False), yaxis=dict(tickfont=dict(size=11)),
+        font=dict(color="#334155"),
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
 def tab_predictions():
     st.markdown('<div class="tab-header">PREDICTIONS</div>', unsafe_allow_html=True)
 
-    c1, c2, c3 = st.columns([1, 1, 3])
-    with c1:
-        min_p = st.slider("Min Probability", 0.0, 1.0, 0.5, 0.05)
-    with c2:
-        limit = st.selectbox("Show", [50, 100, 200], index=1)
+    # ── filters ──────────────────────────────────────────────────────────────
+    fc1, fc2, fc3 = st.columns([1, 1, 2])
+    with fc1:
+        sectors = ["All"] + repo.get_sectors("stock_snapshots")
+        sector_filter = st.selectbox("Sector", sectors, key="pred_sector")
+    with fc2:
+        search = st.text_input("Search symbol / name", key="pred_search")
 
-    df = repo.get_predictions(min_prob=min_p, limit=limit)
+    df = repo.get_all_predictions(
+        sector=sector_filter if sector_filter != "All" else None,
+        search=search,
+    )
 
     if df.empty:
-        st.info("No predictions yet. Run inference first: `python main.py predict`")
+        st.info("No predictions yet. Run `python main.py run` first.")
         return
 
-    st.caption(f"{len(df)} predictions above {min_p:.0%}")
+    # ── summary stats ────────────────────────────────────────────────────────
+    n_bullish = (df["Probability"] >= 0.65).sum()
+    n_bearish = (df["Probability"] < 0.35).sum()
+    sc1, sc2, sc3, sc4 = st.columns(4)
+    sc1.metric("Total", len(df))
+    sc2.metric("Bullish (≥65%)", int(n_bullish))
+    sc3.metric("Bearish (<35%)", int(n_bearish))
+    sc4.metric("Last updated", str(df["Predicted At"].max())[:16] if not df.empty else "—")
+
+    st.markdown("---")
+
+    # ── main table ───────────────────────────────────────────────────────────
+    display_df = df.copy()
+    display_df["P(growth)"] = display_df["Probability"].apply(lambda x: f"{float(x)*100:.1f}%")
+    display_df["Market Cap"] = display_df["Market Cap"].apply(fmt_market_cap)
+    display_df["Close"] = display_df["Close"].apply(nan_safe(lambda x: f"${float(x):.2f}"))
+    display_df["RSI"] = display_df["RSI"].apply(nan_safe(lambda x: f"{float(x):.1f}"))
+    display_df["As of"] = display_df["Input End"].astype(str)
+    show_cols = ["Symbol", "Name", "Sector", "Close", "Market Cap", "RSI", "P(growth)", "As of"]
 
     col_export, _ = st.columns([1, 5])
     with col_export:
         st.download_button("Export CSV", df.to_csv(index=False), "predictions.csv", "text/csv")
 
-    df["Probability"] = df["Probability"].apply(lambda x: f"{float(x)*100:.1f}%")
-    df["Market Cap"] = df["Market Cap"].apply(fmt_market_cap)
-    df["Close"] = df["Close"].apply(nan_safe(lambda x: f"${float(x):.2f}"))
+    st.dataframe(display_df[show_cols], use_container_width=True, hide_index=True)
 
-    st.dataframe(df.drop(columns=["Input End"]), use_container_width=True, hide_index=True)
+    # ── SHAP drill-down ───────────────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown('<div class="tab-header">SIGNAL ATTRIBUTION</div>', unsafe_allow_html=True)
+
+    symbols_list = df["Symbol"].tolist()
+    selected = st.selectbox("Select stock for attribution", symbols_list, key="pred_detail")
+
+    if selected:
+        row = df[df["Symbol"] == selected].iloc[0]
+        input_end = row["Input End"]
+
+        with st.spinner(f"Computing SHAP for {selected}..."):
+            shap_result = _get_shap(selected, input_end)
+
+        if shap_result is None:
+            st.warning(f"Could not compute attribution for {selected} (insufficient price data).")
+            return
+
+        prob = float(shap_result["probability"])
+        dc1, dc2 = st.columns([1, 3])
+        with dc1:
+            color = "#16a34a" if prob >= 0.65 else ("#d97706" if prob >= 0.45 else "#dc2626")
+            filled = int(prob * 20)
+            bar = "█" * filled + "░" * (20 - filled)
+            st.markdown(f"""
+            <div class="metric-card" style="text-align:left;padding:16px">
+              <div class="metric-label">{selected} — P(GROWTH)</div>
+              <div class="metric-value" style="color:{color}">{prob*100:.1f}%</div>
+              <div style="font-family:monospace;font-size:13px;color:{color}">{bar}</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:6px">As of {shap_result['input_end_date']}</div>
+              <div style="font-size:11px;color:#94a3b8">Bias: {shap_result.get('bias', 0):.4f}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with dc2:
+            ac1, ac2 = st.columns(2)
+            with ac1:
+                _shap_chart(shap_result.get("top_positive", []), "#16a34a", "▲ Bullish Signals")
+            with ac2:
+                _shap_chart(shap_result.get("top_negative", []), "#dc2626", "▼ Bearish Signals")
 
 
 # ── main ──────────────────────────────────────────────────────────────────────

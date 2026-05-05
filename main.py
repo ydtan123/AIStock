@@ -69,7 +69,11 @@ def cmd_run(args):
             session.close()
 
         from ingestion.pipeline import _process_symbol, _refresh_snapshots
-        result = _process_symbol(fetcher, stock, force=args.force)
+        from model.train import load_model, load_feature_columns
+        booster = load_model()
+        feature_cols = load_feature_columns() if booster is not None else None
+        result = _process_symbol(fetcher, stock, force=args.force,
+                                 booster=booster, feature_cols=feature_cols)
         _refresh_snapshots()
         logger.info("Result: %s", result)
     else:
