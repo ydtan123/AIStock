@@ -29,10 +29,20 @@ logger = logging.getLogger(__name__)
 # --- config ---
 
 MODEL_DIR = Path(__file__).parent / "artifacts"
-FEATURE_COLS_FILE = MODEL_DIR / "feature_columns.json"
-MODEL_FILE = MODEL_DIR / "xgb_model.pkl"
 BATCH_SIZE = 500
 MAX_WORKERS = 4
+
+
+def _model_dir(label_method: str) -> Path:
+    return MODEL_DIR / label_method
+
+
+def _model_file(label_method: str) -> Path:
+    return _model_dir(label_method) / "xgb_model.pkl"
+
+
+def _feature_cols_file(label_method: str) -> Path:
+    return _model_dir(label_method) / "feature_columns.json"
 
 TRAIN_CUTOFF = date(2025, 1, 1)
 VAL_CUTOFF = date(2026, 1, 1)
@@ -140,6 +150,14 @@ def generate_and_persist_samples(label_methods: list[LabelMethod] | None = None)
     if label_methods is None:
         label_methods = LABEL_METHODS
 
+    context: dict = {}
+    if _needs_spy_context(label_methods):
+        spy_df = _load_spy_prices()
+        if spy_df is not None:
+            context["spy"] = spy_df
+        else:
+            logger.warning("SPY prices unavailable — beats_spy labels will be null")
+
     session = get_session()
     try:
         stocks = session.query(Stock).filter(Stock.is_active == True).all()
@@ -194,7 +212,7 @@ def generate_and_persist_samples(label_methods: list[LabelMethod] | None = None)
             tech_data = tech_by_stock.get(sid, [])
             try:
                 windows = builder.build_all_windows(prices, tech_data, stock.sector, stock.symbol)
-                label_map = compute_all_labels(prices, label_methods, builder.window_days)
+                label_map = compute_all_labels(prices, label_methods, builder.window_days, context)
                 samples = [{**w, "labels": label_map.get(w["input_end_date"], {})} for w in windows]
                 return _persist_stock_samples(stock.id, stock.symbol, samples, label_methods)
             except Exception as e:
@@ -224,6 +242,59 @@ def generate_and_persist_samples(label_methods: list[LabelMethod] | None = None)
     logger.info("Sample generation complete: %d new features, %d labels updated",
                 total_new_features, total_labels_updated)
     return summary
+
+
+def _read_samples_smoke_splits(label_method: str, rows_per_split: int) -> tuple[Path, Path, Path, Path, int]:
+    """Fetch a small, balanced sample for smoke tests — one capped query per split."""
+    import tempfile
+
+    base = (
+        "SELECT sf.features, sl.label, sf.input_end_date, sf.symbol "
+        "FROM sample_features sf "
+        "JOIN sample_labels sl ON sl.stock_id = sf.stock_id "
+        "  AND sl.input_end_date = sf.input_end_date "
+        "WHERE sl.label_method = :method AND sl.label IS NOT NULL "
+    )
+    split_defs = [
+        ("train", base + "AND sf.input_end_date < :cut1 LIMIT :n",
+         {"method": label_method, "cut1": TRAIN_CUTOFF, "n": rows_per_split}),
+        ("val",   base + "AND sf.input_end_date >= :cut1 AND sf.input_end_date < :cut2 LIMIT :n",
+         {"method": label_method, "cut1": TRAIN_CUTOFF, "cut2": VAL_CUTOFF, "n": rows_per_split}),
+        ("test",  base + "AND sf.input_end_date >= :cut2 LIMIT :n",
+         {"method": label_method, "cut2": VAL_CUTOFF, "n": rows_per_split}),
+    ]
+
+    tmpdir = Path(tempfile.mkdtemp(prefix="aistock_smoke_"))
+    dirs: dict[str, Path] = {}
+    total = 0
+
+    session = get_session()
+    try:
+        for split_name, query, params in split_defs:
+            split_dir = tmpdir / split_name
+            split_dir.mkdir()
+            dirs[split_name] = split_dir
+            rows = session.execute(text(query), params).fetchall()
+            if not rows:
+                logger.warning("smoke: no rows for split=%s label=%s", split_name, label_method)
+                continue
+            chunk = []
+            for row in rows:
+                features_raw = row[0]
+                if isinstance(features_raw, str):
+                    features_raw = json.loads(features_raw)
+                sample = features_raw if isinstance(features_raw, dict) else dict(features_raw)
+                sample["label"] = row[1]
+                sample["input_end_date"] = row[2]
+                sample["symbol"] = row[3]
+                chunk.append(sample)
+            pd.DataFrame(chunk).to_parquet(split_dir / "chunk_0000.parquet", index=False)
+            total += len(chunk)
+            logger.info("smoke: split=%s rows=%d", split_name, len(chunk))
+    finally:
+        session.close()
+
+    return dirs["train"], dirs["val"], dirs["test"], tmpdir, total
 
 
 def _read_samples_from_db(label_method: str, max_rows: int | None = None) -> tuple[Path, Path, Path, Path, int]:
@@ -566,23 +637,29 @@ def train(
     save: bool = True,
     skip_generate: bool = True,
     smoke_test: bool = False,
+    num_boost_round: int = 200,
 ) -> dict:
     """Generate/persist samples, then train XGBoost. Returns metrics dict."""
     import shutil
 
-    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+    _model_dir(label_method).mkdir(parents=True, exist_ok=True)
 
     method = next((m for m in LABEL_METHODS if m.name == label_method), None)
     if method is None:
         raise ValueError(f"Unknown label_method: {label_method}")
+
+    if label_method == "beats_spy" and not _ensure_spy_prices():
+        raise RuntimeError("SPY prices required for beats_spy. Run: python main.py run --symbol SPY --force")
 
     if skip_generate and _samples_up_to_date(label_method, method.version):
         logger.info("Samples up to date, skipping generation")
     else:
         generate_and_persist_samples()
 
-    max_rows = 10_000 if smoke_test else None
-    train_dir, val_dir, test_dir, tmpdir, _ = _read_samples_from_db(label_method, max_rows=max_rows)
+    if smoke_test:
+        train_dir, val_dir, test_dir, tmpdir, _ = _read_samples_smoke_splits(label_method, rows_per_split=300)
+    else:
+        train_dir, val_dir, test_dir, tmpdir, _ = _read_samples_from_db(label_method)
 
     try:
         feature_cols = _get_canonical_feature_cols(train_dir)
@@ -622,7 +699,7 @@ def train(
     booster = xgb.train(
         params,
         dtrain,
-        num_boost_round=200,
+        num_boost_round=num_boost_round,
         evals=[(dval, "val")],
         verbose_eval=50,
     )
@@ -633,6 +710,15 @@ def train(
 
     val_auc = roc_auc_score(y_val, val_proba)
     test_auc = roc_auc_score(y_test, test_proba)
+
+    # TPR / TNR at 0.5 threshold
+    test_pred = (test_proba >= 0.5).astype(int)
+    tp = int(((test_pred == 1) & (y_test == 1)).sum())
+    tn = int(((test_pred == 0) & (y_test == 0)).sum())
+    fp = int(((test_pred == 1) & (y_test == 0)).sum())
+    fn = int(((test_pred == 0) & (y_test == 1)).sum())
+    tpr = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    tnr = tn / (tn + fp) if (tn + fp) > 0 else 0.0
 
     train_total = neg_count + pos_count
     metrics = {
@@ -645,18 +731,26 @@ def train(
         "pos_rate_train": float(pos_count / train_total) if train_total > 0 else 0.0,
         "pos_rate_val": float((y_val == 1).sum() / len(y_val)) if len(y_val) > 0 else 0.0,
         "pos_rate_test": float((y_test == 1).sum() / len(y_test)) if len(y_test) > 0 else 0.0,
+        "tpr": float(tpr),
+        "tnr": float(tnr),
+        "tp": tp,
+        "tn": tn,
+        "fp": fp,
+        "fn": fn,
     }
 
     logger.info("Val AUC: %.4f  Test AUC: %.4f", val_auc, test_auc)
     logger.info("Pos rate -- Train: %.3f  Val: %.3f  Test: %.3f",
                 metrics["pos_rate_train"], metrics["pos_rate_val"], metrics["pos_rate_test"])
+    logger.info("TPR: %.4f  TNR: %.4f  (threshold=0.5, TP=%d TN=%d FP=%d FN=%d)",
+                tpr, tnr, tp, tn, fp, fn)
 
     if save:
-        with open(FEATURE_COLS_FILE, "w") as f:
+        with open(_feature_cols_file(label_method), "w") as f:
             json.dump({"columns": feature_cols}, f)
-        with open(MODEL_FILE, "wb") as f:
+        with open(_model_file(label_method), "wb") as f:
             pickle.dump(booster, f)
-        logger.info("Model saved to %s", MODEL_DIR)
+        logger.info("Model saved to %s", _model_dir(label_method))
 
     scores = booster.get_score(importance_type="weight")
     importances = pd.Series(scores).reindex(feature_cols, fill_value=0).sort_values(ascending=False)
@@ -665,17 +759,66 @@ def train(
     return metrics
 
 
-def load_model() -> Optional[xgb.Booster]:
+def load_model(label_method: str = "max_high_5pct") -> Optional[xgb.Booster]:
     """Load trained model from disk."""
-    if not MODEL_FILE.exists():
+    f = _model_file(label_method)
+    if not f.exists():
         return None
-    with open(MODEL_FILE, "rb") as f:
-        return pickle.load(f)
+    with open(f, "rb") as fp:
+        return pickle.load(fp)
 
 
-def load_feature_columns() -> list[str]:
+def load_feature_columns(label_method: str = "max_high_5pct") -> list[str]:
     """Load feature column names for inference alignment."""
-    if not FEATURE_COLS_FILE.exists():
+    path = _feature_cols_file(label_method)
+    if not path.exists():
         return []
-    with open(FEATURE_COLS_FILE) as f:
-        return json.load(f)["columns"]
+    with open(path) as fp:
+        return json.load(fp)["columns"]
+
+
+def _load_spy_prices() -> pd.DataFrame | None:
+    """Load SPY daily prices for beats_spy label computation."""
+    session = get_session()
+    try:
+        spy = session.query(Stock).filter_by(symbol="SPY").first()
+        if spy is None:
+            return None
+        df = pd.read_sql(
+            text("SELECT date, close FROM daily_prices WHERE stock_id = :sid ORDER BY date"),
+            session.bind, params={"sid": spy.id},
+        )
+        if df.empty:
+            return None
+        df["date"] = pd.to_datetime(df["date"])
+        return df.sort_values("date").reset_index(drop=True)
+    finally:
+        session.close()
+
+
+def _ensure_spy_prices() -> bool:
+    """Verify SPY exists and has price data for beats_spy label.
+
+    Returns True if ready. Logs error and returns False if SPY missing.
+    """
+    session = get_session()
+    try:
+        spy = session.query(Stock).filter_by(symbol="SPY").first()
+        if spy is None:
+            logger.error("SPY not found in DB. Run: python main.py run --symbol SPY --force")
+            return False
+        count = session.execute(
+            text("SELECT COUNT(*) FROM daily_prices WHERE stock_id = :sid"),
+            {"sid": spy.id},
+        ).scalar()
+        if count == 0:
+            logger.error("SPY has no price data. Run: python main.py run --symbol SPY --force")
+            return False
+        return True
+    finally:
+        session.close()
+
+
+def _needs_spy_context(methods: list[LabelMethod]) -> bool:
+    """Check if any label method requires SPY context."""
+    return any(m.name == "beats_spy" for m in methods)
