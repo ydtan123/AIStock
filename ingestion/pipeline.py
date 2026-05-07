@@ -246,9 +246,11 @@ def _needs_full_backfill(stock_id: int) -> bool:
         session.close()
 
 
-def _upsert_prediction(stock_id: int, probability: float, input_end_date) -> None:
+def _upsert_prediction(stock_id: int, probability: float, input_end_date,
+                      label_method: str = "max_high_5pct") -> None:
     row = {
         "stock_id": stock_id,
+        "label_method": label_method,
         "probability": round(probability, 6),
         "input_end_date": input_end_date,
         "predicted_at": datetime.utcnow(),
@@ -267,7 +269,11 @@ def _upsert_prediction(stock_id: int, probability: float, input_end_date) -> Non
 
 
 def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
-                    booster=None, feature_cols=None) -> dict:
+                    models: list | None = None) -> dict:
+    """Process one symbol through the daily pipeline.
+
+    models: list of (booster, feature_cols, label_method) tuples.
+    """
     result = {"symbol": stock.symbol, "prices": 0, "fundamentals": False, "indicators": 0, "error": None}
     try:
         prices_inserted, new_max_date = _fetch_and_store_prices(fetcher, stock)
@@ -279,27 +285,27 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
         if _needs_full_backfill(stock.id):
             result["indicators"] = compute_indicators(stock.id, since_date=None)
         elif prices_inserted > 0 and new_max_date:
-            # New prices: compute only for the newly added date(s)
-            # compute_indicators loads _LOOKBACK_DAYS warmup automatically
             result["indicators"] = compute_indicators(stock.id, since_date=new_max_date)
-        # else: no new prices — skip indicator compute, result["indicators"] stays 0
 
-        # Predict with latest features regardless of whether new prices arrived
-        if booster is not None and feature_cols is not None:
+        # Predict with all available models
+        if models:
             from model.inference import _build_inference_features, _align_features
             feat = _build_inference_features(stock.id, stock.symbol)
             if feat is not None:
-                dmatrix = _align_features(feat["features"], feature_cols)
-                prob = float(booster.predict(dmatrix)[0])
-                _upsert_prediction(stock.id, prob, feat["input_end_date"])
-                result["probability"] = round(prob, 4)
+                probs = {}
+                for booster, feature_cols, label_method in models:
+                    dmatrix = _align_features(feat["features"], feature_cols)
+                    prob = float(booster.predict(dmatrix)[0])
+                    _upsert_prediction(stock.id, prob, feat["input_end_date"], label_method)
+                    probs[label_method] = round(prob, 4)
+                result["probabilities"] = probs
 
         _update_checkpoint(stock.id)
+        prob_str = ", ".join(f"{k}={v:.4f}" for k, v in result.get("probabilities", {}).items()) if "probabilities" in result else "-"
         logger.info(
-            "%-6s  prices=%-4d  indicators=%-4d  overview=%-9s  prob=%s",
+            "%-6s  prices=%-4d  indicators=%-4d  overview=%-9s  probs=%s",
             stock.symbol, prices_inserted, result["indicators"],
-            "refreshed" if refreshed else "skipped",
-            f"{result.get('probability', '-'):.4f}" if "probability" in result else "-",
+            "refreshed" if refreshed else "skipped", prob_str,
         )
 
     except Exception as e:
@@ -323,29 +329,33 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
         session = get_session()
         stocks = (
             session.query(Stock)
-            .outerjoin(StockPrediction, Stock.id == StockPrediction.stock_id)
             .outerjoin(StockIndicator, Stock.id == StockIndicator.stock_id)
             .filter(Stock.is_active == True)
-            .order_by(
-                StockPrediction.probability.desc().nullslast(),
-                StockIndicator.market_cap.desc().nullslast(),
-            )
+            .order_by(StockIndicator.market_cap.desc().nullslast())
             .all()
         )
         session.close()
         logger.info("Pipeline starting: %d active symbols", len(stocks))
 
-        # Load model once; workers share read-only booster (thread-safe)
+        # Load all available models; workers share read-only boosters (thread-safe)
         from model.train import load_model, load_feature_columns
-        booster = load_model()
-        feature_cols = load_feature_columns() if booster is not None else None
-        if booster is None:
-            logger.warning("No trained model found — predict step will be skipped")
+        from model.labels import LABEL_METHODS
+        models = []
+        for method in LABEL_METHODS:
+            b = load_model(method.name)
+            fc = load_feature_columns(method.name) if b is not None else None
+            if b is not None and fc:
+                models.append((b, fc, method.name))
+            else:
+                logger.warning("No trained model for %s — skipping", method.name)
+
+        if not models:
+            logger.warning("No trained models found — predict step will be skipped")
 
         total = len(stocks)
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
             futures = {
-                pool.submit(_process_symbol, fetcher, s, force, booster, feature_cols): s
+                pool.submit(_process_symbol, fetcher, s, force, models if models else None): s
                 for s in stocks
             }
             for future in as_completed(futures):

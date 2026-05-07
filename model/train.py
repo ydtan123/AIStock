@@ -632,6 +632,13 @@ def _samples_up_to_date(label_method: str, label_version: str) -> bool:
         session.close()
 
 
+def _feature_importances(booster: xgb.Booster, feature_cols: list[str]) -> pd.Series:
+    """Map booster importance (f0/f1/... keys) back to named feature columns."""
+    raw = booster.get_score(importance_type="weight")
+    named = {feature_cols[int(k[1:])]: v for k, v in raw.items() if k.startswith("f")}
+    return pd.Series(named).reindex(feature_cols, fill_value=0).sort_values(ascending=False)
+
+
 def train(
     label_method: str = "max_high_5pct",
     save: bool = True,
@@ -752,8 +759,174 @@ def train(
             pickle.dump(booster, f)
         logger.info("Model saved to %s", _model_dir(label_method))
 
-    scores = booster.get_score(importance_type="weight")
-    importances = pd.Series(scores).reindex(feature_cols, fill_value=0).sort_values(ascending=False)
+    importances = _feature_importances(booster, feature_cols)
+    logger.info("Top 15 features:\n%s", importances.head(15).to_string())
+
+    return metrics
+
+
+def tune_hyperparams(
+    label_method: str = "beats_spy",
+    n_trials: int = 50,
+    save: bool = True,
+) -> dict:
+    """Optuna search over XGBoost hyperparams, optimizing val AUC.
+
+    Data is loaded once; all Optuna trials reuse the in-memory DMatrix objects.
+    Best params are used to retrain the final model which is saved to disk.
+    """
+    import shutil
+
+    try:
+        import optuna
+    except ImportError as e:
+        raise ImportError("pip install optuna") from e
+
+    optuna.logging.set_verbosity(optuna.logging.WARNING)
+
+    method = next((m for m in LABEL_METHODS if m.name == label_method), None)
+    if method is None:
+        raise ValueError(f"Unknown label_method: {label_method}")
+
+    if label_method == "beats_spy" and not _ensure_spy_prices():
+        raise RuntimeError("SPY prices required. Run: python main.py run --symbol SPY --force")
+
+    _model_dir(label_method).mkdir(parents=True, exist_ok=True)
+
+    train_dir, val_dir, test_dir, tmpdir, _ = _read_samples_from_db(label_method)
+
+    try:
+        feature_cols = _get_canonical_feature_cols(train_dir)
+        train_files = sorted(train_dir.glob("chunk_*.parquet"))
+        neg_count, pos_count = _count_labels_in_dir(train_dir)
+        logger.info("Train label counts — neg: %d  pos: %d", neg_count, pos_count)
+
+        dtrain = xgb.QuantileDMatrix(ParquetDataIter(train_files, feature_cols))
+        X_val, y_val = _load_split_to_arrays(val_dir, feature_cols)
+        X_test, y_test = _load_split_to_arrays(test_dir, feature_cols)
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+    dval = xgb.DMatrix(X_val, label=y_val)
+    dtest = xgb.DMatrix(X_test, label=y_test)
+
+    scale_pos_weight = neg_count / pos_count if pos_count > 0 else 1.0
+    logger.info("scale_pos_weight: %.2f  val: %d  test: %d  features: %d",
+                scale_pos_weight, len(y_val), len(y_test), len(feature_cols))
+
+    best_so_far: list[float] = [0.0]
+
+    def objective(trial: "optuna.Trial") -> float:
+        params = {
+            "objective": "binary:logistic",
+            "eval_metric": "auc",
+            "scale_pos_weight": scale_pos_weight,
+            "max_depth": trial.suggest_int("max_depth", 3, 8),
+            "learning_rate": trial.suggest_float("learning_rate", 0.005, 0.3, log=True),
+            "subsample": trial.suggest_float("subsample", 0.5, 1.0),
+            "colsample_bytree": trial.suggest_float("colsample_bytree", 0.4, 1.0),
+            "min_child_weight": trial.suggest_int("min_child_weight", 1, 30),
+            "gamma": trial.suggest_float("gamma", 0.0, 5.0),
+            "reg_alpha": trial.suggest_float("reg_alpha", 0.0, 10.0),
+            "reg_lambda": trial.suggest_float("reg_lambda", 0.5, 15.0),
+            "seed": 42,
+            "nthread": -1,
+        }
+        num_boost_round = trial.suggest_int("num_boost_round", 100, 800)
+
+        logger.info(
+            "Trial %d start — depth=%d lr=%.4f sub=%.2f col=%.2f mcw=%d rounds=%d",
+            trial.number, params["max_depth"], params["learning_rate"],
+            params["subsample"], params["colsample_bytree"],
+            params["min_child_weight"], num_boost_round,
+        )
+
+        booster = xgb.train(
+            params,
+            dtrain,
+            num_boost_round=num_boost_round,
+            evals=[(dval, "val")],
+            verbose_eval=False,
+        )
+        val_proba = booster.predict(dval)
+        auc = float(roc_auc_score(y_val, val_proba))
+        improved = auc > best_so_far[0]
+        if improved:
+            best_so_far[0] = auc
+        logger.info(
+            "Trial %d done  — val_auc=%.4f%s",
+            trial.number, auc, "  *** NEW BEST ***" if improved else "",
+        )
+        return auc
+
+    logger.info("Starting Optuna search: %d trials", n_trials)
+    study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=42))
+    study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
+
+    best = dict(study.best_params)
+    best_num_boost_round = best.pop("num_boost_round")
+    logger.info("Best val_auc=%.4f after %d trials", study.best_value, n_trials)
+    logger.info("Best params: %s  num_boost_round=%d", best, best_num_boost_round)
+
+    final_params = {
+        "objective": "binary:logistic",
+        "eval_metric": "auc",
+        "scale_pos_weight": scale_pos_weight,
+        "seed": 42,
+        "nthread": -1,
+        **best,
+    }
+    booster = xgb.train(
+        final_params,
+        dtrain,
+        num_boost_round=best_num_boost_round,
+        evals=[(dval, "val")],
+        verbose_eval=50,
+    )
+
+    val_proba = booster.predict(dval)
+    test_proba = booster.predict(dtest)
+    val_auc = roc_auc_score(y_val, val_proba)
+    test_auc = roc_auc_score(y_test, test_proba)
+
+    test_pred = (test_proba >= 0.5).astype(int)
+    tp = int(((test_pred == 1) & (y_test == 1)).sum())
+    tn = int(((test_pred == 0) & (y_test == 0)).sum())
+    fp = int(((test_pred == 1) & (y_test == 0)).sum())
+    fn = int(((test_pred == 0) & (y_test == 1)).sum())
+    tpr = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    tnr = tn / (tn + fp) if (tn + fp) > 0 else 0.0
+
+    train_total = neg_count + pos_count
+    metrics = {
+        "val_auc": float(val_auc),
+        "test_auc": float(test_auc),
+        "best_trial_val_auc": study.best_value,
+        "n_trials": n_trials,
+        "best_params": {**best, "num_boost_round": best_num_boost_round},
+        "train_samples": train_total,
+        "val_samples": int(len(X_val)),
+        "test_samples": int(len(X_test)),
+        "features": len(feature_cols),
+        "tpr": float(tpr),
+        "tnr": float(tnr),
+        "tp": tp,
+        "tn": tn,
+        "fp": fp,
+        "fn": fn,
+    }
+
+    logger.info("Final — Val AUC: %.4f  Test AUC: %.4f", val_auc, test_auc)
+    logger.info("TPR: %.4f  TNR: %.4f  (TP=%d TN=%d FP=%d FN=%d)", tpr, tnr, tp, tn, fp, fn)
+
+    if save:
+        with open(_feature_cols_file(label_method), "w") as f:
+            json.dump({"columns": feature_cols}, f)
+        with open(_model_file(label_method), "wb") as f:
+            pickle.dump(booster, f)
+        logger.info("Model saved to %s", _model_dir(label_method))
+
+    importances = _feature_importances(booster, feature_cols)
     logger.info("Top 15 features:\n%s", importances.head(15).to_string())
 
     return metrics
