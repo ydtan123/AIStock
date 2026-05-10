@@ -183,6 +183,7 @@ class StockPrediction(Base):
     __tablename__ = "stock_predictions"
 
     stock_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("stocks.id"), primary_key=True)
+    label_method: Mapped[str] = mapped_column(String(64), primary_key=True, default="max_high_5pct")
     probability: Mapped[float] = mapped_column(Float, nullable=False)
     input_end_date: Mapped[datetime] = mapped_column(Date, nullable=False)
     predicted_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
@@ -209,6 +210,115 @@ class SampleFeature(Base):
     __table_args__ = (
         Index("ix_sample_features_symbol", "symbol"),
         Index("ix_sample_features_date", "input_end_date"),
+    )
+
+
+class QuarterlyFundamentals(Base):
+    """Quarterly fundamental data for S&P 500 stocks, sourced from Alpha Vantage.
+
+    datadate is aligned to Mar/Jun/Sep/Dec 1st (MJSD convention).
+    y_return is the forward log return to the next datadate.
+    """
+
+    __tablename__ = "quarterly_fundamentals"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    stock_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("stocks.id"), nullable=False)
+    symbol: Mapped[str] = mapped_column(String(10), nullable=False)
+    sector: Mapped[Optional[str]] = mapped_column(String(100))
+    datadate: Mapped[datetime] = mapped_column(Date, nullable=False)
+    fiscal_date: Mapped[Optional[datetime]] = mapped_column(Date)
+
+    # Price on datadate
+    adj_close_q: Mapped[Optional[float]] = mapped_column(Float)
+    market_cap: Mapped[Optional[float]] = mapped_column(Float)
+
+    # Income statement
+    total_revenue: Mapped[Optional[float]] = mapped_column(Float)
+    gross_profit: Mapped[Optional[float]] = mapped_column(Float)
+    cost_of_revenue: Mapped[Optional[float]] = mapped_column(Float)
+    operating_income: Mapped[Optional[float]] = mapped_column(Float)
+    net_income: Mapped[Optional[float]] = mapped_column(Float)
+    ebitda: Mapped[Optional[float]] = mapped_column(Float)
+    ebit: Mapped[Optional[float]] = mapped_column(Float)
+    interest_expense: Mapped[Optional[float]] = mapped_column(Float)
+    depreciation_amortization: Mapped[Optional[float]] = mapped_column(Float)
+
+    # Balance sheet
+    total_assets: Mapped[Optional[float]] = mapped_column(Float)
+    total_current_assets: Mapped[Optional[float]] = mapped_column(Float)
+    cash_and_equivalents: Mapped[Optional[float]] = mapped_column(Float)
+    inventory: Mapped[Optional[float]] = mapped_column(Float)
+    current_receivables: Mapped[Optional[float]] = mapped_column(Float)
+    total_current_liabilities: Mapped[Optional[float]] = mapped_column(Float)
+    total_liabilities: Mapped[Optional[float]] = mapped_column(Float)
+    short_term_debt: Mapped[Optional[float]] = mapped_column(Float)
+    long_term_debt: Mapped[Optional[float]] = mapped_column(Float)
+    total_equity: Mapped[Optional[float]] = mapped_column(Float)
+    shares_outstanding: Mapped[Optional[float]] = mapped_column(Float)
+    retained_earnings: Mapped[Optional[float]] = mapped_column(Float)
+
+    # Cash flow
+    operating_cashflow: Mapped[Optional[float]] = mapped_column(Float)
+    capital_expenditures: Mapped[Optional[float]] = mapped_column(Float)
+    dividend_payout: Mapped[Optional[float]] = mapped_column(Float)
+    free_cash_flow: Mapped[Optional[float]] = mapped_column(Float)
+
+    # Earnings (from EARNINGS endpoint)
+    reported_eps: Mapped[Optional[float]] = mapped_column(Float)
+    estimated_eps: Mapped[Optional[float]] = mapped_column(Float)
+    eps_surprise: Mapped[Optional[float]] = mapped_column(Float)
+    eps_surprise_pct: Mapped[Optional[float]] = mapped_column(Float)
+
+    # Pre-computed ratios — feature-ready
+    EPS: Mapped[Optional[float]] = mapped_column(Float)
+    BPS: Mapped[Optional[float]] = mapped_column(Float)
+    DPS: Mapped[Optional[float]] = mapped_column(Float)
+    gross_margin: Mapped[Optional[float]] = mapped_column(Float)
+    operating_margin: Mapped[Optional[float]] = mapped_column(Float)
+    net_income_ratio: Mapped[Optional[float]] = mapped_column(Float)
+    ebitda_margin: Mapped[Optional[float]] = mapped_column(Float)
+    cur_ratio: Mapped[Optional[float]] = mapped_column(Float)
+    quick_ratio: Mapped[Optional[float]] = mapped_column(Float)
+    cash_ratio: Mapped[Optional[float]] = mapped_column(Float)
+    debt_ratio: Mapped[Optional[float]] = mapped_column(Float)
+    debt_to_equity: Mapped[Optional[float]] = mapped_column(Float)
+    roe: Mapped[Optional[float]] = mapped_column(Float)
+    roa: Mapped[Optional[float]] = mapped_column(Float)
+    pe: Mapped[Optional[float]] = mapped_column(Float)
+    pb: Mapped[Optional[float]] = mapped_column(Float)
+    ps: Mapped[Optional[float]] = mapped_column(Float)
+    ev: Mapped[Optional[float]] = mapped_column(Float)
+    ev_multiple: Mapped[Optional[float]] = mapped_column(Float)
+    peg: Mapped[Optional[float]] = mapped_column(Float)
+    asset_turnover: Mapped[Optional[float]] = mapped_column(Float)
+    inventory_turnover: Mapped[Optional[float]] = mapped_column(Float)
+    acc_rec_turnover: Mapped[Optional[float]] = mapped_column(Float)
+    payables_turnover: Mapped[Optional[float]] = mapped_column(Float)
+    interest_coverage: Mapped[Optional[float]] = mapped_column(Float)
+    debt_service_coverage: Mapped[Optional[float]] = mapped_column(Float)
+    debt_to_mktcap: Mapped[Optional[float]] = mapped_column(Float)
+    fcf_per_share: Mapped[Optional[float]] = mapped_column(Float)
+    ocf_per_share: Mapped[Optional[float]] = mapped_column(Float)
+    cash_per_share: Mapped[Optional[float]] = mapped_column(Float)
+    capex_per_share: Mapped[Optional[float]] = mapped_column(Float)
+    fcf_to_ocf: Mapped[Optional[float]] = mapped_column(Float)
+    ocf_ratio: Mapped[Optional[float]] = mapped_column(Float)
+    revenue_per_share: Mapped[Optional[float]] = mapped_column(Float)
+    dividend_yield: Mapped[Optional[float]] = mapped_column(Float)
+    solvency_ratio: Mapped[Optional[float]] = mapped_column(Float)
+    price_to_fcf: Mapped[Optional[float]] = mapped_column(Float)
+    price_to_ocf: Mapped[Optional[float]] = mapped_column(Float)
+
+    # Forward return label
+    y_return: Mapped[Optional[float]] = mapped_column(Float)
+
+    ingested_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+
+    __table_args__ = (
+        UniqueConstraint("stock_id", "datadate", name="uq_qfund_stock_date"),
+        Index("ix_qfund_symbol_date", "symbol", "datadate"),
+        Index("ix_qfund_datadate", "datadate"),
     )
 
 

@@ -12,13 +12,20 @@ from repository import ScreenCriteria, StockFilters, StockRepository
 @st.cache_resource
 def _load_model_cached():
     from model.train import load_model, load_feature_columns
-    return load_model(), load_feature_columns()
+    from model.labels import LABEL_METHODS
+    models = {}
+    for method in LABEL_METHODS:
+        b = load_model(method.name)
+        fc = load_feature_columns(method.name) if b is not None else None
+        if b is not None and fc:
+            models[method.name] = (b, fc)
+    return models
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def _get_shap(symbol: str, _input_end_date) -> dict | None:
+def _get_shap(symbol: str, _input_end_date, label_method: str = "max_high_5pct") -> dict | None:
     from model.inference import predict_stocks
-    results = predict_stocks([symbol], top_n=8)
+    results = predict_stocks([symbol], top_n=8, label_method=label_method)
     return results[0] if results and "error" not in results[0] else None
 
 
@@ -365,13 +372,6 @@ def tab_manager():
 
 # ── tab 5: Predictions ────────────────────────────────────────────────────────
 
-def _prob_bar(p: float) -> str:
-    filled = int(p * 20)
-    color = "#16a34a" if p >= 0.65 else ("#d97706" if p >= 0.45 else "#dc2626")
-    bar = "█" * filled + "░" * (20 - filled)
-    return f'<span style="color:{color};font-family:monospace">{bar}</span> {p*100:.1f}%'
-
-
 def _shap_chart(items: list[dict], color: str, title: str):
     if not items:
         return
@@ -394,29 +394,145 @@ def _shap_chart(items: list[dict], color: str, title: str):
     st.plotly_chart(fig, use_container_width=True)
 
 
+@st.dialog("📊 Signal Attribution", width="large")
+def _show_attribution_dialog(symbol: str, input_end, p_high=None, p_spy=None):
+    # ── stock profile ─────────────────────────────────────────────────────────
+    stock = repo.find_stock(symbol)
+    ind = repo.get_indicator(stock.id) if stock else None
+
+    if stock:
+        st.markdown(f"""
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;
+                    padding:12px 16px;margin-bottom:12px">
+          <div style="font-size:16px;font-weight:700;color:#0f172a">{stock.name or symbol}
+            <span style="font-size:12px;font-weight:400;color:#64748b;margin-left:8px">
+              {stock.exchange or ''} · {stock.sector or '—'}</span>
+          </div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px">{stock.industry or ''}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    if ind:
+        def _f(val, fmt=".2f", suffix=""):
+            return f"{float(val):{fmt}}{suffix}" if val is not None else "—"
+
+        m1, m2, m3, m4, m5, m6 = st.columns(6)
+        m1.metric("Mkt Cap", fmt_market_cap(ind.market_cap))
+        m2.metric("PE", _f(ind.pe_ratio, ".1f"))
+        m3.metric("ROE", _f(ind.roe_ttm * 100 if ind.roe_ttm else None, ".1f", "%"))
+        m4.metric("Beta", _f(ind.beta, ".2f"))
+        m5.metric("Div Yield", _f(ind.dividend_yield * 100 if ind.dividend_yield else None, ".2f", "%"))
+        m6.metric("EPS", _f(ind.eps, ".2f"))
+
+        if ind.week_52_high or ind.week_52_low:
+            st.caption(f"52W Range: ${_f(ind.week_52_low)} – ${_f(ind.week_52_high)}  ·  "
+                       f"Analyst Target: ${_f(ind.analyst_target_price)}")
+
+    st.markdown("---")
+
+    # ── probability summary ───────────────────────────────────────────────────
+    def _prob_card(label: str, prob_val, color_hex: str):
+        if prob_val is None or prob_val != prob_val:
+            st.metric(label, "—")
+            return
+        p = float(prob_val)
+        filled = int(p * 20)
+        bar = "█" * filled + "░" * (20 - filled)
+        st.markdown(f"""
+        <div class="metric-card" style="text-align:left;padding:12px">
+          <div class="metric-label">{label}</div>
+          <div class="metric-value" style="color:{color_hex}">{p*100:.1f}%</div>
+          <div style="font-family:monospace;font-size:13px;color:{color_hex}">{bar}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    available_models = []
+    if p_high is not None and p_high == p_high:
+        available_models.append(("max_high_5pct", "P(5% high)", p_high))
+    if p_spy is not None and p_spy == p_spy:
+        available_models.append(("beats_spy", "P(beats SPY)", p_spy))
+
+    if not available_models:
+        st.warning("No prediction data available.")
+        return
+
+    if len(available_models) == 1:
+        selected_model = available_models[0][0]
+        pc1, pc2 = st.columns(2)
+        with pc1:
+            _prob_card(available_models[0][1], available_models[0][2], "#2563eb")
+    else:
+        options = {f"{label}  {float(p)*100:.1f}%": name for name, label, p in available_models}
+        selected_label = st.radio("Attribution model", list(options.keys()), horizontal=True)
+        selected_model = options[selected_label]
+        pc1, pc2 = st.columns(2)
+        with pc1:
+            _prob_card(available_models[0][1], available_models[0][2], "#2563eb")
+        with pc2:
+            _prob_card(available_models[1][1], available_models[1][2], "#7c3aed")
+
+    st.markdown("---")
+
+    # ── attribution ───────────────────────────────────────────────────────────
+    with st.spinner(f"Computing {selected_model} attribution for {symbol}..."):
+        shap_result = _get_shap(symbol, input_end, label_method=selected_model)
+
+    if shap_result is None:
+        st.warning(f"No attribution data for {symbol} ({selected_model}).")
+        return
+
+    prob = float(shap_result["probability"])
+    color = "#16a34a" if prob >= 0.65 else ("#d97706" if prob >= 0.45 else "#dc2626")
+
+    st.caption(f"SHAP attribution for **{selected_model}** (bias: {shap_result.get('bias', 0):.4f})")
+
+    ac1, ac2 = st.columns(2)
+    with ac1:
+        _shap_chart(shap_result.get("top_positive", []), "#16a34a", "▲ Bullish Signals")
+    with ac2:
+        _shap_chart(shap_result.get("top_negative", []), "#dc2626", "▼ Bearish Signals")
+
+
 def tab_predictions():
     st.markdown('<div class="tab-header">PREDICTIONS</div>', unsafe_allow_html=True)
 
+    if "pred_attr_shown_for" not in st.session_state:
+        st.session_state.pred_attr_shown_for = None
+
     # ── filters ──────────────────────────────────────────────────────────────
-    fc1, fc2, fc3 = st.columns([1, 1, 2])
+    fc1, fc2, fc3 = st.columns([1, 1, 1])
     with fc1:
         sectors = ["All"] + repo.get_sectors("stock_snapshots")
         sector_filter = st.selectbox("Sector", sectors, key="pred_sector")
     with fc2:
         search = st.text_input("Search symbol / name", key="pred_search")
+    with fc3:
+        _MC_OPTIONS = {
+            "All": 0,
+            "> $100M": 100_000_000,
+            "> $1B": 1_000_000_000,
+            "> $10B": 10_000_000_000,
+            "> $100B": 100_000_000_000,
+        }
+        mc_label = st.selectbox("Market Cap", list(_MC_OPTIONS.keys()), key="pred_mc")
+        min_mc = _MC_OPTIONS[mc_label]
 
     df = repo.get_all_predictions(
         sector=sector_filter if sector_filter != "All" else None,
         search=search,
     )
 
+    if min_mc > 0:
+        df = df[df["Market Cap"].apply(lambda x: x is not None and x == x and float(x) >= min_mc)]
+
     if df.empty:
         st.info("No predictions yet. Run `python main.py run` first.")
         return
 
     # ── summary stats ────────────────────────────────────────────────────────
-    n_bullish = (df["Probability"] >= 0.65).sum()
-    n_bearish = (df["Probability"] < 0.35).sum()
+    primary_col = "P(5% high)" if "P(5% high)" in df.columns else df.columns[2]
+    n_bullish = (df[primary_col] >= 0.65).sum()
+    n_bearish = (df[primary_col] < 0.35).sum()
     sc1, sc2, sc3, sc4 = st.columns(4)
     sc1.metric("Total", len(df))
     sc2.metric("Bullish (≥65%)", int(n_bullish))
@@ -427,59 +543,51 @@ def tab_predictions():
 
     # ── main table ───────────────────────────────────────────────────────────
     display_df = df.copy()
-    display_df["P(growth)"] = display_df["Probability"].apply(lambda x: f"{float(x)*100:.1f}%")
+
+    def _fmt_prob(x):
+        return f"{float(x)*100:.1f}%" if x is not None and x == x else "—"
+
+    if "P(5% high)" in display_df.columns:
+        display_df["P(5% high)"] = display_df["P(5% high)"].apply(_fmt_prob)
+    if "P(beats SPY)" in display_df.columns:
+        display_df["P(beats SPY)"] = display_df["P(beats SPY)"].apply(_fmt_prob)
+
     display_df["Market Cap"] = display_df["Market Cap"].apply(fmt_market_cap)
     display_df["Close"] = display_df["Close"].apply(nan_safe(lambda x: f"${float(x):.2f}"))
     display_df["RSI"] = display_df["RSI"].apply(nan_safe(lambda x: f"{float(x):.1f}"))
     display_df["As of"] = display_df["Input End"].astype(str)
-    show_cols = ["Symbol", "Name", "Sector", "Close", "Market Cap", "RSI", "P(growth)", "As of"]
+
+    show_cols = ["Symbol", "Name", "Sector", "Close", "Market Cap", "RSI"]
+    if "P(5% high)" in display_df.columns:
+        show_cols.append("P(5% high)")
+    if "P(beats SPY)" in display_df.columns:
+        show_cols.append("P(beats SPY)")
+    show_cols.append("As of")
 
     col_export, _ = st.columns([1, 5])
     with col_export:
         st.download_button("Export CSV", df.to_csv(index=False), "predictions.csv", "text/csv")
 
-    st.dataframe(display_df[show_cols], use_container_width=True, hide_index=True)
+    st.caption("💡 Click any row to view signal attribution.")
 
-    # ── SHAP drill-down ───────────────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown('<div class="tab-header">SIGNAL ATTRIBUTION</div>', unsafe_allow_html=True)
+    event = st.dataframe(
+        display_df[show_cols].head(100),
+        use_container_width=True,
+        hide_index=True,
+        selection_mode="single-row",
+        on_select="rerun",
+        height=600,
+    )
 
-    symbols_list = df["Symbol"].tolist()
-    selected = st.selectbox("Select stock for attribution", symbols_list, key="pred_detail")
-
-    if selected:
-        row = df[df["Symbol"] == selected].iloc[0]
-        input_end = row["Input End"]
-
-        with st.spinner(f"Computing SHAP for {selected}..."):
-            shap_result = _get_shap(selected, input_end)
-
-        if shap_result is None:
-            st.warning(f"Could not compute attribution for {selected} (insufficient price data).")
-            return
-
-        prob = float(shap_result["probability"])
-        dc1, dc2 = st.columns([1, 3])
-        with dc1:
-            color = "#16a34a" if prob >= 0.65 else ("#d97706" if prob >= 0.45 else "#dc2626")
-            filled = int(prob * 20)
-            bar = "█" * filled + "░" * (20 - filled)
-            st.markdown(f"""
-            <div class="metric-card" style="text-align:left;padding:16px">
-              <div class="metric-label">{selected} — P(GROWTH)</div>
-              <div class="metric-value" style="color:{color}">{prob*100:.1f}%</div>
-              <div style="font-family:monospace;font-size:13px;color:{color}">{bar}</div>
-              <div style="font-size:11px;color:#94a3b8;margin-top:6px">As of {shap_result['input_end_date']}</div>
-              <div style="font-size:11px;color:#94a3b8">Bias: {shap_result.get('bias', 0):.4f}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with dc2:
-            ac1, ac2 = st.columns(2)
-            with ac1:
-                _shap_chart(shap_result.get("top_positive", []), "#16a34a", "▲ Bullish Signals")
-            with ac2:
-                _shap_chart(shap_result.get("top_negative", []), "#dc2626", "▼ Bearish Signals")
+    # Open attribution dialog on new row selection
+    sel_rows = event.selection.rows
+    new_idx = sel_rows[0] if sel_rows else None
+    if new_idx is not None and new_idx != st.session_state.pred_attr_shown_for:
+        st.session_state.pred_attr_shown_for = new_idx
+        row = df.iloc[new_idx]
+        p_high = row.get("P(5% high)")
+        p_spy = row.get("P(beats SPY)")
+        _show_attribution_dialog(row["Symbol"], row["Input End"], p_high, p_spy)
 
 
 # ── main ──────────────────────────────────────────────────────────────────────

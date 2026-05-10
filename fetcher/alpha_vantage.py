@@ -170,6 +170,110 @@ class AlphaVantageFetcher(FetcherBase):
             "ex_dividend_date": _safe_date(data.get("ExDividendDate")),
         }
 
+    def get_income_statement(self, symbol: str) -> pd.DataFrame:
+        """Fetch quarterly income statements. Returns DataFrame indexed by fiscalDateEnding."""
+        data = self._get({"function": "INCOME_STATEMENT", "symbol": symbol})
+        reports = data.get("quarterlyReports", [])
+        if not reports:
+            return pd.DataFrame()
+        rows = []
+        for r in reports:
+            rows.append({
+                "fiscal_date": _safe_date(r.get("fiscalDateEnding")),
+                "total_revenue": _safe_float(r.get("totalRevenue")),
+                "gross_profit": _safe_float(r.get("grossProfit")),
+                "cost_of_revenue": _safe_float(r.get("costOfRevenue")),
+                "operating_income": _safe_float(r.get("operatingIncome")),
+                "operating_expenses": _safe_float(r.get("operatingExpenses")),
+                "net_income": _safe_float(r.get("netIncome")),
+                "ebitda": _safe_float(r.get("ebitda")),
+                "ebit": _safe_float(r.get("ebit")),
+                "interest_expense": _safe_float(r.get("interestExpense")),
+                "income_tax_expense": _safe_float(r.get("incomeTaxExpense")),
+                "depreciation_amortization": _safe_float(r.get("depreciationAndAmortization")),
+                "shares_outstanding_is": _safe_float(r.get("commonStockSharesOutstanding")),
+            })
+        df = pd.DataFrame(rows).dropna(subset=["fiscal_date"])
+        df.sort_values("fiscal_date", inplace=True)
+        return df
+
+    def get_balance_sheet(self, symbol: str) -> pd.DataFrame:
+        """Fetch quarterly balance sheets. Returns DataFrame indexed by fiscalDateEnding."""
+        data = self._get({"function": "BALANCE_SHEET", "symbol": symbol})
+        reports = data.get("quarterlyReports", [])
+        if not reports:
+            return pd.DataFrame()
+        rows = []
+        for r in reports:
+            rows.append({
+                "fiscal_date": _safe_date(r.get("fiscalDateEnding")),
+                "total_assets": _safe_float(r.get("totalAssets")),
+                "total_current_assets": _safe_float(r.get("totalCurrentAssets")),
+                "cash_and_equivalents": _safe_float(r.get("cashAndCashEquivalentsAtCarryingValue")),
+                "inventory": _safe_float(r.get("inventory")),
+                "current_receivables": _safe_float(r.get("currentNetReceivables")),
+                "total_current_liabilities": _safe_float(r.get("totalCurrentLiabilities")),
+                "total_liabilities": _safe_float(r.get("totalLiabilities")),
+                "short_term_debt": _safe_float(r.get("shortTermDebt")),
+                "long_term_debt": _safe_float(r.get("longTermDebt")),
+                "total_equity": _safe_float(r.get("totalShareholderEquity")),
+                "retained_earnings": _safe_float(r.get("retainedEarnings")),
+                "goodwill": _safe_float(r.get("goodwill")),
+                "intangible_assets": _safe_float(r.get("intangibleAssets")),
+                "shares_outstanding_bs": _safe_float(r.get("commonStockSharesOutstanding")),
+            })
+        df = pd.DataFrame(rows).dropna(subset=["fiscal_date"])
+        df.sort_values("fiscal_date", inplace=True)
+        return df
+
+    def get_cash_flow(self, symbol: str) -> pd.DataFrame:
+        """Fetch quarterly cash flow statements. Returns DataFrame indexed by fiscalDateEnding."""
+        data = self._get({"function": "CASH_FLOW", "symbol": symbol})
+        reports = data.get("quarterlyReports", [])
+        if not reports:
+            return pd.DataFrame()
+        rows = []
+        for r in reports:
+            rows.append({
+                "fiscal_date": _safe_date(r.get("fiscalDateEnding")),
+                "operating_cashflow": _safe_float(r.get("operatingCashflow")),
+                "capital_expenditures": _safe_float(r.get("capitalExpenditures")),
+                "dividend_payout": _safe_float(
+                    r.get("dividendPayoutCommonStock") or r.get("dividendPayout")
+                ),
+            })
+        df = pd.DataFrame(rows).dropna(subset=["fiscal_date"])
+        df.sort_values("fiscal_date", inplace=True)
+        return df
+
+    def get_earnings(self, symbol: str) -> pd.DataFrame:
+        """Fetch quarterly earnings (EPS actuals vs estimates)."""
+        data = self._get({"function": "EARNINGS", "symbol": symbol})
+        reports = data.get("quarterlyEarnings", [])
+        if not reports:
+            return pd.DataFrame()
+        rows = []
+        for r in reports:
+            surp_pct = r.get("surprisePercentage", "")
+            try:
+                surp_pct_val = (
+                    float(str(surp_pct).replace("%", ""))
+                    if surp_pct not in (None, "None", "")
+                    else None
+                )
+            except (TypeError, ValueError):
+                surp_pct_val = None
+            rows.append({
+                "fiscal_date": _safe_date(r.get("fiscalDateEnding")),
+                "reported_eps": _safe_float(r.get("reportedEPS")),
+                "estimated_eps": _safe_float(r.get("estimatedEPS")),
+                "eps_surprise": _safe_float(r.get("surprise")),
+                "eps_surprise_pct": surp_pct_val,
+            })
+        df = pd.DataFrame(rows).dropna(subset=["fiscal_date"])
+        df.sort_values("fiscal_date", inplace=True)
+        return df
+
     def get_listing(self) -> pd.DataFrame:
         text = self._get({"function": "LISTING_STATUS", "datatype": "csv"})
         df = pd.read_csv(io.StringIO(text))

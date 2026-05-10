@@ -242,7 +242,7 @@ class StockRepository:
     def get_all_predictions(self, sector: Optional[str] = None, search: str = "") -> pd.DataFrame:
         session = self._get_session()
         try:
-            where = "WHERE sp.probability IS NOT NULL"
+            where = ""
             params: dict = {}
             if sector:
                 where += " AND ss.sector = :sector"
@@ -251,17 +251,26 @@ class StockRepository:
                 where += " AND (s.symbol LIKE :search OR s.name LIKE :search)"
                 params["search"] = f"%{search}%"
             q = f"""
-            SELECT s.symbol, s.name, sp.probability, sp.input_end_date, sp.predicted_at,
+            SELECT s.symbol, s.name,
+                   MAX(CASE WHEN sp.label_method = 'max_high_5pct' THEN sp.probability END) AS p_high,
+                   MAX(CASE WHEN sp.label_method = 'beats_spy' THEN sp.probability END) AS p_spy,
+                   MAX(sp.input_end_date) AS input_end_date,
+                   MAX(sp.predicted_at) AS predicted_at,
                    ss.close, ss.market_cap, ss.sector, ss.rsi_14
             FROM stock_predictions sp
             JOIN stocks s ON s.id = sp.stock_id
             LEFT JOIN stock_snapshots ss ON ss.stock_id = sp.stock_id
+            WHERE sp.probability IS NOT NULL
             {where}
-            ORDER BY sp.probability DESC
+            GROUP BY s.id, s.symbol, s.name, ss.close, ss.market_cap, ss.sector, ss.rsi_14
+            ORDER BY COALESCE(
+                MAX(CASE WHEN sp.label_method = 'max_high_5pct' THEN sp.probability END),
+                MAX(CASE WHEN sp.label_method = 'beats_spy' THEN sp.probability END)
+            ) DESC
             """
             rows = session.execute(text(q), params).fetchall()
             return pd.DataFrame(rows, columns=[
-                "Symbol", "Name", "Probability", "Input End", "Predicted At",
+                "Symbol", "Name", "P(5% high)", "P(beats SPY)", "Input End", "Predicted At",
                 "Close", "Market Cap", "Sector", "RSI",
             ])
         finally:

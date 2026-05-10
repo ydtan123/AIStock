@@ -74,7 +74,8 @@ def _align_features(feature_dict: dict, feature_cols: list[str]) -> xgb.DMatrix:
     return xgb.DMatrix(X)
 
 
-def predict_stocks(symbols: list[str], top_n: int = 5) -> list[dict]:
+def predict_stocks(symbols: list[str], top_n: int = 5,
+                   label_method: str = "max_high_5pct") -> list[dict]:
     """Score specific stocks and return SHAP feature attribution per prediction.
 
     Returns list of result dicts, one per symbol:
@@ -84,13 +85,13 @@ def predict_stocks(symbols: list[str], top_n: int = 5) -> list[dict]:
       - top_negative: top_n features pulling prediction down (SHAP < 0)
       - error: str (only present on failure)
     """
-    booster = load_model()
+    booster = load_model(label_method)
     if booster is None:
-        raise RuntimeError("No trained model found. Run `python main.py train` first.")
+        raise RuntimeError(f"No trained model for {label_method}. Run `python main.py train` first.")
 
-    feature_cols = load_feature_columns()
+    feature_cols = load_feature_columns(label_method)
     if not feature_cols:
-        raise RuntimeError("No feature columns file. Run `python main.py train` first.")
+        raise RuntimeError(f"No feature columns for {label_method}. Run `python main.py train` first.")
 
     symbols_upper = [s.upper() for s in symbols]
     session = get_session()
@@ -148,55 +149,71 @@ def predict_stocks(symbols: list[str], top_n: int = 5) -> list[dict]:
 
 
 def run_batch_inference() -> dict:
-    """Score all active stocks and persist results to stock_predictions table."""
-    booster = load_model()
-    if booster is None:
-        logger.error("No trained model found. Run model.train.train() first.")
-        return {"error": "no model"}
-
-    feature_cols = load_feature_columns()
-    if not feature_cols:
-        logger.error("No feature columns file found.")
-        return {"error": "no feature columns"}
+    """Score all active stocks with all available models, persist to stock_predictions."""
+    from model.labels import LABEL_METHODS
 
     session = get_session()
     stocks = session.query(Stock).filter(Stock.is_active == True).all()
     session.close()
 
-    logger.info("Running inference for %d active stocks...", len(stocks))
+    total_predicted = 0
+    total_skipped = 0
+    total_failed = 0
 
-    rows = []
-    skipped = 0
-
-    for stock in stocks:
-        result = _build_inference_features(stock.id, stock.symbol)
-        if result is None:
-            skipped += 1
+    for method in LABEL_METHODS:
+        booster = load_model(method.name)
+        if booster is None:
+            logger.warning("No trained model for %s — skipping", method.name)
+            total_failed += 1
             continue
 
-        dmatrix = _align_features(result["features"], feature_cols)
-        prob = float(booster.predict(dmatrix)[0])
+        feature_cols = load_feature_columns(method.name)
+        if not feature_cols:
+            logger.warning("No feature columns for %s — skipping", method.name)
+            total_failed += 1
+            continue
 
-        rows.append({
-            "stock_id": stock.id,
-            "probability": round(prob, 6),
-            "input_end_date": result["input_end_date"],
-            "predicted_at": datetime.now(timezone.utc),
-        })
+        logger.info("Running inference [%s] for %d active stocks...", method.name, len(stocks))
 
-    session = get_session()
-    try:
-        for row in rows:
-            stmt = insert(StockPrediction).values(**row).on_duplicate_key_update(
-                probability=row["probability"],
-                input_end_date=row["input_end_date"],
-                predicted_at=row["predicted_at"],
-            )
-            session.execute(stmt)
-        session.commit()
-    finally:
-        session.close()
+        rows = []
+        skipped = 0
 
-    summary = {"predicted": len(rows), "skipped": skipped, "failed": 0}
-    logger.info("Inference complete: %d predicted, %d skipped", len(rows), skipped)
+        for stock in stocks:
+            result = _build_inference_features(stock.id, stock.symbol)
+            if result is None:
+                skipped += 1
+                continue
+
+            dmatrix = _align_features(result["features"], feature_cols)
+            prob = float(booster.predict(dmatrix)[0])
+
+            rows.append({
+                "stock_id": stock.id,
+                "label_method": method.name,
+                "probability": round(prob, 6),
+                "input_end_date": result["input_end_date"],
+                "predicted_at": datetime.now(timezone.utc),
+            })
+
+        session = get_session()
+        try:
+            for row in rows:
+                stmt = insert(StockPrediction).values(**row).on_duplicate_key_update(
+                    probability=row["probability"],
+                    input_end_date=row["input_end_date"],
+                    predicted_at=row["predicted_at"],
+                )
+                session.execute(stmt)
+            session.commit()
+        finally:
+            session.close()
+
+        logger.info("Inference [%s] complete: %d predicted, %d skipped",
+                    method.name, len(rows), skipped)
+        total_predicted += len(rows)
+        total_skipped += skipped
+
+    summary = {"predicted": total_predicted, "skipped": total_skipped, "failed": total_failed}
+    logger.info("Batch inference complete: %d predicted, %d skipped, %d models unavailable",
+                total_predicted, total_skipped, total_failed)
     return summary
