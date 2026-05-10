@@ -28,7 +28,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
 # Run from project root: python scripts/ingest_quarterly_fundamentals.py
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from config import load_config
 from fetcher.alpha_vantage import AlphaVantageFetcher

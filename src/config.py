@@ -10,7 +10,7 @@ def load_config() -> dict:
     if _config is not None:
         return _config
 
-    config_path = Path(__file__).parent / "config.yaml"
+    config_path = Path(__file__).parent.parent / "config.yaml"
     if not config_path.exists():
         print(
             "config.yaml not found. Copy config.yaml.example to config.yaml "

@@ -27,16 +27,38 @@ database:
   url: "mysql+pymysql://user:pass@localhost/stock_db"
 ```
 
+## Directory Structure
+
+```
+src/          # all source code
+  app.py        Streamlit dashboard
+  config.py     config loader (reads config.yaml from project root)
+  database.py   engine creation, session factory, get_session()
+  display.py    formatting utilities
+  main.py       CLI entry point (--symbol, --start, --end)
+  models.py     SQLAlchemy models: Stock, DailyPrice, StockIndicator
+  repository.py data access layer
+  scheduler.py  APScheduler background job
+  fetcher/      Alpha Vantage / yfinance fetch logic
+  ingestion/    pipeline, indicators computation
+  model/        XGBoost training, inference, labels, feature builder
+tests/        pytest smoke tests
+scripts/      one-off utility scripts
+docs/         ADRs and agent docs
+launchd/      macOS launchd plist templates
+config.yaml   API keys, data source selection, DB connection URL
+```
+
 ## Key Files
 
 | File | Purpose |
 |------|---------|
 | `config.yaml` | API keys, data source selection, DB connection URL |
-| `models.py` | SQLAlchemy models: `Stock`, `DailyPrice`, `StockIndicator` |
-| `database.py` | Engine creation, session factory, `get_session()` |
-| `fetcher.py` | Alpha Vantage / yfinance fetch logic, incremental update logic |
-| `main.py` | CLI entry point (`--symbol`, `--start`, `--end`) |
-| `app.py` | Streamlit dashboard |
+| `src/models.py` | SQLAlchemy models: `Stock`, `DailyPrice`, `StockIndicator` |
+| `src/database.py` | Engine creation, session factory, `get_session()` |
+| `src/fetcher/` | Alpha Vantage / yfinance fetch logic, incremental update logic |
+| `src/main.py` | CLI entry point (`--symbol`, `--start`, `--end`) |
+| `src/app.py` | Streamlit dashboard |
 
 ## Database Schema
 
@@ -53,19 +75,19 @@ Three tables:
 pip install -r requirements.txt
 
 # Initialize / migrate database tables
-python -c "from database import engine; from models import Base; Base.metadata.create_all(engine)"
+python -c "import sys; sys.path.insert(0,'src'); from database import engine; from models import Base; Base.metadata.create_all(engine)"
 
 # Fetch data for a symbol (full history)
-python main.py --symbol AAPL
+python src/main.py --symbol AAPL
 
 # Fetch with custom date range
-python main.py --symbol AAPL --start 2020-01-01 --end 2024-12-31
+python src/main.py --symbol AAPL --start 2020-01-01 --end 2024-12-31
 
 # Incremental refresh (fetches only missing dates)
-python main.py --symbol AAPL --incremental
+python src/main.py --symbol AAPL --incremental
 
 # Launch Streamlit dashboard
-streamlit run app.py
+streamlit run src/app.py
 ```
 
 ## Architecture Notes

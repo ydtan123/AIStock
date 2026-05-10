@@ -7,6 +7,9 @@ Uses the same _needs_full_backfill check as the daily pipeline.
 import logging
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from database import get_session
 from ingestion.indicators import compute_indicators
