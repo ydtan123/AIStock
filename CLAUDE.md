@@ -4,16 +4,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Stock Data Ingestion & Visualization System. Fetches OHLCV + fundamental data from Alpha Vantage or Yahoo Finance, stores in MySQL, and exposes a Streamlit web dashboard.
+Stock Data Ingestion, ML Stock Selection & Visualization System. Two parallel subsystems share a MySQL database: (1) AIStock — price/fundamental ingestion + XGBoost prediction per stock; (2) FinRL-Trading (git submodule at `external/FinRL-Trading/`) — sector-based ML pipeline that selects a portfolio from S&P 500.
 
 ## Tech Stack
 
-- **Language**: Python
+- **Language**: Python, `.venv` at project root
 - **ORM**: SQLAlchemy 2.0 (declarative unified style)
-- **Database**: MySQL via `pymysql` driver
-- **Data sources**: Alpha Vantage (`TIME_SERIES_DAILY_ADJUSTED`, `OVERVIEW` endpoints) or `yfinance`
-- **Web app**: Streamlit + Plotly (`plotly.graph_objects` for candlestick charts)
-- **CLI**: `argparse`
+- **Database**: MySQL via `pymysql`
+- **Data sources**: Alpha Vantage, yfinance, or AIStock DB (for FinRL pipeline)
+- **Web app**: Streamlit + Plotly (`plotly.graph_objects`)
+- **ML**: XGBoost (per-stock prediction), Ridge/Stacking ensemble (sector ML via FinRL)
+
+## Commands
+
+```bash
+# Run dashboard
+PYTHONPATH=src streamlit run src/app.py
+
+# Run ML pipeline (standalone)
+PYTHONPATH=src python src/finrl_pipeline.py --source AISTOCK_DB --start-date 2020-01-01
+
+# Fetch data for a symbol
+PYTHONPATH=src python src/main.py --symbol AAPL
+PYTHONPATH=src python src/main.py --symbol AAPL --incremental
+
+# Initialize DB tables
+python -c "import sys; sys.path.insert(0,'src'); from database import engine; from models import Base; Base.metadata.create_all(engine)"
+
+# Run smoke tests (requires DB with data)
+PYTHONPATH=src pytest tests/test_smoke_pipeline.py -m smoke -s
+# Single label
+PYTHONPATH=src pytest tests/test_smoke_pipeline.py -m smoke -k max_high_5pct -s
+```
 
 ## Configuration
 
@@ -27,132 +49,103 @@ database:
   url: "mysql+pymysql://user:pass@localhost/stock_db"
 ```
 
-## Directory Structure
+## Architecture
+
+### sys.path Hazard (Critical)
+
+`external/FinRL-Trading/src/data/data_fetcher.py` inserts `external/FinRL-Trading/src/` at `sys.path[0]` unconditionally on import. This makes `import config` resolve to FinRL's `config/` package instead of AIStock's `src/config.py`.
+
+**The fix (already applied in `src/finrl_pipeline.py`):** Pre-import `config`, `database`, `repository` at module level before any FinRL imports so `sys.modules` caches the correct AIStock versions. Never change this ordering.
+
+### AIStock Subsystem (`src/`)
 
 ```
-src/          # all source code
-  app.py        Streamlit dashboard
-  config.py     config loader (reads config.yaml from project root)
-  database.py   engine creation, session factory, get_session()
-  display.py    formatting utilities
-  main.py       CLI entry point (--symbol, --start, --end)
-  models.py     SQLAlchemy models: Stock, DailyPrice, StockIndicator
-  repository.py data access layer
-  scheduler.py  APScheduler background job
-  fetcher/      Alpha Vantage / yfinance fetch logic
-  ingestion/    pipeline, indicators computation
-  model/        XGBoost training, inference, labels, feature builder
-tests/        pytest smoke tests
-scripts/      one-off utility scripts
-docs/         ADRs and agent docs
-launchd/      macOS launchd plist templates
-config.yaml   API keys, data source selection, DB connection URL
+config.py       loads config.yaml — import this before database.py
+database.py     engine + get_session() — depends on config.py
+models.py       SQLAlchemy models: Stock, DailyPrice, StockIndicator,
+                SampleFeature, SampleLabel
+repository.py   StockRepository — all DB queries go here
+fetcher/        FetcherBase + AlphaVantage/Yahoo implementations, TokenBucket rate limiter
+ingestion/      pipeline.py (batch ingest), indicators.py, symbols.py
+model/          XGBoost per-stock prediction
+  labels.py       LabelMethod subclasses registered in LABEL_METHODS list
+  feature_builder.py  rolling 5-day window features
+  train.py        train(label_method, ...) → metrics dict; stores to DB
+  inference.py    predict_stocks([symbols], label_method) → list[dict]
+scheduler.py    APScheduler wrapping ingestion pipeline
+app.py          Streamlit dashboard (single file, ~1500 lines)
+finrl_pipeline.py   orchestrates FinRL ML pipeline; run standalone or called from app.py
+ml_bucket_selector.py  MLBucketSelector class wrapping external run_bucket()
 ```
 
-## Key Files
+### FinRL Subsystem (`external/FinRL-Trading/src/`)
 
-| File | Purpose |
-|------|---------|
-| `config.yaml` | API keys, data source selection, DB connection URL |
-| `src/models.py` | SQLAlchemy models: `Stock`, `DailyPrice`, `StockIndicator` |
-| `src/database.py` | Engine creation, session factory, `get_session()` |
-| `src/fetcher/` | Alpha Vantage / yfinance fetch logic, incremental update logic |
-| `src/main.py` | CLI entry point (`--symbol`, `--start`, `--end`) |
-| `src/app.py` | Streamlit dashboard |
+Only these paths matter for AIStock integration:
+- `strategies/ml_bucket_selection.py` — `run_bucket()`, `FEATURE_COLS`, `SECTOR_TO_BUCKET`
+- `data/data_fetcher.py` — `AIStockDBSource` added by this project; `create_data_source("aistock_db")`
+
+### Dashboard Pages (`src/app.py`)
+
+Sidebar `st.selectbox` routes to these page functions:
+
+| Page | Function | Notes |
+|------|----------|-------|
+| Overview | `show_overview()` | Quick stats |
+| Stock Data | `page_stock_data()` | 5 tabs: Lookup, Technical, Screener, Manager, Predictions |
+| ML Pipeline | `show_ml_pipeline()` | Runs `finrl_pipeline` in background thread; streams logs via queue |
+| Strategy Backtesting | `show_strategy_backtesting()` | |
+| Live / Paper Trading | `show_live_trading()` / `show_paper_trading()` | |
+| Portfolio Analysis | `show_portfolio_analysis()` | |
+| Settings | `show_settings()` | |
+
+### ML Pipeline Data Flow
+
+1. `finrl_pipeline.run_pipeline_and_save_report(cfg)` → writes to `data/`
+2. `AIStockDBSource.get_sp500_components()` → tickers from DB
+3. `AIStockDBSource.get_fundamental_data()` → quarterly fundamentals → `data/fundamentals.csv`
+4. `MLBucketSelector.fit_predict()` → calls `run_bucket()` per sector → `data/ml_weights_sector.csv`
+5. `_run_simple_backtest()` → fetches price data including benchmarks (SPY/QQQ by default) → `data/backtest_result_YYYYMMDD.json`
+6. `data/selection_report_YYYYMMDD.csv` — final output
+
+Log streaming: a `_QueueHandler` + `_StdoutToQueue` wrapper redirect both `logging` and `print()` from the pipeline thread into a `queue.Queue` that the Streamlit UI polls every 0.5 s.
+
+### XGBoost Per-Stock Model
+
+- Features: rolling 5-day window of OHLCV + technical indicators
+- Labels: binary (defined by `LabelMethod` subclasses in `model/labels.py`; add new methods there)
+- Stored in DB: `sample_features`, `sample_labels` tables
+- Model files: `MODEL_DIR` (default `models/`) — one pickle per label method
+- `train()` runs parallel symbol processing with `ThreadPoolExecutor`
+
+### Benchmark Comparison
+
+`_run_simple_backtest()` accepts `benchmarks: list[str]` (default `["SPY", "QQQ"]`). Fetches benchmark price series from same `data_source`, stores `benchmark_values` and `benchmark_metrics` in the backtest JSON. UI plots all as `go.Scatter` traces (dashed lines) on the same chart.
 
 ## Database Schema
 
-Three tables:
+- **stocks**: `id`, `symbol` (unique), `company_name`, `sector`, `is_active`
+- **daily_prices**: `(stock_id, date)` unique — OHLCV
+- **stock_indicators**: `stock_id` FK — PE, market cap, dividend yield — upsert on update
+- **sample_features** / **sample_labels**: rolling window ML inputs/outputs per stock+date+label
 
-- **stocks**: `id`, `symbol` (unique), `company_name`, `sector`
-- **daily_prices**: `id`, `stock_id` (FK), `date`, `open`, `high`, `low`, `close`, `volume` — unique index on `(stock_id, date)`
-- **stock_indicators**: `id`, `stock_id` (FK), `pe_ratio`, `market_cap`, `dividend_yield`, `last_updated` — upsert on update
-
-## Commands
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Initialize / migrate database tables
-python -c "import sys; sys.path.insert(0,'src'); from database import engine; from models import Base; Base.metadata.create_all(engine)"
-
-# Fetch data for a symbol (full history)
-python src/main.py --symbol AAPL
-
-# Fetch with custom date range
-python src/main.py --symbol AAPL --start 2020-01-01 --end 2024-12-31
-
-# Incremental refresh (fetches only missing dates)
-python src/main.py --symbol AAPL --incremental
-
-# Launch Streamlit dashboard
-streamlit run src/app.py
-```
-
-## Architecture Notes
-
-**Incremental update**: Before fetching, query `max(date)` from `daily_prices` for the symbol. Request API data from `max_date + 1 day` through today. Skip fetch entirely if already up to date.
-
-**Upsert for indicators**: Alpha Vantage `OVERVIEW` data changes over time. Use SQLAlchemy's `INSERT ... ON DUPLICATE KEY UPDATE` (MySQL dialect) or merge logic to update existing `stock_indicators` rows rather than inserting duplicates.
-
-**Rate limiting**: Alpha Vantage free tier allows 5 calls/minute, 500/day. The fetcher must respect this — add `time.sleep(12)` between calls when batch-processing multiple symbols.
-
-**Source abstraction**: `fetcher.py` should expose a common interface regardless of source. The `config.yaml` `source` key selects the backend; callers should not need to know which provider is active.
-
-**Streamlit dashboard layout**:
-- Sidebar: symbol search input
-- Main panel: Plotly candlestick chart, metric cards (PE ratio, market cap, volume), recent data table
-
-<!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
 
-**IMPORTANT: This project has a knowledge graph. ALWAYS use the
-code-review-graph MCP tools BEFORE using Grep/Glob/Read to explore
-the codebase.** The graph is faster, cheaper (fewer tokens), and gives
-you structural context (callers, dependents, test coverage) that file
-scanning cannot.
-
-### When to use graph tools FIRST
-
-- **Exploring code**: `semantic_search_nodes` or `query_graph` instead of Grep
-- **Understanding impact**: `get_impact_radius` instead of manually tracing imports
-- **Code review**: `detect_changes` + `get_review_context` instead of reading entire files
-- **Finding relationships**: `query_graph` with callers_of/callees_of/imports_of/tests_for
-- **Architecture questions**: `get_architecture_overview` + `list_communities`
-
-Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
-
-### Key Tools
+**ALWAYS use code-review-graph MCP tools BEFORE Grep/Glob/Read to explore the codebase.**
 
 | Tool | Use when |
 |------|----------|
-| `detect_changes` | Reviewing code changes — gives risk-scored analysis |
-| `get_review_context` | Need source snippets for review — token-efficient |
-| `get_impact_radius` | Understanding blast radius of a change |
-| `get_affected_flows` | Finding which execution paths are impacted |
-| `query_graph` | Tracing callers, callees, imports, tests, dependencies |
-| `semantic_search_nodes` | Finding functions/classes by name or keyword |
-| `get_architecture_overview` | Understanding high-level codebase structure |
-| `refactor_tool` | Planning renames, finding dead code |
+| `detect_changes` | Reviewing code changes |
+| `get_review_context` | Need source snippets for review |
+| `get_impact_radius` | Blast radius of a change |
+| `get_affected_flows` | Which execution paths are impacted |
+| `query_graph` | Trace callers, callees, imports, tests |
+| `semantic_search_nodes` | Find functions/classes by name or keyword |
+| `get_architecture_overview` | High-level community structure |
 
-### Workflow
+Graph auto-updates on file changes via hooks. 7 communities, 0 cross-community edges.
 
-1. The graph auto-updates on file changes (via hooks).
-2. Use `detect_changes` for code review.
-3. Use `get_affected_flows` to understand impact.
-4. Use `query_graph` pattern="tests_for" to check coverage.
+## Agent Skills
 
-## Agent skills
-
-### Issue tracker
-
-Issues live in GitHub Issues on `ydtan123/AIStock`. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Default label vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-Single-context — one `CONTEXT.md` + `docs/adr/` at repo root. See `docs/agents/domain.md`.
+- Issues: GitHub Issues on `ydtan123/AIStock` — see `docs/agents/issue-tracker.md`
+- Triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`
+- Domain docs: `CONTEXT.md` + `docs/adr/` at repo root

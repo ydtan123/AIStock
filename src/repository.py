@@ -6,7 +6,7 @@ import pandas as pd
 from sqlalchemy import text
 
 from database import get_session
-from models import DailyPrice, Stock, StockIndicator, StockSnapshot, TechnicalIndicator
+from models import DailyPrice, ScheduledJobRun, SelectedStock, Stock, StockIndicator, StockSnapshot, TechnicalIndicator
 
 
 @dataclass
@@ -71,6 +71,13 @@ class StockRepository:
         session = self._get_session()
         try:
             return session.query(StockIndicator).filter_by(stock_id=stock_id).first()
+        finally:
+            session.close()
+
+    def get_snapshot(self, stock_id: int) -> Optional[StockSnapshot]:
+        session = self._get_session()
+        try:
+            return session.query(StockSnapshot).filter_by(stock_id=stock_id).first()
         finally:
             session.close()
 
@@ -272,6 +279,121 @@ class StockRepository:
             return pd.DataFrame(rows, columns=[
                 "Symbol", "Name", "P(5% high)", "P(beats SPY)", "Input End", "Predicted At",
                 "Close", "Market Cap", "Sector", "RSI",
+            ])
+        finally:
+            session.close()
+
+    def save_selected_stocks(self, records: list[dict]) -> int:
+        session = self._get_session()
+        try:
+            session.query(SelectedStock).delete()
+            run_at = datetime.utcnow()
+            inserted = 0
+            for rec in records:
+                row = SelectedStock(
+                    ticker=rec["ticker"],
+                    model_name=rec.get("model_name", ""),
+                    ml_score=float(rec.get("ml_score", 0)),
+                    bucket=rec.get("bucket"),
+                    weight=float(rec["weight"]) if rec.get("weight") is not None else None,
+                    date_selected=rec.get("date_selected", date.today()),
+                    model_file=rec.get("model_file"),
+                    pipeline_run_at=run_at,
+                )
+                session.add(row)
+                inserted += 1
+            session.commit()
+            return inserted
+        finally:
+            session.close()
+
+    def get_latest_selected_stocks(self) -> list[dict]:
+        session = self._get_session()
+        try:
+            latest_run = (
+                session.query(SelectedStock.pipeline_run_at)
+                .order_by(SelectedStock.pipeline_run_at.desc())
+                .limit(1)
+                .scalar()
+            )
+            if not latest_run:
+                return []
+            rows = (
+                session.query(SelectedStock)
+                .filter(SelectedStock.pipeline_run_at == latest_run)
+                .all()
+            )
+            return [
+                {
+                    "ticker": r.ticker,
+                    "model_name": r.model_name,
+                    "ml_score": r.ml_score,
+                    "bucket": r.bucket,
+                    "weight": r.weight,
+                    "date_selected": r.date_selected,
+                    "model_file": r.model_file,
+                    "pipeline_run_at": r.pipeline_run_at,
+                }
+                for r in rows
+            ]
+        finally:
+            session.close()
+
+    def save_predict_only_results(self, predictions: list[dict]) -> int:
+        """Insert predict-only results as new rows with predicted_at timestamp."""
+        import math
+
+        if not predictions:
+            return 0
+        session = self._get_session()
+        try:
+            now = datetime.utcnow()
+            inserted = 0
+            for rec in predictions:
+                ds = rec.get("datadate")
+                if isinstance(ds, str):
+                    ds = datetime.strptime(ds, "%Y-%m-%d").date()
+                ar = rec.get("actual_return")
+                row = SelectedStock(
+                    ticker=rec["ticker"],
+                    model_name=rec.get("model_name", ""),
+                    ml_score=float(rec.get("ml_score", 0)),
+                    bucket=rec.get("bucket"),
+                    weight=None,
+                    date_selected=ds if ds else date.today(),
+                    model_file=rec.get("model_file"),
+                    pipeline_run_at=now,
+                    predicted_return=float(rec.get("predicted_return")) if rec.get("predicted_return") is not None else None,
+                    predicted_at=now,
+                    actual_return=float(ar) if ar is not None and not (isinstance(ar, float) and math.isnan(ar)) else None,
+                )
+                session.add(row)
+                inserted += 1
+            session.commit()
+            return inserted
+        finally:
+            session.close()
+
+    def get_job_runs(self, limit: int = 100) -> pd.DataFrame:
+        session = self._get_session()
+        try:
+            rows = (
+                session.query(ScheduledJobRun)
+                .order_by(ScheduledJobRun.started_at.desc())
+                .limit(limit)
+                .all()
+            )
+            recs = [{
+                "id": r.id,
+                "Job Name": r.job_name,
+                "Start Time": r.started_at,
+                "End Time": r.finished_at,
+                "Stocks Updated": r.stocks_updated,
+                "Status": r.status,
+                "Error": r.error_message,
+            } for r in rows]
+            return pd.DataFrame(recs, columns=[
+                "id", "Job Name", "Start Time", "End Time", "Stocks Updated", "Status", "Error",
             ])
         finally:
             session.close()

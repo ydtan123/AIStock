@@ -1,0 +1,6 @@
+[submodule "external/FinRL-Trading"]
+	path = external/FinRL-Trading
+	url = https://github.com/AI4Finance-Foundation/FinRL-Trading.git
+[submodule "external/TradingAgents"]
+	path = external/TradingAgents
+	url = https://github.com/ydtan123/TradingAgents.git

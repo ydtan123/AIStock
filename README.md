@@ -95,22 +95,20 @@ Open [http://localhost:8501](http://localhost:8501) → **Manager** tab → set 
 
 Stop the temporary Streamlit instance: `kill %1`
 
-### 8. Install launchd agents (production)
-
-Replace `YOUR_USERNAME` with your macOS username in both plist files:
+### 8. Install launchd agent (production)
 
 ```bash
-sed -i '' "s/YOUR_USERNAME/$(whoami)/g" launchd/com.stockdb.scheduler.plist
-sed -i '' "s/YOUR_USERNAME/$(whoami)/g" launchd/com.stockdb.app.plist
-
-cp launchd/com.stockdb.scheduler.plist ~/Library/LaunchAgents/
-cp launchd/com.stockdb.app.plist ~/Library/LaunchAgents/
-
-launchctl load ~/Library/LaunchAgents/com.stockdb.scheduler.plist
-launchctl load ~/Library/LaunchAgents/com.stockdb.app.plist
+cp com.aistock.scheduler.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.aistock.scheduler.plist
 ```
 
-The scheduler runs daily at 18:00 (Mon–Fri). The dashboard runs at [http://localhost:8501](http://localhost:8501) on startup.
+The scheduler runs the daily pipeline at 9:30 AM Pacific (Mon–Fri) and weekly symbol refresh on Sundays at 2:00 AM Pacific.
+
+Start the dashboard manually or via launchd:
+
+```bash
+PYTHONPATH=src streamlit run src/app.py &
+```
 
 ---
 
@@ -182,26 +180,85 @@ python main.py run --symbol AAPL --start 2020-01-01 --end 2024-12-31
 
 ## Managing the Production Services
 
-```bash
-# Check status
-launchctl list | grep stockdb
+### Scheduler Daemon
 
-# View logs
-tail -f ~/PROD/AIStock/logs/scheduler.log
-tail -f ~/PROD/AIStock/logs/app.log
+```bash
+# Check if scheduler is running (PID and exit code)
+launchctl list | grep aistock
+# Example output:  44333  0  com.aistock.scheduler
+#                   ^^^^^  ^
+#                   PID    exit code (0 = running OK)
+
+# View scheduler logs
+tail -f logs/scheduler_stdout.log
+cat logs/scheduler_stderr.log
 
 # Restart scheduler
-launchctl unload ~/Library/LaunchAgents/com.stockdb.scheduler.plist
-launchctl load ~/Library/LaunchAgents/com.stockdb.scheduler.plist
+launchctl unload ~/Library/LaunchAgents/com.aistock.scheduler.plist
+launchctl load ~/Library/LaunchAgents/com.aistock.scheduler.plist
+
+# Stop scheduler
+launchctl unload ~/Library/LaunchAgents/com.aistock.scheduler.plist
+```
+
+### Check Scheduled Jobs (Next Run Times)
+
+Query the APScheduler job store directly from MySQL:
+
+```bash
+cd ~/PROD/AIStock && source venv/bin/activate
+.venv/bin/python -c "
+import sys; sys.path.insert(0, 'src')
+from datetime import datetime, timezone
+from database import get_session
+from sqlalchemy import text
+s = get_session()
+rows = s.execute(text('SELECT id, next_run_time FROM apscheduler_jobs ORDER BY next_run_time')).fetchall()
+for r in rows:
+    ts = datetime.fromtimestamp(r[1], tz=timezone.utc).astimezone()
+    print(f'  {r[0]:30s}  next: {ts}')
+s.close()
+"
+```
+
+Example output:
+```
+  daily_pipeline                  next: 2026-05-12 00:30:00 CST
+  weekly_symbols                  next: 2026-05-17 17:00:00 CST
+```
+
+### Job Run History (Web App)
+
+Open the dashboard at [http://localhost:8501](http://localhost:8501) → **Navigation → Job History**.
+
+Shows each scheduled job execution with job name, start time, end time, stocks updated, status, and error messages. Data comes from the `scheduled_job_runs` table.
+
+### Dashboard (Streamlit)
+
+```bash
+# Check if dashboard is running
+launchctl list | grep stockdb
+
+# View dashboard logs
+tail -f logs/app.log
 
 # Restart dashboard
 launchctl unload ~/Library/LaunchAgents/com.stockdb.app.plist
 launchctl load ~/Library/LaunchAgents/com.stockdb.app.plist
-
-# Stop all services
-launchctl unload ~/Library/LaunchAgents/com.stockdb.scheduler.plist
-launchctl unload ~/Library/LaunchAgents/com.stockdb.app.plist
 ```
+
+---
+
+## Running the Web App
+
+```bash
+cd ~/PROD/AIStock && source venv/bin/activate
+PYTHONPATH=src streamlit run src/app.py
+```
+
+Open [http://localhost:8501](http://localhost:8501) in your browser.
+
+> **Note:** If you cloned the repo and are running locally (not via launchd), use the command above. The `PYTHONPATH=src` prefix is required so Streamlit can resolve the `src/` imports correctly.
 
 ---
 

@@ -168,6 +168,18 @@ class StockSnapshot(Base):
     )
 
 
+class ScheduledJobRun(Base):
+    __tablename__ = "job_status"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    job_name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    stocks_updated: Mapped[int] = mapped_column(Integer, default=0)
+    status: Mapped[str] = mapped_column(String(30), nullable=False, default="running")
+    error_message: Mapped[Optional[str]] = mapped_column(Text)
+
+
 class PipelineRun(Base):
     __tablename__ = "pipeline_runs"
 
@@ -319,6 +331,30 @@ class QuarterlyFundamentals(Base):
         UniqueConstraint("stock_id", "datadate", name="uq_qfund_stock_date"),
         Index("ix_qfund_symbol_date", "symbol", "datadate"),
         Index("ix_qfund_datadate", "datadate"),
+    )
+
+
+class SelectedStock(Base):
+    """Stocks selected by the ML pipeline, persisted for predict-only mode."""
+
+    __tablename__ = "selected_stocks"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    ticker: Mapped[str] = mapped_column(String(10), nullable=False)
+    model_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    ml_score: Mapped[float] = mapped_column(Float, nullable=False)
+    bucket: Mapped[Optional[str]] = mapped_column(String(50))
+    weight: Mapped[Optional[float]] = mapped_column(Float)
+    date_selected: Mapped[datetime] = mapped_column(Date, nullable=False)
+    model_file: Mapped[Optional[str]] = mapped_column(String(255))
+    pipeline_run_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    predicted_return: Mapped[Optional[float]] = mapped_column(Float)
+    predicted_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    actual_return: Mapped[Optional[float]] = mapped_column(Float)
+
+    __table_args__ = (
+        Index("ix_selected_stocks_ticker", "ticker"),
+        Index("ix_selected_stocks_run_at", "pipeline_run_at"),
     )
 
 
