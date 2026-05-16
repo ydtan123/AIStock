@@ -29,7 +29,6 @@ from typing import Any
 import yaml
 
 _LOG = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 PROJECT_ROOT = Path(__file__).parent.parent
 REPORTS_BASE = PROJECT_ROOT / "reports" / "full_pipeline"
@@ -96,6 +95,7 @@ def write_summary(results: dict, report_dir: Path) -> None:
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     parser = argparse.ArgumentParser(description="Run full 4-step stock analysis pipeline")
     parser.add_argument(
         "--config", default=str(PROJECT_ROOT / "config.yaml"),
@@ -115,6 +115,7 @@ def main() -> None:
             results["step1"] = step1_daily_update(cfg, report_dir)
         else:
             _LOG.info("Skipping step 1 (--skip-step1 flag set)")
+            results["steps_completed"] = 0
 
         top10 = step2_finrl_selection(cfg, report_dir)
         results["step2_top10"] = top10
@@ -131,7 +132,10 @@ def main() -> None:
         _LOG.error("Pipeline failed: %s", exc, exc_info=True)
         results["status"] = "failed"
         results["error"] = str(exc)
-        write_summary(results, report_dir)
+        try:
+            write_summary(results, report_dir)
+        except Exception as summary_exc:
+            _LOG.warning("Could not write failure summary: %s", summary_exc)
         sys.exit(1)
 
     write_summary(results, report_dir)
