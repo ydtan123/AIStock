@@ -14,7 +14,7 @@ import config  # noqa: F401
 import database  # noqa: F401
 import repository  # noqa: F401
 
-from full_pipeline import _write_step_report, _score_ticker
+from full_pipeline import _write_step_report, _score_ticker, _parse_ta_ndjson
 
 
 def test_write_step_report_creates_json_and_md():
@@ -61,3 +61,29 @@ def test_score_ticker_hold():
 
 def test_score_ticker_missing_fields():
     assert _score_ticker({}) == pytest.approx(0.0)
+
+
+def test_parse_ta_ndjson_extracts_ticker_results():
+    ndjson = "\n".join([
+        json.dumps({"type": "start", "tickers": ["AAPL", "NVDA"]}),
+        json.dumps({"type": "ticker_start", "ticker": "AAPL"}),
+        json.dumps({
+            "type": "ticker_result",
+            "ticker": "AAPL",
+            "decision": "BUY",
+            "bullet_summaries": {"Market": ["Bullish trend"]},
+            "investment_plan": "Go long",
+            "final_decision": "Strong buy",
+            "llm_calls": 12,
+        }),
+        json.dumps({"type": "ticker_error", "ticker": "NVDA", "error": "timeout"}),
+        json.dumps({"type": "done", "total_llm_calls": 12, "summary": []}),
+        "this is not json and should be skipped",
+    ])
+    results = _parse_ta_ndjson(ndjson)
+
+    assert "AAPL" in results
+    assert results["AAPL"]["decision"] == "BUY"
+    assert results["AAPL"]["bullet_summaries"]["Market"] == ["Bullish trend"]
+    assert results["AAPL"]["llm_calls"] == 12
+    assert "NVDA" not in results  # error event is not a ticker_result

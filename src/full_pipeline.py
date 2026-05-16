@@ -205,11 +205,79 @@ def step3_hedge_fund(tickers: list[str], cfg: dict, report_dir: Path) -> list[st
 
 
 def _parse_ta_ndjson(stdout: str) -> dict[str, dict]:
-    raise NotImplementedError
+    """Parse ta_run.py NDJSON stdout → {ticker: result_dict} for ticker_result events."""
+    results: dict[str, dict] = {}
+    for line in stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if event.get("type") == "ticker_result":
+            ticker = event.get("ticker")
+            if ticker:
+                results[ticker] = {
+                    "decision": event.get("decision"),
+                    "bullet_summaries": event.get("bullet_summaries") or {},
+                    "investment_plan": event.get("investment_plan", ""),
+                    "final_decision": event.get("final_decision", ""),
+                    "llm_calls": event.get("llm_calls", 0),
+                }
+    return results
 
 
 def step4_trading_agents(tickers: list[str], cfg: dict, report_dir: Path) -> dict:
-    raise NotImplementedError
+    if not tickers:
+        raise ValueError("step4_trading_agents: no tickers provided")
+
+    started_at = datetime.now().isoformat()
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    _LOG.info("[Step 4] TradingAgents evaluation: %s (date=%s)", tickers, date_str)
+
+    cmd = [
+        sys.executable,
+        str(PROJECT_ROOT / "src" / "ta_run.py"),
+        "--tickers", ",".join(tickers),
+        "--date", date_str,
+    ]
+    _LOG.info("[Step 4] Command: %s", " ".join(cmd))
+
+    proc = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        cwd=str(PROJECT_ROOT),
+    )
+
+    # Log stderr (ta_run.py sends logs there)
+    if proc.stderr:
+        for line in proc.stderr.splitlines():
+            _LOG.info("[ta_run stderr] %s", line)
+
+    ta_results = _parse_ta_ndjson(proc.stdout)
+
+    if proc.returncode != 0 and not ta_results:
+        raise RuntimeError(
+            f"TradingAgents failed (exit {proc.returncode}). "
+            f"Stderr tail: {proc.stderr[-500:]}"
+        )
+
+    finished_at = datetime.now().isoformat()
+    step_data = {
+        "status": "success",
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "data": {
+            "tickers_evaluated": tickers,
+            "date": date_str,
+            "results": ta_results,
+        },
+    }
+    _write_step_report(report_dir, "step4_trading_agents", step_data)
+    _LOG.info("[Step 4] Done: %d tickers analysed", len(ta_results))
+    return step_data
 
 
 def write_summary(results: dict, report_dir: Path) -> None:
