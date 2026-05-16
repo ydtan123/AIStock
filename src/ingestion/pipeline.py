@@ -331,7 +331,7 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
             session.query(Stock)
             .outerjoin(StockIndicator, Stock.id == StockIndicator.stock_id)
             .filter(Stock.is_active == True)
-            .order_by(StockIndicator.market_cap.desc().nullslast())
+            .order_by(StockIndicator.market_cap.desc())
             .all()
         )
         session.close()
