@@ -14,6 +14,30 @@ import config  # noqa: F401
 import database  # noqa: F401
 import repository  # noqa: F401
 
+from full_pipeline import _write_step_report
 
-def test_placeholder():
-    assert True
+
+def test_write_step_report_creates_json_and_md():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        report_dir = Path(tmpdir)
+        data = {
+            "status": "success",
+            "started_at": "2026-05-16T10:00:00",
+            "finished_at": "2026-05-16T10:05:00",
+            "data": {"processed": 42, "errors": 1},
+        }
+        _write_step_report(report_dir, "step1_daily_update", data)
+
+        json_path = report_dir / "step1_daily_update.json"
+        md_path = report_dir / "step1_daily_update.md"
+
+        assert json_path.exists(), "JSON file not created"
+        assert md_path.exists(), "MD file not created"
+
+        loaded = json.loads(json_path.read_text())
+        assert loaded["status"] == "success"
+        assert loaded["data"]["processed"] == 42
+
+        md_text = md_path.read_text().lower()
+        assert "step1 daily update" in md_text
+        assert "success" in md_text
