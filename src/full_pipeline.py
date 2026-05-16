@@ -132,11 +132,76 @@ def step2_finrl_selection(cfg: dict, report_dir: Path) -> list[dict]:
 
 
 def _score_ticker(decision: dict) -> float:
-    raise NotImplementedError
+    """Convert ai-hedge-fund decision to net score in [-1.0, +1.0].
+
+    buy → +confidence/100
+    sell / short → -confidence/100
+    hold / anything else → 0.0
+    """
+    action = (decision.get("action") or "hold").lower()
+    confidence = float(decision.get("confidence") or 0) / 100.0
+    if action == "buy":
+        return confidence
+    if action in ("sell", "short"):
+        return -confidence
+    return 0.0
 
 
 def step3_hedge_fund(tickers: list[str], cfg: dict, report_dir: Path) -> list[str]:
-    raise NotImplementedError
+    if not tickers:
+        raise ValueError("step3_hedge_fund: no tickers provided")
+
+    started_at = datetime.now().isoformat()
+    _LOG.info("[Step 3] ai-hedge-fund evaluation of %d tickers: %s", len(tickers), tickers)
+
+    ahf_dir = PROJECT_ROOT / "external" / "ai-hedge-fund"
+    tmp_json = Path(tempfile.mktemp(suffix="_ahf.json"))
+
+    cmd = [
+        "poetry", "run", "python", "main_non_interactive.py",
+        "--tickers", ",".join(tickers),
+        "--output-json", str(tmp_json),
+    ]
+    _LOG.info("[Step 3] Command: %s (cwd=%s)", " ".join(cmd), ahf_dir)
+
+    proc = subprocess.run(cmd, cwd=str(ahf_dir), text=True)
+    if proc.returncode != 0:
+        raise RuntimeError(f"ai-hedge-fund subprocess failed (exit {proc.returncode})")
+    if not tmp_json.exists():
+        raise RuntimeError(f"ai-hedge-fund did not write {tmp_json}")
+
+    ahf_result = json.loads(tmp_json.read_text())
+    tmp_json.unlink(missing_ok=True)
+
+    decisions: dict = ahf_result.get("decisions") or {}
+    scored: dict[str, float] = {}
+    for ticker, dec in decisions.items():
+        if dec:
+            scored[ticker] = _score_ticker(dec)
+
+    top3 = sorted(scored, key=lambda t: scored[t], reverse=True)[:3]
+
+    finished_at = datetime.now().isoformat()
+    step_data = {
+        "status": "success",
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "data": {
+            "tickers_evaluated": tickers,
+            "decisions": {
+                t: {
+                    "action": (decisions.get(t) or {}).get("action"),
+                    "confidence": (decisions.get(t) or {}).get("confidence"),
+                    "net_score": scored.get(t, 0.0),
+                }
+                for t in tickers
+            },
+            "top3": top3,
+        },
+    }
+    _write_step_report(report_dir, "step3_hedge_fund", step_data)
+    _LOG.info("[Step 3] Done: top3 by net consensus = %s", top3)
+    return top3
 
 
 def _parse_ta_ndjson(stdout: str) -> dict[str, dict]:

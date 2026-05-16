@@ -14,7 +14,7 @@ import config  # noqa: F401
 import database  # noqa: F401
 import repository  # noqa: F401
 
-from full_pipeline import _write_step_report
+from full_pipeline import _write_step_report, _score_ticker
 
 
 def test_write_step_report_creates_json_and_md():
@@ -41,3 +41,23 @@ def test_write_step_report_creates_json_and_md():
         md_text = md_path.read_text().lower()
         assert "step1 daily update" in md_text
         assert "success" in md_text
+
+
+def test_score_ticker_buy():
+    assert _score_ticker({"action": "buy", "confidence": 80}) == pytest.approx(0.80)
+
+
+def test_score_ticker_sell():
+    assert _score_ticker({"action": "sell", "confidence": 60}) == pytest.approx(-0.60)
+
+
+def test_score_ticker_short():
+    assert _score_ticker({"action": "short", "confidence": 70}) == pytest.approx(-0.70)
+
+
+def test_score_ticker_hold():
+    assert _score_ticker({"action": "hold", "confidence": 50}) == pytest.approx(0.0)
+
+
+def test_score_ticker_missing_fields():
+    assert _score_ticker({}) == pytest.approx(0.0)
