@@ -4,7 +4,7 @@ from sqlalchemy import (
     BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey,
     Index, Integer, SmallInteger, String, Text, UniqueConstraint
 )
-from sqlalchemy.dialects.mysql import DECIMAL, JSON
+from sqlalchemy.dialects.mysql import DECIMAL, JSON, MEDIUMTEXT
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -355,6 +355,26 @@ class SelectedStock(Base):
     __table_args__ = (
         Index("ix_selected_stocks_ticker", "ticker"),
         Index("ix_selected_stocks_run_at", "pipeline_run_at"),
+    )
+
+
+class StockNews(Base):
+    """Persistent cache for TradingAgents news tool calls (get_news, get_global_news, get_insider_transactions)."""
+
+    __tablename__ = "stock_news"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    tool_name: Mapped[str] = mapped_column(String(60), nullable=False)
+    ticker: Mapped[str] = mapped_column(String(20), nullable=False, default="")
+    start_date: Mapped[str] = mapped_column(String(20), nullable=False, default="")
+    end_date: Mapped[str] = mapped_column(String(20), nullable=False, default="")
+    result: Mapped[str] = mapped_column(MEDIUMTEXT, nullable=False)
+    fetched_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("tool_name", "ticker", "start_date", "end_date", name="uq_stock_news_key"),
+        Index("ix_stock_news_ticker", "ticker"),
+        Index("ix_stock_news_fetched_at", "fetched_at"),
     )
 
 
