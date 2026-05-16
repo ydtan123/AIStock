@@ -67,7 +67,39 @@ def _write_step_report(report_dir: Path, step_name: str, data: dict) -> None:
 
 
 def step1_daily_update(cfg: dict, report_dir: Path) -> dict:
-    raise NotImplementedError
+    from fetcher.alpha_vantage import AlphaVantageFetcher
+    from fetcher.yahoo import YahooFetcher
+    from ingestion.pipeline import run_daily_pipeline
+
+    started_at = datetime.now().isoformat()
+    _LOG.info("[Step 1] Daily data update starting")
+
+    source = cfg.get("source", "alpha_vantage")
+    if source == "alpha_vantage":
+        fetcher = AlphaVantageFetcher(cfg["alpha_vantage"]["api_key"])
+    else:
+        fetcher = YahooFetcher()
+
+    summary = run_daily_pipeline(fetcher)
+
+    finished_at = datetime.now().isoformat()
+    step_data = {
+        "status": "success",
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "data": {
+            "processed": summary.get("processed", 0),
+            "errors": summary.get("errors", 0),
+            "symbols_sample": (summary.get("symbols") or [])[:20],
+        },
+    }
+    _write_step_report(report_dir, "step1_daily_update", step_data)
+    _LOG.info(
+        "[Step 1] Done: %d processed, %d errors",
+        summary.get("processed", 0),
+        summary.get("errors", 0),
+    )
+    return step_data
 
 
 def step2_finrl_selection(cfg: dict, report_dir: Path) -> list[dict]:
