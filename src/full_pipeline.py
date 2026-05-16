@@ -103,7 +103,32 @@ def step1_daily_update(cfg: dict, report_dir: Path) -> dict:
 
 
 def step2_finrl_selection(cfg: dict, report_dir: Path) -> list[dict]:
-    raise NotImplementedError
+    from finrl_pipeline import run_pipeline_and_save_report
+    from repository import StockRepository
+
+    started_at = datetime.now().isoformat()
+    _LOG.info("[Step 2] FinRL ML selection starting")
+
+    fp_cfg = cfg.get("finrl_pipeline", {})
+    run_pipeline_and_save_report(fp_cfg)
+
+    repo = StockRepository()
+    all_selected = repo.get_latest_selected_stocks()
+    top10 = sorted(all_selected, key=lambda r: r.get("ml_score", 0.0), reverse=True)[:10]
+
+    finished_at = datetime.now().isoformat()
+    step_data = {
+        "status": "success",
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "data": {
+            "total_selected": len(all_selected),
+            "top10": top10,
+        },
+    }
+    _write_step_report(report_dir, "step2_finrl", step_data)
+    _LOG.info("[Step 2] Done: %d total selected, top 10 extracted", len(all_selected))
+    return top10
 
 
 def _score_ticker(decision: dict) -> float:
