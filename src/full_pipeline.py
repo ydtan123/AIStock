@@ -155,7 +155,9 @@ def step3_hedge_fund(tickers: list[str], cfg: dict, report_dir: Path) -> list[st
     _LOG.info("[Step 3] ai-hedge-fund evaluation of %d tickers: %s", len(tickers), tickers)
 
     ahf_dir = PROJECT_ROOT / "external" / "ai-hedge-fund"
-    tmp_json = Path(tempfile.mktemp(suffix="_ahf.json"))
+    tmp_file = tempfile.NamedTemporaryFile(suffix="_ahf.json", delete=False)
+    tmp_file.close()
+    tmp_json = Path(tmp_file.name)
 
     cmd = [
         "poetry", "run", "python", "main_non_interactive.py",
@@ -293,6 +295,7 @@ def write_summary(results: dict, report_dir: Path) -> None:
         "report_dir": str(report_dir),
         "top10_finrl": top10,
         "top3_consensus": top3,
+        "failed_at": results.get("failed_at"),
         "error": results.get("error"),
     }
 
@@ -337,27 +340,32 @@ def main() -> None:
 
     results: dict[str, Any] = {"run_id": report_dir.name, "report_dir": str(report_dir)}
 
+    current_step = "init"
     try:
         if not args.skip_step1:
+            current_step = "step1_daily_update"
             results["step1"] = step1_daily_update(cfg, report_dir)
         else:
             _LOG.info("Skipping step 1 (--skip-step1 flag set)")
-            results["steps_completed"] = 0
 
+        current_step = "step2_finrl_selection"
         top10 = step2_finrl_selection(cfg, report_dir)
         results["step2_top10"] = top10
 
+        current_step = "step3_hedge_fund"
         top3 = step3_hedge_fund([r["ticker"] for r in top10], cfg, report_dir)
         results["step3_top3"] = top3
 
+        current_step = "step4_trading_agents"
         step4_result = step4_trading_agents(top3, cfg, report_dir)
         results["step4"] = step4_result
 
         results["status"] = "success"
         results["steps_completed"] = 4
     except Exception as exc:
-        _LOG.error("Pipeline failed: %s", exc, exc_info=True)
+        _LOG.error("Pipeline failed at %s: %s", current_step, exc, exc_info=True)
         results["status"] = "failed"
+        results["failed_at"] = current_step
         results["error"] = str(exc)
         try:
             write_summary(results, report_dir)
