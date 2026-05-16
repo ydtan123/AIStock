@@ -235,7 +235,7 @@ _ALWAYS_REQUIRED_FIELDS = {
 }
 
 
-def _run_ticker(
+async def _run_ticker(
     ticker: str,
     date: str,
     selected_analysts: list[str],
@@ -255,7 +255,7 @@ def _run_ticker(
     init_state = graph.propagator.create_initial_state(ticker, date)
     graph_args = graph.propagator.get_graph_args()
 
-    final_state = asyncio.run(graph.graph.ainvoke(init_state, **graph_args))
+    final_state = await graph.graph.ainvoke(init_state, **graph_args)
     graph.curr_state = final_state
     graph.ticker = ticker
     graph._log_state(date, final_state)
@@ -308,6 +308,7 @@ def _run_ticker(
             config["quick_think_llm"],
             config.get("backend_url"),
         ).get_llm()
+        _loop = asyncio.get_running_loop()
         for field, label in [
             ("market_report",       "Market Analysis"),
             ("sentiment_report",    "Social Sentiment"),
@@ -317,7 +318,9 @@ def _run_ticker(
         ]:
             text = (final_state.get(field) or "").strip()
             if text:
-                bullet_summaries[label] = _summarise_report(text, _summary_llm, f"{ticker}/{label}", logger)
+                bullet_summaries[label] = await _loop.run_in_executor(
+                    None, _summarise_report, text, _summary_llm, f"{ticker}/{label}", logger,
+                )
     except Exception as exc:
         logger.warning("[SUMMARY] Failed: %s", exc)
 
@@ -386,7 +389,7 @@ def main() -> None:
     parser.add_argument("--skip", default="", help="Comma-separated analysts to skip")
     parser.add_argument("--llm-provider", default="deepseek")
     parser.add_argument("--deep-model", default="deepseek-v4-pro")
-    parser.add_argument("--quick-model", default="deepseek-v4-pro")
+    parser.add_argument("--quick-model", default="deepseek-chat")
     parser.add_argument("--core-api", default="alpha_vantage")
     parser.add_argument("--technical-api", default="alpha_vantage")
     parser.add_argument("--fundamental-api", default="alpha_vantage")
@@ -444,23 +447,35 @@ def main() -> None:
     logger.info(_SEP)
 
     _emit({"type": "start", "tickers": tickers, "date": args.date, "analysts": selected_analysts})
-    logger.info("Starting | tickers=%s  date=%s", tickers, args.date)
+    logger.info("Starting | tickers=%s  date=%s  parallel=%s", tickers, args.date, len(tickers) > 1)
 
-    total_llm_calls = 0
-    total_per_node: dict[str, int] = {}
-    summary_rows: list[dict] = []
+    async def _run_all() -> tuple[int, dict[str, int], list[dict]]:
+        async def _run_one(ticker: str) -> dict | None:
+            logger.info(_THIN)
+            logger.info("[%s] Starting analysis", ticker)
+            _emit({"type": "ticker_start", "ticker": ticker})
+            try:
+                result = await _run_ticker(ticker, args.date, selected_analysts, config, logger)
+                _emit(result)
+                return result
+            except Exception as exc:
+                logger.error("[%s] Failed: %s", ticker, exc, exc_info=True)
+                _emit({"type": "ticker_error", "ticker": ticker, "error": str(exc)})
+                return None
 
-    for ticker in tickers:
-        logger.info(_THIN)
-        logger.info("[%s] Starting analysis", ticker)
-        _emit({"type": "ticker_start", "ticker": ticker})
-        try:
-            result = _run_ticker(ticker, args.date, selected_analysts, config, logger)
-            _emit(result)
-            total_llm_calls += result["llm_calls"]
-            for node, cnt in result["per_node"].items():
-                total_per_node[node] = total_per_node.get(node, 0) + cnt
-            summary_rows.append({"ticker": ticker, "decision": result["decision"]})
+        results = await asyncio.gather(*(_run_one(t) for t in tickers))
+
+        total_llm = 0
+        total_per_n: dict[str, int] = {}
+        rows: list[dict] = []
+        for ticker, result in zip(tickers, results):
+            if result is None:
+                rows.append({"ticker": ticker, "decision": "ERROR"})
+                continue
+            total_llm += result["llm_calls"]
+            for node, cnt in result.get("per_node", {}).items():
+                total_per_n[node] = total_per_n.get(node, 0) + cnt
+            rows.append({"ticker": ticker, "decision": result["decision"]})
             logger.info(
                 "[%s] Done | decision=%s | LLM calls=%d | tool calls=%d",
                 ticker,
@@ -477,10 +492,9 @@ def main() -> None:
                     logger.info("[%s]   %s", ticker, section)
                     for b in bullets:
                         logger.info("[%s]     %s", ticker, b)
-        except Exception as exc:
-            logger.error("[%s] Failed: %s", ticker, exc, exc_info=True)
-            _emit({"type": "ticker_error", "ticker": ticker, "error": str(exc)})
-            summary_rows.append({"ticker": ticker, "decision": "ERROR"})
+        return total_llm, total_per_n, rows
+
+    total_llm_calls, total_per_node, summary_rows = asyncio.run(_run_all())
 
     _emit({
         "type": "done",
