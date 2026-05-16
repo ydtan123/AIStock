@@ -281,7 +281,44 @@ def step4_trading_agents(tickers: list[str], cfg: dict, report_dir: Path) -> dic
 
 
 def write_summary(results: dict, report_dir: Path) -> None:
-    raise NotImplementedError
+    status = results.get("status", "unknown")
+    top10_records = results.get("step2_top10") or []
+    top10 = [r.get("ticker") for r in top10_records if r.get("ticker")]
+    top3 = results.get("step3_top3") or []
+
+    summary = {
+        "run_id": results.get("run_id"),
+        "status": status,
+        "steps_completed": results.get("steps_completed", 0),
+        "report_dir": str(report_dir),
+        "top10_finrl": top10,
+        "top3_consensus": top3,
+        "error": results.get("error"),
+    }
+
+    json_path = report_dir / "summary.json"
+    md_path = report_dir / "summary.md"
+
+    json_path.write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
+
+    lines = [
+        "# Full Pipeline Summary\n\n",
+        f"**Run ID:** {summary['run_id']}  \n",
+        f"**Status:** {summary['status']}  \n",
+        f"**Steps completed:** {summary['steps_completed']}/4\n\n",
+        "## FinRL Top 10\n\n",
+        "| Rank | Ticker |\n|------|--------|\n",
+    ]
+    for i, t in enumerate(top10, 1):
+        lines.append(f"| {i} | {t} |\n")
+    lines.append("\n## TradingAgents Final (Top 3)\n\n")
+    for t in top3:
+        lines.append(f"- **{t}**\n")
+    if summary.get("error"):
+        lines.append(f"\n---\n**Error:** {summary['error']}\n")
+
+    md_path.write_text("".join(lines), encoding="utf-8")
+    _LOG.info("Summary written to %s", report_dir)
 
 
 def main() -> None:
