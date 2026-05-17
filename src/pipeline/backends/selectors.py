@@ -58,3 +58,52 @@ class StockSelector(ABC):
 
     @abstractmethod
     def select(self, ctx: StepContext) -> list[ScoredTicker]: ...
+
+
+# --- Concrete backend: FinrlStockSelector ------------------------------------
+# NOTE: sys.path hazard — external/FinRL-Trading/src/data/data_fetcher.py
+# inserts itself at sys.path[0] on import. We pre-import AIStock's config/
+# database/repository/models inside _run_finrl_pipeline before importing
+# finrl_pipeline.
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _run_finrl_pipeline(cfg_overrides: dict) -> dict:
+    """Indirection seam — tests monkeypatch this."""
+    import config  # noqa: F401
+    import database  # noqa: F401
+    import repository  # noqa: F401
+    import models  # noqa: F401
+
+    from finrl_pipeline import run_pipeline_and_save_report
+
+    csv_path = run_pipeline_and_save_report(cfg_overrides)
+    return {"csv_path": str(csv_path), "selected_stocks": []}
+
+
+@SELECTOR_REGISTRY.register
+class FinrlStockSelector(StockSelector):
+    name = "finrl"
+
+    def __init__(self, cfg: dict | None = None):
+        self.cfg = cfg or {}
+
+    def select(self, ctx: StepContext) -> list[ScoredTicker]:
+        sub_cfg = self.cfg or ctx.cfg.get("stock_selection", {}).get("finrl", {})
+        ctx.logger.info("FinrlStockSelector starting with cfg=%s", sub_cfg)
+        report = _run_finrl_pipeline(sub_cfg)
+        selected = report.get("selected_stocks", []) if isinstance(report, dict) else []
+        out: list[ScoredTicker] = []
+        for row in selected:
+            out.append(
+                ScoredTicker(
+                    ticker=row["ticker"],
+                    ml_score=float(row.get("ml_score", row.get("score", 0.0))),
+                    sector=row.get("sector"),
+                )
+            )
+        ctx.logger.info("FinrlStockSelector produced %d tickers", len(out))
+        return out
