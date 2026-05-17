@@ -225,3 +225,103 @@ def test_ai_hedge_fund_registered_under_name():
         AIHedgeFundFastEvaluator,
     )
     assert FAST_EVALUATOR_REGISTRY.get("ai_hedge_fund") is AIHedgeFundFastEvaluator
+
+
+# --- T10: DeepEvaluator + TradingAgentsDeepEvaluator -------------------------
+
+def test_deep_evaluator_is_abstract():
+    from pipeline.backends.deep_evaluators import DeepEvaluator
+    with pytest.raises(TypeError):
+        DeepEvaluator()  # type: ignore[abstract]
+
+
+def test_deep_evaluation_dataclass():
+    from pipeline.backends.deep_evaluators import DeepEvaluation
+    de = DeepEvaluation(
+        ticker="NVDA",
+        evaluation_date="2026-05-17",
+        agent_outputs={"market_report": "x"},
+        extra_outputs={"foo": 1},
+        final_decision="BUY",
+    )
+    assert de.agent_outputs["market_report"] == "x"
+    assert de.extra_outputs["foo"] == 1
+
+
+def test_trading_agents_evaluator_maps_final_state(monkeypatch, tmp_path):
+    from pipeline.backends import deep_evaluators as de_mod
+
+    fake_final_state = {
+        "market_report": "trends up",
+        "sentiment_report": "buzz",
+        "news_report": "press",
+        "fundamentals_report": "PE ok",
+        "investment_plan": "long-term BUY",
+        "trader_investment_plan": "Buy 100",
+        "final_trade_decision": "BUY 100 shares of NVDA",
+        "bull_argument": "bullish thesis",
+        "bear_argument": "bearish thesis",
+        "risk_debate_aggressive": "aggressive view",
+        "risk_debate_conservative": "conservative view",
+        "risk_debate_neutral": "neutral view",
+    }
+
+    class FakeGraph:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+        def propagate(self, company_name, trade_date):
+            return fake_final_state, "BUY"
+
+    captured = {"installs": 0}
+
+    def fake_install_cache():
+        captured["installs"] += 1
+
+    monkeypatch.setattr(de_mod, "_install_news_cache", fake_install_cache)
+    monkeypatch.setattr(de_mod, "_build_graph", lambda **kw: FakeGraph(**kw))
+
+    evaluator = de_mod.TradingAgentsDeepEvaluator(
+        cfg={
+            "model_name": "deepseek-v4-pro",
+            "use_news_cache": True,
+            "selected_analysts": ["market", "social", "news", "fundamentals"],
+            "evaluation_date": "2026-05-17",
+        }
+    )
+    out = evaluator.evaluate(["NVDA"], make_ctx(tmp_path))
+    assert len(out) == 1
+    de = out[0]
+    assert de.ticker == "NVDA"
+    assert de.final_decision == "BUY"
+    assert de.agent_outputs["market_report"] == "trends up"
+    assert de.agent_outputs["bull_argument"] == "bullish thesis"
+    assert de.agent_outputs["risk_aggressive"] == "aggressive view"
+    assert captured["installs"] == 1
+
+
+def test_trading_agents_registered_under_name():
+    from pipeline.backends.deep_evaluators import (
+        DEEP_EVALUATOR_REGISTRY,
+        TradingAgentsDeepEvaluator,
+    )
+    assert DEEP_EVALUATOR_REGISTRY.get("trading_agents") is TradingAgentsDeepEvaluator
+
+
+def test_use_news_cache_false_skips_install(monkeypatch, tmp_path):
+    from pipeline.backends import deep_evaluators as de_mod
+
+    class FakeGraph:
+        def __init__(self, **kw): pass
+        def propagate(self, c, d): return {}, "HOLD"
+
+    captured = {"installs": 0}
+    monkeypatch.setattr(
+        de_mod, "_install_news_cache",
+        lambda: captured.__setitem__("installs", captured["installs"] + 1),
+    )
+    monkeypatch.setattr(de_mod, "_build_graph", lambda **kw: FakeGraph())
+
+    ev = de_mod.TradingAgentsDeepEvaluator(cfg={"use_news_cache": False})
+    ev.evaluate(["NVDA"], make_ctx(tmp_path))
+    assert captured["installs"] == 0
