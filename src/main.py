@@ -89,67 +89,16 @@ def cmd_run(args):
     symbols = _resolve_symbols(args)
     if symbols:
         from ingestion.pipeline import _process_symbol, _refresh_snapshots
-        from model.train import load_model, load_feature_columns
-        from model.labels import LABEL_METHODS
-
-        models = []
-        for method in LABEL_METHODS:
-            b = load_model(method.name)
-            fc = load_feature_columns(method.name) if b is not None else None
-            if b is not None and fc:
-                models.append((b, fc, method.name))
 
         for sym in symbols:
             stock = _ensure_stock(sym, args.force)
-            result = _process_symbol(fetcher, stock, force=args.force,
-                                     models=models if models else None)
+            result = _process_symbol(fetcher, stock, force=args.force)
             logger.info("Result [%s]: %s", sym, result)
 
         _refresh_snapshots()
     else:
         summary = run_daily_pipeline(fetcher, force=args.force)
         logger.info("Pipeline summary: processed=%d errors=%d", summary["processed"], summary["errors"])
-
-
-def cmd_train(args):
-    from model.labels import LABEL_METHODS
-
-    label_filter = getattr(args, "label", None)
-    methods = [m for m in LABEL_METHODS if label_filter is None or m.name == label_filter]
-    if not methods:
-        logger.error("Unknown label method: %s", label_filter)
-        sys.exit(1)
-
-    if getattr(args, "tune", False):
-        from model.train import tune_hyperparams
-        n_trials = getattr(args, "trials", 50)
-        for method in methods:
-            logger.info("Tuning hyperparams for label: %s  trials=%d", method.name, n_trials)
-            metrics = tune_hyperparams(label_method=method.name, n_trials=n_trials)
-            logger.info("Tune result [%s]: %s", method.name, metrics)
-    else:
-        from model.train import train
-        for method in methods:
-            logger.info("Training model for label: %s", method.name)
-            metrics = train(label_method=method.name)
-            logger.info("Metrics [%s]: %s", method.name, metrics)
-
-
-def cmd_predict(args):
-    if args.symbols:
-        from model.inference import predict_stocks
-        from display import print_predictions
-        results = predict_stocks(args.symbols, top_n=args.top_n)
-        print_predictions(results)
-    else:
-        from model.inference import run_batch_inference
-        summary = run_batch_inference()
-        logger.info("Inference: %s", summary)
-
-
-def cmd_report(args):
-    from model.train import data_quality_report
-    data_quality_report()
 
 
 def main():
@@ -169,28 +118,6 @@ def main():
     run_p.add_argument("--start", type=lambda s: date.fromisoformat(s), default=None, help="Override start date (YYYY-MM-DD)")
     run_p.add_argument("--end", type=lambda s: date.fromisoformat(s), default=None, help="Override end date (YYYY-MM-DD)")
 
-    train_p = sub.add_parser("train", help="Train XGBoost growth prediction model")
-    train_p.add_argument("--label", "-l", default=None,
-                         help="Label method to train (default: all). e.g. beats_spy")
-    train_p.add_argument("--tune", action="store_true",
-                         help="Run Optuna hyperparameter search instead of default train")
-    train_p.add_argument("--trials", type=int, default=50,
-                         help="Number of Optuna trials (default: 50, used with --tune)")
-
-    predict_p = sub.add_parser(
-        "predict",
-        help="Score stocks. With symbols: show SHAP attribution. Without: batch score all active stocks.",
-    )
-    predict_p.add_argument(
-        "symbols", nargs="*", metavar="SYMBOL",
-        help="Symbols to score (e.g. AAPL MSFT). Omit to score all active stocks.",
-    )
-    predict_p.add_argument(
-        "--top-n", type=int, default=5, dest="top_n",
-        help="Number of top positive/negative SHAP features to show (default: 5)",
-    )
-    sub.add_parser("report", help="Data quality report: coverage, gaps, counts")
-
     args = parser.parse_args()
 
     if args.command == "init-db":
@@ -199,12 +126,6 @@ def main():
         cmd_bootstrap(args)
     elif args.command == "run":
         cmd_run(args)
-    elif args.command == "train":
-        cmd_train(args)
-    elif args.command == "predict":
-        cmd_predict(args)
-    elif args.command == "report":
-        cmd_report(args)
 
 
 if __name__ == "__main__":

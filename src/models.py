@@ -39,9 +39,6 @@ class Stock(Base):
     indicator: Mapped[Optional["StockIndicator"]] = relationship(back_populates="stock", uselist=False)
     technical_indicators: Mapped[list["TechnicalIndicator"]] = relationship(back_populates="stock")
     snapshot: Mapped[Optional["StockSnapshot"]] = relationship(back_populates="stock", uselist=False)
-    sample_features: Mapped[list["SampleFeature"]] = relationship(back_populates="stock")
-    sample_labels: Mapped[list["SampleLabel"]] = relationship(back_populates="stock")
-
     __table_args__ = (Index("ix_stocks_is_active", "is_active"),)
 
 
@@ -189,40 +186,6 @@ class PipelineRun(Base):
     symbols_processed: Mapped[int] = mapped_column(Integer, default=0)
     errors_count: Mapped[int] = mapped_column(Integer, default=0)
     status: Mapped[str] = mapped_column(String(30), default="running")
-
-
-class StockPrediction(Base):
-    __tablename__ = "stock_predictions"
-
-    stock_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("stocks.id"), primary_key=True)
-    label_method: Mapped[str] = mapped_column(String(64), primary_key=True, default="max_high_5pct")
-    probability: Mapped[float] = mapped_column(Float, nullable=False)
-    input_end_date: Mapped[datetime] = mapped_column(Date, nullable=False)
-    predicted_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
-
-    stock: Mapped["Stock"] = relationship()
-
-    __table_args__ = (
-        Index("ix_predictions_probability", "probability"),
-    )
-
-
-class SampleFeature(Base):
-    __tablename__ = "sample_features"
-
-    stock_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("stocks.id"), primary_key=True)
-    input_end_date: Mapped[datetime] = mapped_column(Date, primary_key=True)
-    features: Mapped[dict] = mapped_column(JSON, nullable=False)
-    sector: Mapped[Optional[str]] = mapped_column(String(100))
-    symbol: Mapped[str] = mapped_column(String(10), nullable=False)
-    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
-
-    stock: Mapped["Stock"] = relationship()
-
-    __table_args__ = (
-        Index("ix_sample_features_symbol", "symbol"),
-        Index("ix_sample_features_date", "input_end_date"),
-    )
 
 
 class QuarterlyFundamentals(Base):
@@ -382,22 +345,6 @@ class StockNews(Base):
     )
 
 
-class SampleLabel(Base):
-    __tablename__ = "sample_labels"
-
-    stock_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("stocks.id"), primary_key=True)
-    input_end_date: Mapped[datetime] = mapped_column(Date, primary_key=True)
-    label_method: Mapped[str] = mapped_column(String(50), primary_key=True)
-    label: Mapped[Optional[int]] = mapped_column(SmallInteger, nullable=True)
-    label_version: Mapped[str] = mapped_column(String(10), nullable=False)
-    computed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
-
-    stock: Mapped["Stock"] = relationship()
-
-    __table_args__ = (
-        Index("ix_sample_labels_method", "label_method"),
-        Index("ix_sample_labels_method_label", "label_method", "label"),
-    )
 
 
 class FastEvaluationConclusion(Base):

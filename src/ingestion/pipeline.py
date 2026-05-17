@@ -13,7 +13,7 @@ from database import get_session, get_engine
 from fetcher.base import FetcherBase
 from ingestion.indicators import compute_indicators
 from ingestion.symbols import refresh_symbols
-from models import DailyPrice, PipelineRun, Stock, StockIndicator, StockPrediction, StockSnapshot
+from models import DailyPrice, PipelineRun, Stock, StockIndicator, StockSnapshot
 
 logger = logging.getLogger(__name__)
 
@@ -21,24 +21,82 @@ DEFAULT_START = date(2010, 1, 1)
 MAX_WORKERS = 5
 
 
-def _get_max_price_date(session, stock_id: int) -> Optional[date]:
-    result = session.execute(
-        text("SELECT MAX(date) FROM daily_prices WHERE stock_id = :sid"),
-        {"sid": stock_id},
-    ).scalar()
-    return result
+def _prefetch_stock_dates(stock_ids: list[int]) -> dict:
+    """Batch-fetch all per-stock dates needed for skip decisions.
 
-
-def _fetch_and_store_prices(fetcher: FetcherBase, stock: Stock) -> tuple[int, Optional[date]]:
-    """Fetch incremental prices for one stock. Returns (rows_inserted, new_max_date)."""
+    Four queries in a single session replaces 4N individual queries
+    when processing N stocks. Returns {stock_id: value_or_None}.
+    """
+    if not stock_ids:
+        return {
+            "max_price_dates": {},
+            "first_indicator_dates": {},
+            "first_price_dates": {},
+            "indicator_last_updated": {},
+        }
     session = get_session()
     try:
-        max_date = _get_max_price_date(session, stock.id)
-        start = (max_date + timedelta(days=1)) if max_date else DEFAULT_START
-        end = date.today()
+        ids = tuple(stock_ids)
 
-        if start > end:
-            return 0, max_date
+        rows = session.execute(
+            text("SELECT stock_id, MAX(date) FROM daily_prices WHERE stock_id IN :ids GROUP BY stock_id"),
+            {"ids": ids},
+        ).fetchall()
+        max_price_dates = {r[0]: r[1] for r in rows}
+
+        rows = session.execute(
+            text("SELECT stock_id, MIN(date) FROM technical_indicators WHERE stock_id IN :ids GROUP BY stock_id"),
+            {"ids": ids},
+        ).fetchall()
+        first_indicator_dates = {r[0]: r[1] for r in rows}
+
+        rows = session.execute(
+            text("SELECT stock_id, MIN(date) FROM daily_prices WHERE stock_id IN :ids GROUP BY stock_id"),
+            {"ids": ids},
+        ).fetchall()
+        first_price_dates = {r[0]: r[1] for r in rows}
+
+        rows = session.execute(
+            text("SELECT stock_id, last_updated FROM stock_indicators WHERE stock_id IN :ids"),
+            {"ids": ids},
+        ).fetchall()
+        indicator_last_updated = {r[0]: r[1] for r in rows}
+
+        return {
+            "max_price_dates": max_price_dates,
+            "first_indicator_dates": first_indicator_dates,
+            "first_price_dates": first_price_dates,
+            "indicator_last_updated": indicator_last_updated,
+        }
+    finally:
+        session.close()
+
+
+def _fetch_and_store_prices(fetcher: FetcherBase, stock: Stock,
+                            max_date: Optional[date] = None) -> tuple[int, Optional[date]]:
+    """Fetch incremental prices for one stock. Returns (rows_inserted, new_max_date).
+
+    When *max_date* is provided (from prefetch), skips the per-stock MAX(date)
+    query and skips opening a session entirely if no fetch is needed.
+    """
+    if max_date is None:
+        session = get_session()
+        try:
+            max_date = session.execute(
+                text("SELECT MAX(date) FROM daily_prices WHERE stock_id = :sid"),
+                {"sid": stock.id},
+            ).scalar()
+        finally:
+            session.close()
+
+    start = (max_date + timedelta(days=1)) if max_date else DEFAULT_START
+    end = date.today()
+
+    if start > end:
+        return 0, max_date
+
+    session = get_session()
+    try:
 
         df = fetcher.get_daily(stock.symbol, start, end)
         if df.empty:
@@ -65,18 +123,18 @@ def _fetch_and_store_prices(fetcher: FetcherBase, stock: Stock) -> tuple[int, Op
             batch = values[i:i + batch_size]
             for attempt in range(5):
                 try:
-                    for v in batch:
-                        stmt = insert(DailyPrice).values(**v).on_duplicate_key_update(
-                            open=v["open"],
-                            high=v["high"],
-                            low=v["low"],
-                            close=v["close"],
-                            adj_close=v["adj_close"],
-                            volume=v["volume"],
-                            dividend_amount=v["dividend_amount"],
-                            split_coefficient=v["split_coefficient"],
-                        )
-                        session.execute(stmt)
+                    stmt = insert(DailyPrice).values(batch)
+                    stmt = stmt.on_duplicate_key_update(
+                        open=stmt.inserted.open,
+                        high=stmt.inserted.high,
+                        low=stmt.inserted.low,
+                        close=stmt.inserted.close,
+                        adj_close=stmt.inserted.adj_close,
+                        volume=stmt.inserted.volume,
+                        dividend_amount=stmt.inserted.dividend_amount,
+                        split_coefficient=stmt.inserted.split_coefficient,
+                    )
+                    session.execute(stmt)
                     session.commit()
                     count += len(batch)
                     break
@@ -95,18 +153,29 @@ def _fetch_and_store_prices(fetcher: FetcherBase, stock: Stock) -> tuple[int, Op
         session.close()
 
 
-def _upsert_fundamentals(fetcher: FetcherBase, stock: Stock, force: bool = False) -> bool:
-    """Fetch and upsert OVERVIEW data. Skips if last_updated < refresh_days ago."""
+def _upsert_fundamentals(fetcher: FetcherBase, stock: Stock, force: bool = False,
+                         indicator_last_updated: Optional[datetime] = None) -> bool:
+    """Fetch and upsert OVERVIEW data. Skips if last_updated < refresh_days ago.
+
+    When *indicator_last_updated* is provided (from prefetch), the freshness check
+    is in-memory — no DB query needed.
+    """
     config = load_config()
     refresh_days = config.get("scheduler", {}).get("overview_refresh_days", 7)
 
+    if not force and indicator_last_updated is not None:
+        age = (datetime.utcnow() - indicator_last_updated).days
+        if age < refresh_days:
+            return False
+
     session = get_session()
     try:
-        existing = session.query(StockIndicator).filter_by(stock_id=stock.id).first()
-        if not force and existing and existing.last_updated:
-            age = (datetime.utcnow() - existing.last_updated).days
-            if age < refresh_days:
-                return False
+        if not force and indicator_last_updated is None:
+            existing = session.query(StockIndicator).filter_by(stock_id=stock.id).first()
+            if existing and existing.last_updated:
+                age = (datetime.utcnow() - existing.last_updated).days
+                if age < refresh_days:
+                    return False
 
         data = fetcher.get_overview(stock.symbol)
         if not data:
@@ -211,17 +280,34 @@ def _refresh_snapshots():
     logger.info("Snapshots refreshed.")
 
 
-def _update_checkpoint(stock_id: int):
+def _batch_update_checkpoints(stock_ids: list[int]):
+    """Single bulk UPDATE for all processed stock checkpoints."""
+    if not stock_ids:
+        return
     session = get_session()
     try:
-        session.query(Stock).filter_by(id=stock_id).update({"last_price_fetch": datetime.utcnow()})
+        session.execute(
+            text("UPDATE stocks SET last_price_fetch = :now WHERE id IN :ids"),
+            {"now": datetime.utcnow(), "ids": tuple(stock_ids)},
+        )
         session.commit()
     finally:
         session.close()
 
 
-def _needs_full_backfill(stock_id: int) -> bool:
-    """True if stock has no indicators or earliest indicator is far from earliest price."""
+def _needs_full_backfill(stock_id: int, first_indicator_date: Optional[date] = None,
+                         first_price_date: Optional[date] = None) -> bool:
+    """True if stock has no indicators or earliest indicator is far from earliest price.
+
+    When pre-fetched dates are provided, the check is in-memory — no DB queries.
+    """
+    if first_indicator_date is not None or first_price_date is not None:
+        if first_indicator_date is None:
+            return True
+        if first_price_date is None:
+            return False
+        return (first_indicator_date - first_price_date).days > 365
+
     session = get_session()
     try:
         row = session.execute(text("""
@@ -246,66 +332,31 @@ def _needs_full_backfill(stock_id: int) -> bool:
         session.close()
 
 
-def _upsert_prediction(stock_id: int, probability: float, input_end_date,
-                      label_method: str = "max_high_5pct") -> None:
-    row = {
-        "stock_id": stock_id,
-        "label_method": label_method,
-        "probability": round(probability, 6),
-        "input_end_date": input_end_date,
-        "predicted_at": datetime.utcnow(),
-    }
-    session = get_session()
-    try:
-        stmt = insert(StockPrediction).values(**row).on_duplicate_key_update(
-            probability=row["probability"],
-            input_end_date=row["input_end_date"],
-            predicted_at=row["predicted_at"],
-        )
-        session.execute(stmt)
-        session.commit()
-    finally:
-        session.close()
-
-
 def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
-                    models: list | None = None) -> dict:
-    """Process one symbol through the daily pipeline.
-
-    models: list of (booster, feature_cols, label_method) tuples.
-    """
+                    prefetch: Optional[dict] = None) -> dict:
     result = {"symbol": stock.symbol, "prices": 0, "fundamentals": False, "indicators": 0, "error": None}
     try:
-        prices_inserted, new_max_date = _fetch_and_store_prices(fetcher, stock)
+        md = prefetch.get("max_price_dates", {}).get(stock.id) if prefetch else None
+        fid = prefetch.get("first_indicator_dates", {}).get(stock.id) if prefetch else None
+        fpd = prefetch.get("first_price_dates", {}).get(stock.id) if prefetch else None
+        ilu = prefetch.get("indicator_last_updated", {}).get(stock.id) if prefetch else None
+
+        prices_inserted, new_max_date = _fetch_and_store_prices(fetcher, stock, max_date=md)
         result["prices"] = prices_inserted
 
-        refreshed = _upsert_fundamentals(fetcher, stock, force=force)
+        refreshed = _upsert_fundamentals(fetcher, stock, force=force,
+                                         indicator_last_updated=ilu)
         result["fundamentals"] = refreshed
 
-        if _needs_full_backfill(stock.id):
+        if _needs_full_backfill(stock.id, first_indicator_date=fid, first_price_date=fpd):
             result["indicators"] = compute_indicators(stock.id, since_date=None)
         elif prices_inserted > 0 and new_max_date:
             result["indicators"] = compute_indicators(stock.id, since_date=new_max_date)
 
-        # Predict with all available models
-        if models:
-            from model.inference import _build_inference_features, _align_features
-            feat = _build_inference_features(stock.id, stock.symbol)
-            if feat is not None:
-                probs = {}
-                for booster, feature_cols, label_method in models:
-                    dmatrix = _align_features(feat["features"], feature_cols)
-                    prob = float(booster.predict(dmatrix)[0])
-                    _upsert_prediction(stock.id, prob, feat["input_end_date"], label_method)
-                    probs[label_method] = round(prob, 4)
-                result["probabilities"] = probs
-
-        _update_checkpoint(stock.id)
-        prob_str = ", ".join(f"{k}={v:.4f}" for k, v in result.get("probabilities", {}).items()) if "probabilities" in result else "-"
         logger.info(
-            "%-6s  prices=%-4d  indicators=%-4d  overview=%-9s  probs=%s",
+            "%-6s  prices=%-4d  indicators=%-4d  overview=%-9s",
             stock.symbol, prices_inserted, result["indicators"],
-            "refreshed" if refreshed else "skipped", prob_str,
+            "refreshed" if refreshed else "skipped",
         )
 
     except Exception as e:
@@ -315,7 +366,7 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
 
 
 def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
-    """Run the 5-step daily pipeline. Returns summary dict."""
+    """Run the daily pipeline: prices, fundamentals, indicators, snapshots. Returns summary dict."""
     session = get_session()
     run = PipelineRun(started_at=datetime.utcnow(), status="running")
     session.add(run)
@@ -324,6 +375,7 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
     session.close()
 
     summary = {"processed": 0, "errors": 0, "symbols": []}
+    processed_ids: list[int] = []
 
     try:
         session = get_session()
@@ -337,25 +389,12 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
         session.close()
         logger.info("Pipeline starting: %d active symbols", len(stocks))
 
-        # Load all available models; workers share read-only boosters (thread-safe)
-        from model.train import load_model, load_feature_columns
-        from model.labels import LABEL_METHODS
-        models = []
-        for method in LABEL_METHODS:
-            b = load_model(method.name)
-            fc = load_feature_columns(method.name) if b is not None else None
-            if b is not None and fc:
-                models.append((b, fc, method.name))
-            else:
-                logger.warning("No trained model for %s — skipping", method.name)
-
-        if not models:
-            logger.warning("No trained models found — predict step will be skipped")
+        prefetch = _prefetch_stock_dates([s.id for s in stocks])
 
         total = len(stocks)
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
             futures = {
-                pool.submit(_process_symbol, fetcher, s, force, models if models else None): s
+                pool.submit(_process_symbol, fetcher, s, force, prefetch): s
                 for s in stocks
             }
             for future in as_completed(futures):
@@ -363,6 +402,8 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
                 summary["processed"] += 1
                 if result["error"]:
                     summary["errors"] += 1
+                else:
+                    processed_ids.append(futures[future].id)
                 summary["symbols"].append(result)
                 if summary["processed"] % 50 == 0 or summary["processed"] == total:
                     logger.info(
@@ -370,6 +411,7 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
                         summary["processed"], total, summary["errors"],
                     )
 
+        _batch_update_checkpoints(processed_ids)
         _refresh_snapshots()
 
     except Exception as e:

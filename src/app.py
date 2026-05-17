@@ -66,28 +66,6 @@ if "ml_log_queue" not in st.session_state:
     st.session_state.ml_log_queue = queue.Queue()
 
 
-# ── Model cache ───────────────────────────────────────────────────────────────
-
-@st.cache_resource
-def _load_model_cached():
-    from model.train import load_model, load_feature_columns
-    from model.labels import LABEL_METHODS
-    models = {}
-    for method in LABEL_METHODS:
-        b = load_model(method.name)
-        fc = load_feature_columns(method.name) if b is not None else None
-        if b is not None and fc:
-            models[method.name] = (b, fc)
-    return models
-
-
-@st.cache_data(ttl=300, show_spinner=False)
-def _get_shap(symbol: str, _input_end_date, label_method: str = "max_high_5pct") -> dict | None:
-    from model.inference import predict_stocks
-    results = predict_stocks([symbol], top_n=8, label_method=label_method)
-    return results[0] if results and "error" not in results[0] else None
-
-
 # ── ML Pipeline ──────────────────────────────────────────────────────────────
 
 
@@ -801,9 +779,6 @@ def display_quick_stats(repo) -> None:
         c1, c2 = st.columns(2)
         c1.metric("Total", summary.get("total", "—"))
         c2.metric("Active", summary.get("active", "—"))
-        df = repo.get_all_predictions()
-        if not df.empty and "P(5% high)" in df.columns:
-            st.metric("Bullish", int((df["P(5% high)"] >= 0.65).sum()))
     except Exception as exc:
         st.error(f"Could not load stats: {exc}")
 
@@ -856,70 +831,13 @@ def show_overview(repo) -> None:
     st.header("Platform Overview")
     try:
         summary = repo.count_summary()
-        df = repo.get_all_predictions()
     except Exception as exc:
         st.error(f"Failed to load data: {exc}")
         return
 
-    primary_col = "P(5% high)" if not df.empty and "P(5% high)" in df.columns else None
-    n_preds = len(df)
-    n_bullish = int((df[primary_col] >= 0.65).sum()) if primary_col else 0
-    n_bearish = int((df[primary_col] < 0.35).sum()) if primary_col else 0
-    last_updated = str(df["Predicted At"].max())[:16] if not df.empty and "Predicted At" in df.columns else "—"
-
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2 = st.columns(2)
     c1.metric("Total Stocks", summary.get("total", "—"))
     c2.metric("Active Stocks", summary.get("active", "—"))
-    c3.metric("Bullish Signals", n_bullish)
-    c4.metric("Bearish Signals", n_bearish)
-    st.markdown("---")
-
-    if not df.empty and primary_col:
-        col_left, col_right = st.columns([2, 1])
-        with col_left:
-            st.subheader("Prediction Distribution")
-            fig = px.histogram(df, x=primary_col, nbins=20,
-                               labels={primary_col: "P(5% high)"},
-                               color_discrete_sequence=["#2563eb"])
-            fig.add_vline(x=0.65, line_dash="dash", line_color="#16a34a", annotation_text="Bullish threshold")
-            fig.add_vline(x=0.35, line_dash="dash", line_color="#dc2626", annotation_text="Bearish threshold")
-            fig.update_layout(height=300, margin=dict(l=0, r=0, t=30, b=0),
-                              plot_bgcolor="#f8fafc", paper_bgcolor="#ffffff")
-            st.plotly_chart(fig, width='stretch')
-        with col_right:
-            st.subheader("Signal Breakdown")
-            n_neutral = n_preds - n_bullish - n_bearish
-            for signal, count, color in [("Bullish", n_bullish, "#16a34a"),
-                                          ("Neutral", n_neutral, "#d97706"),
-                                          ("Bearish", n_bearish, "#dc2626")]:
-                pct = count / n_preds * 100 if n_preds > 0 else 0
-                st.markdown(
-                    f'<div style="display:flex;justify-content:space-between;padding:6px 0;'
-                    f'border-bottom:1px solid #f1f5f9">'
-                    f'<span style="color:{color};font-weight:600">{signal}</span>'
-                    f'<span style="color:#334155">{count} ({pct:.1f}%)</span></div>',
-                    unsafe_allow_html=True,
-                )
-
-    st.markdown("---")
-    st.subheader("Recent Predictions")
-    st.caption(f"Last updated: {last_updated}")
-    if not df.empty:
-        show_cols = ["Symbol", "Name", "Sector"]
-        if "P(5% high)" in df.columns:
-            show_cols.append("P(5% high)")
-        if "P(beats SPY)" in df.columns:
-            show_cols.append("P(beats SPY)")
-        show_cols.extend(["Close", "Market Cap"])
-        display = df[[c for c in show_cols if c in df.columns]].head(10).copy()
-        for col in ["P(5% high)", "P(beats SPY)"]:
-            if col in display.columns:
-                display[col] = display[col].apply(
-                    lambda x: f"{float(x)*100:.1f}%" if x is not None and x == x else "—"
-                )
-        st.dataframe(display, width='stretch', hide_index=True)
-    else:
-        st.info("No predictions yet. Run `python main.py run` first.")
 
 
 def show_live_trading() -> None:
@@ -1559,215 +1477,10 @@ def tab_manager():
         df["Active"] = df["Active"].apply(lambda x: "● Active" if x else "○ Inactive")
         st.dataframe(df.drop(columns=["id"]), width='stretch', hide_index=True)
 
-
-def _shap_chart(items: list[dict], color: str, title: str):
-    if not items:
-        return
-    labels = [i["feature"] for i in items]
-    values = [abs(i["contribution"]) for i in items]
-    fig = go.Figure(go.Bar(
-        x=values, y=labels, orientation="h",
-        marker_color=color,
-        text=[f"{'+' if color == '#16a34a' else '-'}{v:.4f}" for v in values],
-        textposition="outside",
-    ))
-    fig.update_layout(
-        title=dict(text=title, font=dict(size=12, color="#334155")),
-        height=max(180, len(items) * 32 + 60),
-        margin=dict(l=0, r=60, t=36, b=0),
-        plot_bgcolor="#f8fafc", paper_bgcolor="#ffffff",
-        xaxis=dict(visible=False), yaxis=dict(tickfont=dict(size=11)),
-        font=dict(color="#334155"),
-    )
-    st.plotly_chart(fig, width='stretch')
-
-
-@st.dialog("📊 Signal Attribution", width="large")
-def _show_attribution_dialog(symbol: str, input_end, p_high=None, p_spy=None):
-    stock = repo.find_stock(symbol)
-    ind = repo.get_indicator(stock.id) if stock else None
-
-    if stock:
-        st.markdown(f"""
-        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;
-                    padding:12px 16px;margin-bottom:12px">
-          <div style="font-size:16px;font-weight:700;color:#0f172a">{stock.name or symbol}
-            <span style="font-size:12px;font-weight:400;color:#64748b;margin-left:8px">
-              {stock.exchange or ''} · {stock.sector or '—'}</span>
-          </div>
-          <div style="font-size:11px;color:#64748b;margin-top:2px">{stock.industry or ''}</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    if ind:
-        def _f(val, fmt=".2f", suffix=""):
-            return f"{float(val):{fmt}}{suffix}" if val is not None else "—"
-
-        m1, m2, m3, m4, m5, m6 = st.columns(6)
-        m1.metric("Mkt Cap", fmt_market_cap(ind.market_cap))
-        m2.metric("PE", _f(ind.pe_ratio, ".1f"))
-        m3.metric("ROE", _f(ind.roe_ttm * 100 if ind.roe_ttm else None, ".1f", "%"))
-        m4.metric("Beta", _f(ind.beta, ".2f"))
-        m5.metric("Div Yield", _f(ind.dividend_yield * 100 if ind.dividend_yield else None, ".2f", "%"))
-        m6.metric("EPS", _f(ind.eps, ".2f"))
-
-        if ind.week_52_high or ind.week_52_low:
-            st.caption(f"52W Range: ${_f(ind.week_52_low)} – ${_f(ind.week_52_high)}  ·  "
-                       f"Analyst Target: ${_f(ind.analyst_target_price)}")
-
-    st.markdown("---")
-
-    def _prob_card(label: str, prob_val, color_hex: str):
-        if prob_val is None or prob_val != prob_val:
-            st.metric(label, "—")
-            return
-        p = float(prob_val)
-        filled = int(p * 20)
-        bar = "█" * filled + "░" * (20 - filled)
-        st.markdown(f"""
-        <div class="metric-card" style="text-align:left;padding:12px">
-          <div class="metric-label">{label}</div>
-          <div class="metric-value" style="color:{color_hex}">{p*100:.1f}%</div>
-          <div style="font-family:monospace;font-size:13px;color:{color_hex}">{bar}</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    available_models = []
-    if p_high is not None and p_high == p_high:
-        available_models.append(("max_high_5pct", "P(5% high)", p_high))
-    if p_spy is not None and p_spy == p_spy:
-        available_models.append(("beats_spy", "P(beats SPY)", p_spy))
-
-    if not available_models:
-        st.warning("No prediction data available.")
-        return
-
-    if len(available_models) == 1:
-        selected_model = available_models[0][0]
-        pc1, _ = st.columns(2)
-        with pc1:
-            _prob_card(available_models[0][1], available_models[0][2], "#2563eb")
-    else:
-        options = {f"{label}  {float(p)*100:.1f}%": name for name, label, p in available_models}
-        selected_label = st.radio("Attribution model", list(options.keys()), horizontal=True)
-        selected_model = options[selected_label]
-        pc1, pc2 = st.columns(2)
-        with pc1:
-            _prob_card(available_models[0][1], available_models[0][2], "#2563eb")
-        with pc2:
-            _prob_card(available_models[1][1], available_models[1][2], "#7c3aed")
-
-    st.markdown("---")
-
-    with st.spinner(f"Computing {selected_model} attribution for {symbol}..."):
-        shap_result = _get_shap(symbol, input_end, label_method=selected_model)
-
-    if shap_result is None:
-        st.warning(f"No attribution data for {symbol} ({selected_model}).")
-        return
-
-    st.caption(f"SHAP attribution for **{selected_model}** (bias: {shap_result.get('bias', 0):.4f})")
-
-    ac1, ac2 = st.columns(2)
-    with ac1:
-        _shap_chart(shap_result.get("top_positive", []), "#16a34a", "▲ Bullish Signals")
-    with ac2:
-        _shap_chart(shap_result.get("top_negative", []), "#dc2626", "▼ Bearish Signals")
-
-
-def tab_predictions():
-    st.markdown('<div class="tab-header">PREDICTIONS</div>', unsafe_allow_html=True)
-
-    if "pred_attr_shown_for" not in st.session_state:
-        st.session_state.pred_attr_shown_for = None
-
-    fc1, fc2, fc3 = st.columns([1, 1, 1])
-    with fc1:
-        sectors = ["All"] + repo.get_sectors("stock_snapshots")
-        sector_filter = st.selectbox("Sector", sectors, key="pred_sector")
-    with fc2:
-        search = st.text_input("Search symbol / name", key="pred_search")
-    with fc3:
-        _MC_OPTIONS = {
-            "All": 0, "> $100M": 100_000_000, "> $1B": 1_000_000_000,
-            "> $10B": 10_000_000_000, "> $100B": 100_000_000_000,
-        }
-        mc_label = st.selectbox("Market Cap", list(_MC_OPTIONS.keys()), key="pred_mc")
-        min_mc = _MC_OPTIONS[mc_label]
-
-    df = repo.get_all_predictions(
-        sector=sector_filter if sector_filter != "All" else None,
-        search=search,
-    )
-    if min_mc > 0:
-        df = df[df["Market Cap"].apply(lambda x: x is not None and x == x and float(x) >= min_mc)]
-
-    if df.empty:
-        st.info("No predictions yet. Run `python main.py run` first.")
-        return
-
-    primary_col = "P(5% high)" if "P(5% high)" in df.columns else df.columns[2]
-    n_bullish = (df[primary_col] >= 0.65).sum()
-    n_bearish = (df[primary_col] < 0.35).sum()
-    sc1, sc2, sc3, sc4 = st.columns(4)
-    sc1.metric("Total", len(df))
-    sc2.metric("Bullish (≥65%)", int(n_bullish))
-    sc3.metric("Bearish (<35%)", int(n_bearish))
-    sc4.metric("Last updated", str(df["Predicted At"].max())[:16] if not df.empty else "—")
-
-    st.markdown("---")
-
-    display_df = df.copy()
-
-    def _fmt_prob(x):
-        return f"{float(x)*100:.1f}%" if x is not None and x == x else "—"
-
-    if "P(5% high)" in display_df.columns:
-        display_df["P(5% high)"] = display_df["P(5% high)"].apply(_fmt_prob)
-    if "P(beats SPY)" in display_df.columns:
-        display_df["P(beats SPY)"] = display_df["P(beats SPY)"].apply(_fmt_prob)
-
-    display_df["Market Cap"] = display_df["Market Cap"].apply(fmt_market_cap)
-    display_df["Close"] = display_df["Close"].apply(nan_safe(lambda x: f"${float(x):.2f}"))
-    display_df["RSI"] = display_df["RSI"].apply(nan_safe(lambda x: f"{float(x):.1f}"))
-    display_df["As of"] = display_df["Input End"].astype(str)
-
-    show_cols = ["Symbol", "Name", "Sector", "Close", "Market Cap", "RSI"]
-    if "P(5% high)" in display_df.columns:
-        show_cols.append("P(5% high)")
-    if "P(beats SPY)" in display_df.columns:
-        show_cols.append("P(beats SPY)")
-    show_cols.append("As of")
-
-    col_export, _ = st.columns([1, 5])
-    with col_export:
-        st.download_button("Export CSV", df.to_csv(index=False), "predictions.csv", "text/csv")
-
-    st.caption("💡 Click any row to view signal attribution.")
-
-    event = st.dataframe(
-        display_df[show_cols].head(100),
-        width='stretch',
-        hide_index=True,
-        selection_mode="single-row",
-        on_select="rerun",
-        height=600,
-    )
-
-    sel_rows = event.selection.rows
-    new_idx = sel_rows[0] if sel_rows else None
-    if new_idx is not None and new_idx != st.session_state.pred_attr_shown_for:
-        st.session_state.pred_attr_shown_for = new_idx
-        row = df.iloc[new_idx]
-        p_high = row.get("P(5% high)")
-        p_spy = row.get("P(beats SPY)")
-        _show_attribution_dialog(row["Symbol"], row["Input End"], p_high, p_spy)
-
-
 def page_stock_data():
     st.header("Stock Data")
-    t1, t2, t3, t4, t5 = st.tabs([
-        "Lookup", "Technical Analysis", "Screener", "Manager", "Predictions"
+    t1, t2, t3, t4 = st.tabs([
+        "Lookup", "Technical Analysis", "Screener", "Manager"
     ])
     with t1:
         tab_lookup()
@@ -1777,8 +1490,6 @@ def page_stock_data():
         tab_screener()
     with t4:
         tab_manager()
-    with t5:
-        tab_predictions()
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────

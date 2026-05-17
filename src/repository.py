@@ -225,64 +225,6 @@ class StockRepository:
         finally:
             session.close()
 
-    def get_predictions(self, min_prob: float = 0.0, limit: int = 200) -> pd.DataFrame:
-        session = self._get_session()
-        try:
-            q = """
-            SELECT s.symbol, s.name, sp.probability, sp.input_end_date,
-                   ss.close, ss.market_cap, ss.sector
-            FROM stock_predictions sp
-            JOIN stocks s ON s.id = sp.stock_id
-            LEFT JOIN stock_snapshots ss ON ss.stock_id = sp.stock_id
-            WHERE sp.probability >= :min_p
-            ORDER BY sp.probability DESC
-            LIMIT :lim
-            """
-            rows = session.execute(text(q), {"min_p": min_prob, "lim": limit}).fetchall()
-            return pd.DataFrame(rows, columns=[
-                "Symbol", "Name", "Probability", "Input End", "Close",
-                "Market Cap", "Sector",
-            ])
-        finally:
-            session.close()
-
-    def get_all_predictions(self, sector: Optional[str] = None, search: str = "") -> pd.DataFrame:
-        session = self._get_session()
-        try:
-            where = ""
-            params: dict = {}
-            if sector:
-                where += " AND ss.sector = :sector"
-                params["sector"] = sector
-            if search:
-                where += " AND (s.symbol LIKE :search OR s.name LIKE :search)"
-                params["search"] = f"%{search}%"
-            q = f"""
-            SELECT s.symbol, s.name,
-                   MAX(CASE WHEN sp.label_method = 'max_high_5pct' THEN sp.probability END) AS p_high,
-                   MAX(CASE WHEN sp.label_method = 'beats_spy' THEN sp.probability END) AS p_spy,
-                   MAX(sp.input_end_date) AS input_end_date,
-                   MAX(sp.predicted_at) AS predicted_at,
-                   ss.close, ss.market_cap, ss.sector, ss.rsi_14
-            FROM stock_predictions sp
-            JOIN stocks s ON s.id = sp.stock_id
-            LEFT JOIN stock_snapshots ss ON ss.stock_id = sp.stock_id
-            WHERE sp.probability IS NOT NULL
-            {where}
-            GROUP BY s.id, s.symbol, s.name, ss.close, ss.market_cap, ss.sector, ss.rsi_14
-            ORDER BY COALESCE(
-                MAX(CASE WHEN sp.label_method = 'max_high_5pct' THEN sp.probability END),
-                MAX(CASE WHEN sp.label_method = 'beats_spy' THEN sp.probability END)
-            ) DESC
-            """
-            rows = session.execute(text(q), params).fetchall()
-            return pd.DataFrame(rows, columns=[
-                "Symbol", "Name", "P(5% high)", "P(beats SPY)", "Input End", "Predicted At",
-                "Close", "Market Cap", "Sector", "RSI",
-            ])
-        finally:
-            session.close()
-
     def save_selected_stocks(self, records: list[dict]) -> int:
         session = self._get_session()
         try:
