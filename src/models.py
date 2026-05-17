@@ -351,10 +351,14 @@ class SelectedStock(Base):
     predicted_return: Mapped[Optional[float]] = mapped_column(Float)
     predicted_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
     actual_return: Mapped[Optional[float]] = mapped_column(Float)
+    pipeline_run_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey("pipeline_runs.id"), nullable=True)
+    sector: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    backend: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
 
     __table_args__ = (
         Index("ix_selected_stocks_ticker", "ticker"),
         Index("ix_selected_stocks_run_at", "pipeline_run_at"),
+        Index("ix_selected_stocks_run_score", "pipeline_run_id", "ml_score"),
     )
 
 
@@ -394,3 +398,85 @@ class SampleLabel(Base):
         Index("ix_sample_labels_method", "label_method"),
         Index("ix_sample_labels_method_label", "label_method", "label"),
     )
+
+
+class FastEvaluationConclusion(Base):
+    """Per-ticker consensus output from the fast evaluation step (ai-hedge-fund)."""
+
+    __tablename__ = "fast_evaluation_conclusion"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    pipeline_run_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("pipeline_runs.id"), nullable=False)
+    ticker: Mapped[str] = mapped_column(String(10), nullable=False)
+    backend: Mapped[str] = mapped_column(String(32), nullable=False)
+    start_date: Mapped[datetime] = mapped_column(Date, nullable=False)
+    end_date: Mapped[datetime] = mapped_column(Date, nullable=False)
+    evaluation_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    positive_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    negative_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    neutral_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    total_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    consensus_score: Mapped[float] = mapped_column(Float, nullable=False)
+    model_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    model_provider: Mapped[str] = mapped_column(String(32), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("pipeline_run_id", "ticker", "backend", name="uq_fec_run_ticker_backend"),
+        Index("ix_fec_ticker", "ticker"),
+    )
+
+
+class FastEvaluationAnalyst(Base):
+    """Per-analyst opinion output from the fast evaluation step."""
+
+    __tablename__ = "fast_evaluation_analysts"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    pipeline_run_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("pipeline_runs.id"), nullable=False)
+    ticker: Mapped[str] = mapped_column(String(10), nullable=False)
+    backend: Mapped[str] = mapped_column(String(32), nullable=False)
+    analyst_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    opinion: Mapped[str] = mapped_column(String(24), nullable=False)
+    confidence: Mapped[float] = mapped_column(Float, nullable=False)
+    reasoning: Mapped[str] = mapped_column(Text, nullable=False)
+    start_date: Mapped[datetime] = mapped_column(Date, nullable=False)
+    end_date: Mapped[datetime] = mapped_column(Date, nullable=False)
+    evaluation_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+    __table_args__ = (
+        Index("ix_fea_run_ticker", "pipeline_run_id", "ticker"),
+    )
+
+
+class DeepEvaluationRow(Base):
+    """Deep-dive analysis output from the deep evaluation step (TradingAgents)."""
+
+    __tablename__ = "deep_evaluation"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    pipeline_run_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("pipeline_runs.id"), nullable=False)
+    ticker: Mapped[str] = mapped_column(String(10), nullable=False)
+    backend: Mapped[str] = mapped_column(String(32), nullable=False)
+    evaluation_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    market_report: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    bull_argument: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    bear_argument: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    research_manager_decision: Mapped[Optional[str]] = mapped_column(String(24), nullable=True)
+    trader_plan: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    final_decision: Mapped[Optional[str]] = mapped_column(String(24), nullable=True)
+    model_name: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    extra_outputs: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+
+    __table_args__ = (
+        Index("ix_de_ticker", "ticker"),
+        Index("ix_de_run", "pipeline_run_id"),
+    )
+
+
+class SchemaMigration(Base):
+    """Tracks applied schema migrations so the migration runner can be idempotent."""
+
+    __tablename__ = "schema_migrations"
+
+    version: Mapped[str] = mapped_column(String(128), primary_key=True)
+    applied_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
