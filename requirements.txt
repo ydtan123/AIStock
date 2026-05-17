@@ -17,3 +17,19 @@ xgboost>=2.0
 scikit-learn>=1.3
 pyarrow>=14.0
 optuna>=3.0
+
+# ai-hedge-fund + TradingAgents in-process integration
+langgraph==1.1.10
+langchain-core==1.3.3
+langchain-anthropic==1.4.3
+langchain-deepseek==1.0.1
+langchain-google-genai==4.2.2
+langchain-groq==1.1.2
+langchain-openai==1.2.1
+langchain-ollama==1.1.0
+langchain-gigachat==0.5.1
+langchain-xai==1.2.2
+colorama==0.4.6
+questionary==2.1.1
+rich==15.0.0
+tabulate==0.10.0
