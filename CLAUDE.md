@@ -21,6 +21,11 @@ Stock Data Ingestion, ML Stock Selection & Visualization System. Two parallel su
 # Run dashboard
 PYTHONPATH=src streamlit run src/app.py
 
+# Full 4-step OOP pipeline
+PYTHONPATH=src python src/full_pipeline.py
+PYTHONPATH=src python src/full_pipeline.py --resume-from fast_evaluation --run-id 42
+PYTHONPATH=src python src/full_pipeline.py --set fast_evaluation.top_n=5
+
 # Run ML pipeline (standalone)
 PYTHONPATH=src python src/finrl_pipeline.py --source AISTOCK_DB --start-date 2020-01-01
 
@@ -31,6 +36,8 @@ PYTHONPATH=src python src/main.py --symbol AAPL --incremental
 # Initialize DB tables
 python -c "import sys; sys.path.insert(0,'src'); from database import engine; from models import Base; Base.metadata.create_all(engine)"
 
+# Run pipeline tests
+PYTHONPATH=src pytest tests/test_pipeline_*.py tests/test_full_pipeline_*.py -v
 # Run smoke tests (requires DB with data)
 PYTHONPATH=src pytest tests/test_smoke_pipeline.py -m smoke -s
 # Single label
@@ -60,23 +67,50 @@ database:
 ### AIStock Subsystem (`src/`)
 
 ```
-config.py       loads config.yaml — import this before database.py
-database.py     engine + get_session() — depends on config.py
-models.py       SQLAlchemy models: Stock, DailyPrice, StockIndicator,
-                SampleFeature, SampleLabel
-repository.py   StockRepository — all DB queries go here
-fetcher/        FetcherBase + AlphaVantage/Yahoo implementations, TokenBucket rate limiter
-ingestion/      pipeline.py (batch ingest), indicators.py, symbols.py
-model/          XGBoost per-stock prediction
-  labels.py       LabelMethod subclasses registered in LABEL_METHODS list
+config.py         loads config.yaml — import this before database.py
+database.py       engine + get_session() — depends on config.py
+models.py         SQLAlchemy models (~400 lines, 16 tables)
+repository.py     StockRepository — all DB queries go here
+fetcher/          FetcherBase + AlphaVantage/Yahoo implementations, TokenBucket rate limiter
+ingestion/        pipeline.py (batch ingest), indicators.py, symbols.py
+model/            XGBoost per-stock prediction
+  labels.py         LabelMethod subclasses registered in LABEL_METHODS list
   feature_builder.py  rolling 5-day window features
-  train.py        train(label_method, ...) → metrics dict; stores to DB
-  inference.py    predict_stocks([symbols], label_method) → list[dict]
-scheduler.py    APScheduler wrapping ingestion pipeline
-app.py          Streamlit dashboard (single file, ~1500 lines)
-finrl_pipeline.py   orchestrates FinRL ML pipeline; run standalone or called from app.py
+  train.py          train(label_method, ...) → metrics dict; stores to DB
+  inference.py      predict_stocks([symbols], label_method) → list[dict]
+scheduler.py      APScheduler wrapping ingestion pipeline
+app.py            Streamlit dashboard (single file, ~2200 lines)
+finrl_pipeline.py orchestrates FinRL ML pipeline; run standalone or called from app.py
 ml_bucket_selector.py  MLBucketSelector class wrapping external run_bucket()
+full_pipeline.py  CLI shim for OOP pipeline orchestrator
+pipeline/         OOP pipeline package
+  ├── base.py           PipelineStep ABC + StepResult + StepContext
+  ├── config.py         ConfigLoader (yaml + dotted-path overrides)
+  ├── orchestrator.py   FullPipeline
+  ├── data_update.py    DataUpdateStep (step 1)
+  ├── stock_selection.py     StockSelectionStep (step 2)
+  ├── fast_evaluation.py     FastEvaluationStep (step 3)
+  ├── deep_evaluation.py     DeepEvaluationStep (step 4)
+  └── backends/         pluggable selector/evaluator implementations
+migrations/         idempotent SQL migration runner + .sql files
 ```
+
+### Full Pipeline (`src/pipeline/` + `src/full_pipeline.py`)
+
+OOP orchestrator with pluggable backends. `src/full_pipeline.py` is a thin CLI shim; all step logic lives in `src/pipeline/`.
+
+| Step name | Class | Backend ABC | Default backend |
+|---|---|---|---|
+| `data_update` | `DataUpdateStep` | (no backend swap) | reuses `src/ingestion/pipeline.py` |
+| `stock_selection` | `StockSelectionStep` | `StockSelector` | `FinrlStockSelector` (wraps FinRL-Trading) |
+| `fast_evaluation` | `FastEvaluationStep` | `FastEvaluator` | `AIHedgeFundFastEvaluator` (wraps `external/ai-hedge-fund` in-process) |
+| `deep_evaluation` | `DeepEvaluationStep` | `DeepEvaluator` | `TradingAgentsDeepEvaluator` (wraps `TradingAgentsGraph`) |
+
+Each step writes a `<step_name>.{json,md}` report to `reports/full_pipeline/<run_id>/`. All steps share a single `pipeline_run_id` (the `pipeline_runs.id`). The orchestrator stops on the first failed step; rerun with `--resume-from <step> --run-id <N>`.
+
+Config lives under per-step namespaces in `config.yaml`. Override at CLI with `--set key.path=value` (repeatable, YAML-typed values). Backwards-compat mapping keeps existing `finrl_pipeline` / `ai_hedge_fund` top-level keys working with a deprecation warning.
+
+Backends are selected by `<step>.backend: "<registered_name>"`. To add a new backend: subclass the relevant ABC in `src/pipeline/backends/*.py`, set its `name` class attribute, decorate with `@REGISTRY.register`. No orchestrator changes needed.
 
 ### FinRL Subsystem (`external/FinRL-Trading/src/`)
 
@@ -123,10 +157,29 @@ Log streaming: a `_QueueHandler` + `_StdoutToQueue` wrapper redirect both `loggi
 
 ## Database Schema
 
-- **stocks**: `id`, `symbol` (unique), `company_name`, `sector`, `is_active`
-- **daily_prices**: `(stock_id, date)` unique — OHLCV
-- **stock_indicators**: `stock_id` FK — PE, market cap, dividend yield — upsert on update
+### Core tables
+
+- **stocks**: `id`, `symbol` (unique), `company_name`, `sector`, `is_active`, `exchange`, `currency`, `country`, `industry`, `shares_outstanding`, `shares_float`
+- **daily_prices**: `(stock_id, date)` unique — OHLCV + `dividend_amount`, `split_coefficient`
+- **stock_indicators**: `stock_id` FK — PE, market cap, EBITDA, EPS, revenue, margins, ROE/ROA, analyst ratings, dividend yield — upsert on update
+- **technical_indicators**: `stock_id` FK + `date` — `indicators` (JSON blob)
+- **stock_snapshots**: `stock_id` PK — screening fast-lookup table
+- **quarterly_fundamentals**: `(stock_id, symbol, datadate)` — 70+ financial metrics per stock-quarter
+
+### ML tables
+
 - **sample_features** / **sample_labels**: rolling window ML inputs/outputs per stock+date+label
+- **stock_predictions**: `(stock_id, label_method)` PK — `probability`, `input_end_date`
+
+### Pipeline & scheduling
+
+- **pipeline_runs**: `id`, `started_at`, `finished_at`, `symbols_processed`, `errors_count`, `status`
+- **selected_stocks**: stocks selected by ML pipeline — columns include `pipeline_run_id`, `sector`, `backend` (added by migration `2026_05_17_pipeline_oop.sql`); indexed by `(pipeline_run_id, ml_score)` for top-N queries
+- **fast_evaluation_conclusion**: `(pipeline_run_id, ticker, backend)` unique — counts of positive/negative/neutral analysts plus `consensus_score`; indexed for top-N queries
+- **fast_evaluation_analysts**: `(pipeline_run_id, ticker)` — one row per analyst opinion with `confidence` and `reasoning`
+- **deep_evaluation**: `(pipeline_run_id, ticker)` — wide row of per-agent text fields (`market_report`, `bull_argument`, `bear_argument`, `research_manager_decision`, `trader_plan`) plus `extra_outputs` JSON for backend-specific data; `final_decision` ∈ {BUY, SELL, HOLD}
+- **schema_migrations**: `version` PK — tracks applied raw-SQL migrations for idempotency
+- **scheduled_job_runs**: APScheduler job execution history
 
 ## MCP Tools: code-review-graph
 
