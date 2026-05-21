@@ -6,7 +6,7 @@ import pandas as pd
 from sqlalchemy import text
 
 from database import get_session
-from models import DailyPrice, ScheduledJobRun, SelectedStock, Stock, StockIndicator, StockSnapshot, TechnicalIndicator
+from models import DailyPrice, ScheduledJobRun, SelectedStock, Stock, StockIndicator, StockNews, StockSnapshot, TechnicalIndicator
 
 
 @dataclass
@@ -229,18 +229,47 @@ class StockRepository:
         session = self._get_session()
         try:
             session.query(SelectedStock).delete()
-            run_at = datetime.utcnow()
+            run_at = datetime.now()
             inserted = 0
             for rec in records:
+                ml_score = float(rec.get("ml_score", 0))
                 row = SelectedStock(
                     ticker=rec["ticker"],
                     model_name=rec.get("model_name", ""),
-                    ml_score=float(rec.get("ml_score", 0)),
+                    ml_score=ml_score,
                     bucket=rec.get("bucket"),
                     weight=float(rec["weight"]) if rec.get("weight") is not None else None,
                     date_selected=rec.get("date_selected", date.today()),
                     model_file=rec.get("model_file"),
                     pipeline_run_at=run_at,
+                    predicted_return=ml_score,
+                    predicted_at=run_at,
+                )
+                session.add(row)
+                inserted += 1
+            session.commit()
+            return inserted
+        finally:
+            session.close()
+
+    def save_predict_only_results(self, predictions: list[dict]) -> int:
+        """Persist FinRL predict-only results to selected_stocks table."""
+        session = self._get_session()
+        try:
+            inserted = 0
+            run_at = datetime.now()
+            for pred in predictions:
+                row = SelectedStock(
+                    ticker=pred["ticker"],
+                    model_name=pred.get("model_name", ""),
+                    ml_score=float(pred.get("ml_score", 0)),
+                    bucket=pred.get("bucket"),
+                    weight=float(pred["weight"]) if pred.get("weight") is not None else None,
+                    date_selected=pred.get("date_selected", date.today()),
+                    model_file=pred.get("model_file"),
+                    pipeline_run_at=run_at,
+                    predicted_return=float(pred.get("predicted_return", 0)),
+                    predicted_at=run_at,
                 )
                 session.add(row)
                 inserted += 1
@@ -281,41 +310,6 @@ class StockRepository:
         finally:
             session.close()
 
-    def save_predict_only_results(self, predictions: list[dict]) -> int:
-        """Insert predict-only results as new rows with predicted_at timestamp."""
-        import math
-
-        if not predictions:
-            return 0
-        session = self._get_session()
-        try:
-            now = datetime.utcnow()
-            inserted = 0
-            for rec in predictions:
-                ds = rec.get("datadate")
-                if isinstance(ds, str):
-                    ds = datetime.strptime(ds, "%Y-%m-%d").date()
-                ar = rec.get("actual_return")
-                row = SelectedStock(
-                    ticker=rec["ticker"],
-                    model_name=rec.get("model_name", ""),
-                    ml_score=float(rec.get("ml_score", 0)),
-                    bucket=rec.get("bucket"),
-                    weight=None,
-                    date_selected=ds if ds else date.today(),
-                    model_file=rec.get("model_file"),
-                    pipeline_run_at=now,
-                    predicted_return=float(rec.get("predicted_return")) if rec.get("predicted_return") is not None else None,
-                    predicted_at=now,
-                    actual_return=float(ar) if ar is not None and not (isinstance(ar, float) and math.isnan(ar)) else None,
-                )
-                session.add(row)
-                inserted += 1
-            session.commit()
-            return inserted
-        finally:
-            session.close()
-
     def get_job_runs(self, limit: int = 100) -> pd.DataFrame:
         session = self._get_session()
         try:
@@ -337,5 +331,45 @@ class StockRepository:
             return pd.DataFrame(recs, columns=[
                 "id", "Job Name", "Start Time", "End Time", "Stocks Updated", "Status", "Error",
             ])
+        finally:
+            session.close()
+
+    def get_stock_news(self, ticker: str, days: int = 7) -> list[dict]:
+        """Return recent news for a ticker from the stock_news cache."""
+        session = self._get_session()
+        try:
+            from datetime import timedelta
+            cutoff = datetime.utcnow() - timedelta(days=days)
+            rows = (
+                session.query(StockNews)
+                .filter(
+                    StockNews.ticker == ticker.upper(),
+                    StockNews.tool_name == "get_news",
+                    StockNews.fetched_at >= cutoff,
+                )
+                .order_by(StockNews.fetched_at.desc())
+                .all()
+            )
+            return [{"fetched_at": r.fetched_at, "result": r.result} for r in rows]
+        finally:
+            session.close()
+
+    def get_insider_transactions(self, ticker: str, days: int = 7) -> list[dict]:
+        """Return recent insider transactions for a ticker from the stock_news cache."""
+        session = self._get_session()
+        try:
+            from datetime import timedelta
+            cutoff = datetime.utcnow() - timedelta(days=days)
+            rows = (
+                session.query(StockNews)
+                .filter(
+                    StockNews.ticker == ticker.upper(),
+                    StockNews.tool_name == "get_insider_transactions",
+                    StockNews.fetched_at >= cutoff,
+                )
+                .order_by(StockNews.fetched_at.desc())
+                .all()
+            )
+            return [{"fetched_at": r.fetched_at, "result": r.result} for r in rows]
         finally:
             session.close()

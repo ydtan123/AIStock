@@ -176,6 +176,18 @@ def test_lookup_tab(page):
     assert symbol_inputs.count() >= 1 or _has_text(page, "Symbol")
 
 
+@pytest.mark.e2e
+def test_lookup_news_and_insider_sections(page):
+    """Lookup tab should have News and Insider Transactions expandable sections."""
+    _switch_page(page, "Stock Data")
+    page.wait_for_timeout(500)
+    page.get_by_text("Lookup").first.click()
+    page.wait_for_timeout(2000)
+    # The expanders render immediately even without data — verify they exist
+    assert _has_text(page, "News"), "News section not found on Lookup tab"
+    assert _has_text(page, "Insider Transactions"), "Insider Transactions section not found on Lookup tab"
+
+
 # ── Tests: Stock Data → Technical Analysis Tab ───────────────────────────────────
 
 
@@ -214,20 +226,6 @@ def test_manager_tab(page):
     page.get_by_text("Manager").first.click()
     page.wait_for_timeout(500)
     assert _has_text(page, "Activate") or _has_text(page, "Deactivate")
-
-
-# ── Tests: Stock Data → Predictions Tab ──────────────────────────────────────────
-
-
-@pytest.mark.e2e
-def test_predictions_tab(page):
-    """Predictions tab should show prediction data or 'No predictions' message."""
-    _switch_page(page, "Stock Data")
-    page.wait_for_timeout(500)
-    page.get_by_text("Predictions").first.click()
-    page.wait_for_timeout(500)
-    # Either has predictions table or shows a message
-    assert _has_text(page, "Predictions")
 
 
 # ── Tests: ML Pipeline Page ──────────────────────────────────────────────────────

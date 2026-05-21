@@ -136,6 +136,15 @@ def run_pipeline_and_save_report(cfg_overrides: dict[str, Any]) -> str:
                 logger.info("  Saved %d selected stocks to DB", selected_stocks_saved)
             except Exception as exc:
                 logger.warning("Failed to save selected stocks to DB: %s", exc)
+            try:
+                saved_paths = getattr(selector, "saved_models", [])
+                _summary = _build_selection_summary(selector.selected_stocks_info, saved_paths)
+                _sum_path = DATA_DIR / f"selection_summary_{date.today():%Y%m%d}.json"
+                with open(_sum_path, "w") as _sf:
+                    json.dump(_summary, _sf, default=str)
+                logger.info("  Saved selection summary → %s", _sum_path)
+            except Exception as exc:
+                logger.warning("Failed to build selection summary: %s", exc)
     except Exception as exc:
         logger.warning("ml_bucket_selection failed (%s); falling back to equal-weight.", exc)
         weights_df = _equal_weight_fallback(fund_df, tickers_df, top_quantile)
@@ -419,13 +428,16 @@ def run_predict_only(symbols: list[str] | None = None,
 def main() -> None:
     import argparse
 
+    # Load config.yaml defaults; CLI args override them
+    _cfg_defaults = _load_pipeline_config_defaults()
+
     parser = argparse.ArgumentParser(description="AIStock ML pipeline runner")
     parser.add_argument("--source", default="AISTOCK_DB",
                         choices=["AISTOCK_DB", "FMP", "WRDS", "YAHOO"],
                         help="Data source (default: AISTOCK_DB)")
     parser.add_argument("--start-date", default="2020-01-01", help="Start date YYYY-MM-DD")
-    parser.add_argument("--end-date", default="2025-12-31", help="End date YYYY-MM-DD")
-    parser.add_argument("--top-quantile", type=float, default=0.75,
+    parser.add_argument("--end-date", default="2026-03-31", help="End date YYYY-MM-DD")
+    parser.add_argument("--top-quantile", type=float, default=0.1,
                         help="Top fraction to select per sector bucket (default: 0.75)")
     parser.add_argument("--test-quarters", type=int, default=20,
                         help="Walk-forward validation window in quarters (default: 20)")
@@ -447,6 +459,22 @@ def main() -> None:
     parser.add_argument("--symbols", nargs="*", default=None,
                         metavar="TICKER",
                         help="Tickers to predict (default: from selected_stocks DB table)")
+
+    # Inject config.yaml values as argparse defaults (CLI args still take precedence)
+    if _cfg_defaults:
+        parser.set_defaults(
+            source=_cfg_defaults.get("source", "AISTOCK_DB"),
+            start_date=_cfg_defaults.get("start_date", "2020-01-01"),
+            end_date=_cfg_defaults.get("end_date", "2025-12-31"),
+            top_quantile=float(_cfg_defaults.get("top_quantile", 0.75)),
+            test_quarters=int(_cfg_defaults.get("test_quarters", 20)),
+            prediction_mode=_cfg_defaults.get("prediction_mode", "regression"),
+            weight_method=_cfg_defaults.get("weight_method", "equal"),
+            rebalance_freq=_cfg_defaults.get("rebalance_freq", "Q"),
+            initial_capital=float(_cfg_defaults.get("initial_capital", 1_000_000)),
+            benchmarks=_cfg_defaults.get("benchmarks", ["SPY", "QQQ"]),
+        )
+
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO,
@@ -512,6 +540,92 @@ def main() -> None:
 
     report_path = run_pipeline_and_save_report(cfg)
     print(f"Report: {report_path}")
+
+    summary_path = DATA_DIR / f"selection_summary_{date.today():%Y%m%d}.json"
+    if summary_path.exists():
+        try:
+            with open(summary_path) as f:
+                _summary = json.load(f)
+            _print_selection_summary(_summary)
+        except Exception as exc:
+            logger.warning("Could not print selection summary: %s", exc)
+
+
+def _load_pipeline_config_defaults() -> dict:
+    config_path = _PROJECT_ROOT / "config.yaml"
+    if not config_path.exists():
+        return {}
+    try:
+        import yaml
+        with open(config_path) as f:
+            raw = yaml.safe_load(f) or {}
+        return raw.get("finrl_pipeline", {})
+    except Exception as exc:
+        logger.warning("Could not load config.yaml finrl_pipeline section: %s", exc)
+        return {}
+
+
+def _build_selection_summary(selected_stocks_info: list, saved_model_paths: list) -> dict:
+    import joblib
+
+    bucket_top_feature: dict[str, str] = {}
+    for mp in saved_model_paths:
+        try:
+            artifact = joblib.load(mp)
+            bucket = artifact.get("bucket", "")
+            feature_cols = artifact.get("feature_cols", [])
+            best_name = artifact.get("best_name", "")
+            model = artifact.get("fitted", {}).get(best_name)
+            if model is None or not feature_cols:
+                continue
+            if hasattr(model, "feature_importances_"):
+                importances = model.feature_importances_
+            elif hasattr(model, "coef_"):
+                c = model.coef_
+                importances = np.abs(c[0] if c.ndim > 1 else c)
+            else:
+                continue
+            if len(importances) == len(feature_cols):
+                top_idx = int(np.argmax(importances))
+                bucket_top_feature[bucket] = feature_cols[top_idx]
+        except Exception:
+            pass
+
+    stocks = []
+    for rec in selected_stocks_info:
+        ticker = str(rec.get("ticker") or rec.get("tic") or rec.get("gvkey", ""))
+        ml_score = float(rec.get("ml_score") or rec.get("predicted_return") or 0.0)
+        bucket = rec.get("bucket", "")
+        stocks.append({
+            "ticker": ticker,
+            "ml_score": ml_score,
+            "bucket": bucket,
+            "top_feature": bucket_top_feature.get(bucket, "N/A"),
+        })
+
+    stocks.sort(key=lambda x: x["ml_score"], reverse=True)
+    return {"total": len(stocks), "stocks": stocks}
+
+
+def _print_selection_summary(summary: dict) -> None:
+    total = summary.get("total", 0)
+    stocks = summary.get("stocks", [])
+    top10 = stocks[:10]
+
+    print(f"\n{'='*68}")
+    print(f"SELECTION SUMMARY — {total} stocks selected")
+    print(f"{'='*68}")
+    if not top10:
+        print("  (no stocks in summary)")
+    else:
+        print(f"  {'Rank':<5} {'Ticker':<8} {'ML Score':>10}  {'Bucket':<22} Top Feature")
+        print(f"  {'-'*5} {'-'*8} {'-'*10}  {'-'*22} {'-'*26}")
+        for i, s in enumerate(top10, 1):
+            print(
+                f"  {i:<5} {s['ticker']:<8} {s['ml_score']:>10.4f}  "
+                f"{s['bucket']:<22} {s['top_feature']}"
+            )
+    print(f"{'='*68}\n")
 
 
 def _compute_metrics(returns) -> dict:
