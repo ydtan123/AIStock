@@ -68,6 +68,8 @@ class StockSelector(ABC):
 
 import logging
 
+from repository import StockRepository
+
 logger = logging.getLogger(__name__)
 
 
@@ -94,16 +96,17 @@ class FinrlStockSelector(StockSelector):
     def select(self, ctx: StepContext) -> list[ScoredTicker]:
         sub_cfg = self.cfg or ctx.cfg.get("stock_selection", {}).get("finrl", {})
         ctx.logger.info("FinrlStockSelector starting with cfg=%s", sub_cfg)
-        report = _run_finrl_pipeline(sub_cfg)
-        selected = report.get("selected_stocks", []) if isinstance(report, dict) else []
-        out: list[ScoredTicker] = []
-        for row in selected:
-            out.append(
-                ScoredTicker(
-                    ticker=row["ticker"],
-                    ml_score=float(row.get("ml_score", row.get("score", 0.0))),
-                    sector=row.get("sector"),
-                )
+        _run_finrl_pipeline(sub_cfg)
+
+        repo = StockRepository()
+        rows = repo.get_latest_selected_stocks()
+        out: list[ScoredTicker] = [
+            ScoredTicker(
+                ticker=row["ticker"],
+                ml_score=float(row.get("ml_score") or 0.0),
+                sector=row.get("sector") or row.get("bucket"),
             )
+            for row in rows
+        ]
         ctx.logger.info("FinrlStockSelector produced %d tickers", len(out))
         return out

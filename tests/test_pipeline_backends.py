@@ -67,22 +67,25 @@ def test_registry_get_unknown_raises():
 
 
 def test_finrl_stock_selector_uses_run_pipeline(monkeypatch, tmp_path):
-    """FinrlStockSelector delegates to finrl_pipeline and returns ScoredTickers."""
+    """FinrlStockSelector runs finrl_pipeline then reads selections from DB."""
     from pipeline.backends import selectors as sel_mod
 
-    fake_report = {
-        "selected_stocks": [
-            {"ticker": "AAPL", "ml_score": 0.83, "sector": "Information Technology"},
-            {"ticker": "MSFT", "ml_score": 0.79, "sector": "Information Technology"},
-        ]
-    }
+    fake_db_rows = [
+        {"ticker": "AAPL", "ml_score": 0.83, "sector": "Information Technology", "bucket": None},
+        {"ticker": "MSFT", "ml_score": 0.79, "sector": "Information Technology", "bucket": None},
+    ]
     captured = {}
 
     def fake_run(cfg_overrides):
         captured["cfg_overrides"] = cfg_overrides
-        return fake_report
 
     monkeypatch.setattr(sel_mod, "_run_finrl_pipeline", fake_run)
+
+    class FakeRepo:
+        def get_latest_selected_stocks(self):
+            return fake_db_rows
+
+    monkeypatch.setattr(sel_mod, "StockRepository", FakeRepo)
 
     selector = sel_mod.FinrlStockSelector(
         cfg={"source": "AISTOCK_DB", "top_quantile": 0.2}
