@@ -27,7 +27,7 @@ def test_data_update_success(monkeypatch, tmp_path):
 
     monkeypatch.setattr(
         "pipeline.data_update._run_pipeline",
-        lambda source, parallel_workers: fake_result,
+        lambda source, step_cfg: fake_result,
     )
 
     step = DataUpdateStep()
@@ -63,7 +63,7 @@ def test_data_update_partial_failure_still_success(monkeypatch, tmp_path):
     }
     monkeypatch.setattr(
         "pipeline.data_update._run_pipeline",
-        lambda source, parallel_workers: fake_result,
+        lambda source, step_cfg: fake_result,
     )
 
     step = DataUpdateStep()
@@ -82,7 +82,7 @@ def test_data_update_all_failed_returns_failed(monkeypatch, tmp_path):
     }
     monkeypatch.setattr(
         "pipeline.data_update._run_pipeline",
-        lambda source, parallel_workers: fake_result,
+        lambda source, step_cfg: fake_result,
     )
 
     step = DataUpdateStep()

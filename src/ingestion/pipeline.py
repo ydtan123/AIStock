@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -20,6 +21,19 @@ logger = logging.getLogger(__name__)
 DEFAULT_START = date(2010, 1, 1)
 MAX_WORKERS = 5
 NEWS_LOOKBACK_DAYS = 7
+
+# Export API keys from config BEFORE any tradingagents imports.
+# tradingagents.dataflows.google reads os.getenv("GOOGLE_API_KEY").
+_cfg = load_config()
+_common = _cfg.get("common", {})
+for _env_key, _cfg_key in [
+    ("GOOGLE_API_KEY", "google_api_key"),
+    ("DEEPSEEK_API_KEY", "deepseek_api_key"),
+    ("OPENAI_API_KEY", "openai_api_key"),
+    ("ANTHROPIC_API_KEY", "anthropic_api_key"),
+]:
+    if _common.get(_cfg_key) and _env_key not in os.environ:
+        os.environ[_env_key] = _common[_cfg_key]
 
 # Install DB-backed news cache BEFORE any tradingagents imports.
 # After this, every route_to_vendor("get_news", ...) call reads/writes stock_news.
@@ -382,9 +396,10 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
             result["news"] = _fetch_stock_news(stock.symbol)
 
         logger.info(
-            "%-6s  prices=%-4d  indicators=%-4d  overview=%-9s",
+            "%-6s  prices=%-4d  indicators=%-4d  overview=%-9s  news=%-5d",
             stock.symbol, prices_inserted, result["indicators"],
             "refreshed" if refreshed else "skipped",
+            result["news"],
         )
 
     except Exception as e:
