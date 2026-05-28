@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -19,6 +20,25 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_START = date(2010, 1, 1)
 MAX_WORKERS = 5
+NEWS_LOOKBACK_DAYS = 7
+
+# Export API keys from config BEFORE any tradingagents imports.
+# tradingagents.dataflows.google reads os.getenv("GOOGLE_API_KEY").
+_cfg = load_config()
+_common = _cfg.get("common", {})
+for _env_key, _cfg_key in [
+    ("GOOGLE_API_KEY", "google_api_key"),
+    ("DEEPSEEK_API_KEY", "deepseek_api_key"),
+    ("OPENAI_API_KEY", "openai_api_key"),
+    ("ANTHROPIC_API_KEY", "anthropic_api_key"),
+]:
+    if _common.get(_cfg_key) and _env_key not in os.environ:
+        os.environ[_env_key] = _common[_cfg_key]
+
+# Install DB-backed news cache BEFORE any tradingagents imports.
+# After this, every route_to_vendor("get_news", ...) call reads/writes stock_news.
+import news_cache  # noqa: E402
+news_cache.install()
 
 
 def _prefetch_stock_dates(stock_ids: list[int]) -> dict:
@@ -332,9 +352,28 @@ def _needs_full_backfill(stock_id: int, first_indicator_date: Optional[date] = N
         session.close()
 
 
+def _fetch_stock_news(symbol: str) -> int:
+    """Fetch last week's news for *symbol* via TradingAgents get_news tool.
+
+    The call is intercepted by the news_cache layer, so results are automatically
+    stored in the stock_news DB table with deduplication.
+    Returns a rough character count if news was fetched, 0 otherwise.
+    """
+    try:
+        from tradingagents.dataflows.interface import route_to_vendor
+        trade_dt = date.today()
+        news_start = (trade_dt - timedelta(days=NEWS_LOOKBACK_DAYS)).strftime("%Y-%m-%d")
+        news_end = trade_dt.strftime("%Y-%m-%d")
+        result = route_to_vendor("get_news", symbol, news_start, news_end)
+        return len(str(result)) if result else 0
+    except Exception as exc:
+        logger.warning("news fetch failed for %s: %s", symbol, exc)
+        return 0
+
+
 def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
                     prefetch: Optional[dict] = None) -> dict:
-    result = {"symbol": stock.symbol, "prices": 0, "fundamentals": False, "indicators": 0, "error": None}
+    result = {"symbol": stock.symbol, "prices": 0, "fundamentals": False, "indicators": 0, "news": 0, "error": None}
     try:
         md = prefetch.get("max_price_dates", {}).get(stock.id) if prefetch else None
         fid = prefetch.get("first_indicator_dates", {}).get(stock.id) if prefetch else None
@@ -353,10 +392,14 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
         elif prices_inserted > 0 and new_max_date:
             result["indicators"] = compute_indicators(stock.id, since_date=new_max_date)
 
+        if force or prices_inserted > 0:
+            result["news"] = _fetch_stock_news(stock.symbol)
+
         logger.info(
-            "%-6s  prices=%-4d  indicators=%-4d  overview=%-9s",
+            "%-6s  prices=%-4d  indicators=%-4d  overview=%-9s  news=%-5d",
             stock.symbol, prices_inserted, result["indicators"],
             "refreshed" if refreshed else "skipped",
+            result["news"],
         )
 
     except Exception as e:

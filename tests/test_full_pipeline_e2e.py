@@ -208,7 +208,7 @@ def fake_backends():
 def test_full_pipeline_e2e(monkeypatch, engine_factory, fake_backends, tmp_path):
     monkeypatch.setattr(
         "pipeline.data_update._run_pipeline",
-        lambda source, parallel_workers: {
+        lambda source, step_cfg: {
             "symbols_attempted": 5,
             "symbols_succeeded": 5,
             "symbols_failed": 0,
