@@ -89,8 +89,17 @@ def _inject_api_keys(ctx_cfg: dict) -> None:
             os.environ[env_var] = value
 
 
+def _last_trading_date() -> str:
+    """Return most recent weekday (Mon–Fri) as YYYY-MM-DD."""
+    d = datetime.now().date()
+    # weekday(): Mon=0 … Sun=6
+    offset = max(0, d.weekday() - 4)  # Sat→1, Sun→2, weekdays→0
+    d -= timedelta(days=offset)
+    return d.strftime("%Y-%m-%d")
+
+
 def _resolve_dates(start: str, end: str) -> tuple[str, str]:
-    final_end = end or datetime.now().strftime("%Y-%m-%d")
+    final_end = end or _last_trading_date()
     if start:
         final_start = start
     else:

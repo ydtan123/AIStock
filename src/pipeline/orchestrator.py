@@ -145,7 +145,7 @@ class FullPipeline:
                 return run.id
         with _open_session(self.session_factory) as s:
             run = s.query(PipelineRun).filter_by(id=self.run_id).one()
-            if run.status == "success":
+            if run.status == "success" and not self.only:
                 raise PipelineError(
                     f"pipeline_run {self.run_id} is already success; cannot resume"
                 )

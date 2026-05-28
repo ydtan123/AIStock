@@ -87,6 +87,12 @@ class FastEvaluationStep(PipelineStep):
         now = dt.datetime.utcnow()
         ranked: list[dict] = []
         with _open_session(ctx) as session:
+            session.query(FastEvaluationAnalyst).filter_by(
+                pipeline_run_id=ctx.run_id
+            ).delete()
+            session.query(FastEvaluationConclusion).filter_by(
+                pipeline_run_id=ctx.run_id
+            ).delete()
             for ev in evaluations:
                 pos, neg, neu = _count_by_opinion(ev.opinions)
                 total = pos + neg + neu

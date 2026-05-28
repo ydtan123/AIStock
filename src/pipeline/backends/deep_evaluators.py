@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -56,6 +57,20 @@ _FINAL_STATE_TO_SLOT = {
 }
 
 
+def _inject_api_keys(ctx_cfg: dict) -> None:
+    common = ctx_cfg.get("common", {})
+    mapping = {
+        "DEEPSEEK_API_KEY": common.get("deepseek_api_key"),
+        "OPENAI_API_KEY": common.get("openai_api_key"),
+        "ANTHROPIC_API_KEY": common.get("anthropic_api_key"),
+        "ALPHA_VANTAGE_API_KEY": common.get("alpha_vantage_api_key") or ctx_cfg.get("alpha_vantage", {}).get("api_key"),
+        "GOOGLE_API_KEY": common.get("google_api_key"),
+    }
+    for env_var, value in mapping.items():
+        if value and not os.environ.get(env_var):
+            os.environ[env_var] = value
+
+
 def _install_news_cache() -> None:
     """Indirection seam — tests monkeypatch this."""
     from news_cache import install
@@ -98,6 +113,8 @@ class TradingAgentsDeepEvaluator(DeepEvaluator):
 
         sub = self.cfg or ctx.cfg.get("deep_evaluation", {}).get("trading_agents", {})
 
+        _inject_api_keys(ctx.cfg)
+
         if sub.get("use_news_cache", True):
             try:
                 _install_news_cache()
@@ -109,14 +126,11 @@ class TradingAgentsDeepEvaluator(DeepEvaluator):
             "market", "social", "news", "fundamentals"
         ]
 
+        deep_model = sub.get("model_name", "deepseek-v4-pro")
         ta_cfg: dict[str, Any] = {
             "llm_provider": sub.get("model_provider", "deepseek"),
-            "deep_think_llm": sub.get("model_name", "deepseek-v4-pro"),
-            "quick_think_llm": (
-                sub.get("quick_model")
-                if not sub.get("quick", False)
-                else sub.get("model_name", "deepseek-v4-pro")
-            ),
+            "deep_think_llm": deep_model,
+            "quick_think_llm": sub.get("quick_model") or deep_model,
             "data_cache_dir": sub.get("data_cache_dir", "data/tradingagents_cache"),
             "results_dir": sub.get("results_dir", "reports/tradingagents"),
             "max_debate_rounds": sub.get("max_debate_rounds", 1),
