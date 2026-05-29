@@ -59,12 +59,17 @@ _FINAL_STATE_TO_SLOT = {
 
 def _inject_api_keys(ctx_cfg: dict) -> None:
     common = ctx_cfg.get("common", {})
+    av_key = (
+        common.get("alpha_vantage_api_key")
+        or ctx_cfg.get("data_update", {}).get("alpha_vantage", {}).get("api_key")
+        or ctx_cfg.get("alpha_vantage", {}).get("api_key")
+    )
     mapping = {
         "DEEPSEEK_API_KEY": common.get("deepseek_api_key"),
         "OPENAI_API_KEY": common.get("openai_api_key"),
         "ANTHROPIC_API_KEY": common.get("anthropic_api_key"),
-        "ALPHA_VANTAGE_API_KEY": common.get("alpha_vantage_api_key") or ctx_cfg.get("alpha_vantage", {}).get("api_key"),
         "GOOGLE_API_KEY": common.get("google_api_key"),
+        "ALPHA_VANTAGE_API_KEY": av_key,
     }
     for env_var, value in mapping.items():
         if value and not os.environ.get(env_var):
@@ -166,9 +171,10 @@ class TradingAgentsDeepEvaluator(DeepEvaluator):
                 slot = _FINAL_STATE_TO_SLOT.get(src_key)
                 if slot:
                     agent_outputs[slot] = value if isinstance(value, str) else str(value)
-                else:
-                    if isinstance(value, (str, int, float, bool, list, dict)) or value is None:
-                        extras[src_key] = value
+                elif src_key == "messages":
+                    pass  # LangChain message objects are not JSON-serializable
+                elif isinstance(value, (str, int, float, bool)) or value is None:
+                    extras[src_key] = value
 
             out.append(
                 DeepEvaluation(
