@@ -58,11 +58,33 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def _setup_logging(level: str) -> logging.Logger:
-    logging.basicConfig(
-        level=level.upper(),
-        format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
+    from datetime import datetime
+    from pathlib import Path
+
+    fmt = logging.Formatter(
+        "%(asctime)s | %(levelname)-7s | %(name)s | %(message)s"
     )
-    return logging.getLogger("full_pipeline")
+
+    # Console handler (stderr)
+    console = logging.StreamHandler()
+    console.setFormatter(fmt)
+
+    # File handler — logs/fullpipeline_YYYYMMDDHHMM.log
+    log_dir = Path("logs")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / f"fullpipeline_{datetime.now():%Y%m%d%H%M}.log"
+    fh = logging.FileHandler(str(log_file), encoding="utf-8")
+    fh.setFormatter(fmt)
+
+    root = logging.getLogger()
+    root.setLevel(level.upper())
+    root.handlers.clear()
+    root.addHandler(console)
+    root.addHandler(fh)
+
+    logger = logging.getLogger("full_pipeline")
+    logger.info("Log file: %s", log_file)
+    return logger
 
 
 def _build_session_factory(cfg: dict):
