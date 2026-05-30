@@ -69,18 +69,27 @@ def _prefetch_stock_dates(stock_ids: list[int]) -> dict:
     """Batch-fetch all per-stock dates needed for skip decisions.
 
     Four queries in a single session replaces 4N individual queries
-    when processing N stocks. Returns {stock_id: value_or_None}.
+    when processing N stocks. Returns:
+        - date dicts keyed by stock_id
+        - skip_stock_ids: set of stock_ids already fully up-to-date
+          (prices at last trading date AND fundamentals fresh)
+
+    Stocks in skip_stock_ids can be excluded from further processing.
     """
+    empty = {
+        "max_price_dates": {},
+        "first_indicator_dates": {},
+        "first_price_dates": {},
+        "indicator_last_updated": {},
+        "skip_stock_ids": set(),
+    }
     if not stock_ids:
-        return {
-            "max_price_dates": {},
-            "first_indicator_dates": {},
-            "first_price_dates": {},
-            "indicator_last_updated": {},
-        }
+        return empty
+
     session = get_session()
     try:
         ids = tuple(stock_ids)
+        ltd = _last_trading_date()
 
         rows = session.execute(
             text("SELECT stock_id, MAX(date) FROM daily_prices WHERE stock_id IN :ids GROUP BY stock_id"),
@@ -106,11 +115,30 @@ def _prefetch_stock_dates(stock_ids: list[int]) -> dict:
         ).fetchall()
         indicator_last_updated = {r[0]: r[1] for r in rows}
 
+        # Determine which stocks are already fully up-to-date
+        cfg = load_config()
+        refresh_days = cfg.get("scheduler", {}).get("overview_refresh_days", 7)
+        now = datetime.utcnow()
+        skip_stock_ids: set[int] = set()
+        for sid in stock_ids:
+            max_date = max_price_dates.get(sid)
+            ilu = indicator_last_updated.get(sid)
+            # Prices are current (up to last trading date)
+            prices_fresh = max_date is not None and max_date >= ltd
+            # Fundamentals are fresh (within refresh_days)
+            fund_fresh = (
+                ilu is not None
+                and (now - ilu).days < refresh_days
+            )
+            if prices_fresh and fund_fresh:
+                skip_stock_ids.add(sid)
+
         return {
             "max_price_dates": max_price_dates,
             "first_indicator_dates": first_indicator_dates,
             "first_price_dates": first_price_dates,
             "indicator_last_updated": indicator_last_updated,
+            "skip_stock_ids": skip_stock_ids,
         }
     finally:
         session.close()
@@ -490,16 +518,26 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False,
 
         prefetch = _prefetch_stock_dates([s.id for s in stocks])
 
+        # Filter out stocks that are already fully up-to-date
+        skip_ids: set[int] = prefetch.get("skip_stock_ids", set())
+        stocks_to_process = [s for s in stocks if s.id not in skip_ids]
+        skipped = len(stocks) - len(stocks_to_process)
+        if skipped:
+            logger.info(
+                "Skipping %d/%d stocks (already up-to-date), processing %d",
+                skipped, len(stocks), len(stocks_to_process),
+            )
+
         global _progress_count, _progress_total
         with _progress_lock:
             _progress_count = 0
-            _progress_total = len(stocks)
+            _progress_total = len(stocks_to_process)
         total = _progress_total
 
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
             futures = {
                 pool.submit(_process_symbol, fetcher, s, force, prefetch): s
-                for s in stocks
+                for s in stocks_to_process
             }
             for future in as_completed(futures):
                 result = future.result()
