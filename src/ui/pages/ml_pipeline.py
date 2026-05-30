@@ -11,10 +11,47 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import streamlit as st
 
 from ui.pages.stock_detail import render as render_stock_detail
 
 MAX_LOG_LINES = 1000
+
+
+@st.cache_data(ttl=3600, show_spinner="Loading ML results...")
+def _load_ml_results(data_dir_str: str) -> dict | None:
+    """Read and return cached ML result CSVs. Returns None if no weights file."""
+    data_dir = Path(data_dir_str)
+    weights_path = None
+    for candidate in ["ml_weights_sector.csv", "ml_weights_today.csv"]:
+        p = data_dir / candidate
+        if p.exists():
+            weights_path = p
+            break
+    if weights_path is None:
+        return None
+    result: dict = {}
+    result["weights_path"] = str(weights_path)
+    result["weights_df"] = pd.read_csv(weights_path)
+    fund_path = data_dir / "fundamentals.csv"
+    if fund_path.exists():
+        result["fundamentals_df"] = pd.read_csv(fund_path)
+    fi_files = sorted(_glob.glob(str(data_dir / "sp500_ml_feature_importance_*.csv")),
+                      key=lambda f: Path(f).stat().st_mtime, reverse=True)
+    if fi_files:
+        result["feature_importance_df"] = pd.read_csv(fi_files[0])
+    return result
+
+
+@st.cache_data(ttl=3600, show_spinner="Loading backtest results...")
+def _load_ml_backtest(data_dir_str: str) -> dict | None:
+    """Read and return cached backtest JSON. Returns the latest backtest dict."""
+    data_dir = Path(data_dir_str)
+    bt_files = sorted(data_dir.glob("backtest_result_*.json"), reverse=True)
+    if not bt_files:
+        return None
+    with open(bt_files[0]) as f:
+        return json.load(f)
 
 
 def _show_ml_results(ctx) -> None:
@@ -24,28 +61,18 @@ def _show_ml_results(ctx) -> None:
         return
 
     ctx.st.header("Results")
-    weights_path = None
-    for candidate in ["ml_weights_sector.csv", "ml_weights_today.csv"]:
-        p = DATA_DIR / candidate
-        if p.exists():
-            weights_path = p
-            break
-    if weights_path is None:
+    cached = _load_ml_results(str(DATA_DIR))
+    if cached is None:
         ctx.st.info("No weights file. Run the pipeline first.")
         return
 
-    try:
-        wdf = pd.read_csv(weights_path)
-        wdf.columns = [c.strip().lower() for c in wdf.columns]
-    except Exception as exc:
-        ctx.st.warning(f"Cannot read weights: {exc}")
-        return
+    wdf = cached["weights_df"].copy()
+    wdf.columns = [c.strip().lower() for c in wdf.columns]
 
-    fund_path = DATA_DIR / "fundamentals.csv"
     s_col = None
-    if fund_path.exists():
+    if "fundamentals_df" in cached:
         try:
-            fdf = pd.read_csv(fund_path)
+            fdf = cached["fundamentals_df"].copy()
             fdf.columns = [c.strip().lower() for c in fdf.columns]
             s_col = next((c for c in ["sector", "gsector"] if c in fdf.columns), None)
             t_col = next((c for c in ["tic", "ticker"] if c in fdf.columns), None)
@@ -110,11 +137,9 @@ def _show_ml_results(ctx) -> None:
         except Exception:
             pass
 
-    fi_files = sorted(_glob.glob(str(DATA_DIR / "sp500_ml_feature_importance_*.csv")),
-                      key=lambda f: Path(f).stat().st_mtime, reverse=True)
-    if fi_files:
+    if "feature_importance_df" in cached:
         try:
-            fi = pd.read_csv(fi_files[0])
+            fi = cached["feature_importance_df"].copy()
             fi.columns = [c.strip().lower() for c in fi.columns]
             fc = next((c for c in fi.columns if c in ("feature", "feature_name")), fi.columns[0])
             ic = next((c for c in fi.columns if c in ("importance", "importance_score")),
@@ -135,16 +160,9 @@ def _show_ml_backtest(ctx) -> None:
     except ImportError:
         return
 
-    bt_files = sorted(DATA_DIR.glob("backtest_result_*.json"), reverse=True)
-    if not bt_files:
+    bt = _load_ml_backtest(str(DATA_DIR))
+    if bt is None:
         ctx.st.info("No backtest results. Run the pipeline to generate one.")
-        return
-
-    try:
-        with open(bt_files[0]) as f:
-            bt = json.load(f)
-    except Exception:
-        ctx.st.warning("Could not read backtest results.")
         return
 
     if "portfolio_values" not in bt or "metrics" not in bt:
