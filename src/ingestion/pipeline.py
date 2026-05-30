@@ -22,6 +22,17 @@ DEFAULT_START = date(2010, 1, 1)
 MAX_WORKERS = 5
 NEWS_LOOKBACK_DAYS = 7
 
+
+def _last_trading_date() -> date:
+    """Return the most recent weekday (Mon–Fri). On weekends, returns Friday."""
+    today = date.today()
+    # Monday=0 ... Sunday=6
+    if today.weekday() == 5:       # Saturday → Friday
+        return today - timedelta(days=1)
+    if today.weekday() == 6:       # Sunday → Friday
+        return today - timedelta(days=2)
+    return today
+
 # Export API keys from config BEFORE any tradingagents imports.
 # tradingagents.dataflows.google reads os.getenv("GOOGLE_API_KEY").
 _cfg = load_config()
@@ -100,7 +111,7 @@ def _fetch_and_store_prices(fetcher: FetcherBase, stock: Stock,
     query and skips opening a session entirely if no fetch is needed.
     """
     start: date
-    end = date.today()
+    end = _last_trading_date()
 
     session = get_session()
     try:
