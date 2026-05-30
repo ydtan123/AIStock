@@ -355,7 +355,7 @@ def _fetch_stock_news(symbol: str, fetcher: FetcherBase | None = None) -> int:
 
     try:
         from tradingagents.dataflows.interface import route_to_vendor
-        trade_dt = date.today()
+        trade_dt = _last_trading_date()
         news_start = (trade_dt - timedelta(days=NEWS_LOOKBACK_DAYS)).strftime("%Y-%m-%d")
         news_end = trade_dt.strftime("%Y-%m-%d")
         result = route_to_vendor("get_news", symbol, news_start, news_end)
@@ -386,8 +386,9 @@ def _fetch_stock_news_av(symbol: str, fetcher: FetcherBase) -> int:
         from tradingagents.dataflows.interface import route_to_vendor
         import json as _json
         payload = _json.dumps(items, default=str)
-        sd = (date.today() - timedelta(days=NEWS_LOOKBACK_DAYS)).strftime("%Y-%m-%d")
-        ed = date.today().strftime("%Y-%m-%d")
+        ltd = _last_trading_date()
+        sd = (ltd - timedelta(days=NEWS_LOOKBACK_DAYS)).strftime("%Y-%m-%d")
+        ed = ltd.strftime("%Y-%m-%d")
         route_to_vendor("get_news", symbol, sd, ed, _result_override=payload)
         return len(payload)
     except Exception as exc:
