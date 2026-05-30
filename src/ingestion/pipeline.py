@@ -395,14 +395,20 @@ def _fetch_stock_news_av(symbol: str, fetcher: FetcherBase) -> int:
         if not items:
             return 0
 
-        # Cache via the same news_cache mechanism
-        from tradingagents.dataflows.interface import route_to_vendor
         import json as _json
         payload = _json.dumps(items, default=str)
         ltd = _last_trading_date()
         sd = (ltd - timedelta(days=NEWS_LOOKBACK_DAYS)).strftime("%Y-%m-%d")
         ed = ltd.strftime("%Y-%m-%d")
-        route_to_vendor("get_news", symbol, sd, ed, _result_override=payload)
+
+        # Write directly to stock_news cache table
+        import news_cache
+        news_cache.set_cached(
+            "get_news",
+            (symbol, sd, ed),
+            {},
+            payload,
+        )
         return len(payload)
     except Exception as exc:
         logger.warning("AV news fallback failed for %s: %s", symbol, exc)
