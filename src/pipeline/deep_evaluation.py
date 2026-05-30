@@ -3,26 +3,12 @@ from __future__ import annotations
 
 import datetime as dt
 import traceback
-from contextlib import contextmanager
 
 from sqlalchemy import desc
 
 from models import DeepEvaluationRow, FastEvaluationConclusion
 from pipeline.backends.deep_evaluators import DEEP_EVALUATOR_REGISTRY
-from pipeline.base import PipelineStep, StepContext, StepResult
-
-
-@contextmanager
-def _open_session(ctx: StepContext):
-    s = ctx.session_factory()
-    if hasattr(s, "__enter__"):
-        with s as session:
-            yield session
-    else:
-        try:
-            yield s
-        finally:
-            s.close()
+from pipeline.base import PipelineStep, StepContext, StepResult, open_session
 
 
 _NAMED_SLOTS = (
@@ -52,7 +38,7 @@ class DeepEvaluationStep(PipelineStep):
                 error=str(e),
             )
 
-        with _open_session(ctx) as session:
+        with open_session(ctx) as session:
             rows = (
                 session.query(FastEvaluationConclusion)
                 .filter(FastEvaluationConclusion.pipeline_run_id == ctx.run_id)
@@ -82,7 +68,8 @@ class DeepEvaluationStep(PipelineStep):
                 error=f"{type(e).__name__}: {e}\n{traceback.format_exc()}",
             )
 
-        with _open_session(ctx) as session:
+        with open_session(ctx) as session:
+            rows: list[DeepEvaluationRow] = []
             for ev in evaluations:
                 slot_kwargs = {slot: ev.agent_outputs.get(slot) for slot in _NAMED_SLOTS}
                 eval_date = (
@@ -90,7 +77,7 @@ class DeepEvaluationStep(PipelineStep):
                     if "T" in ev.evaluation_date
                     else dt.datetime.strptime(ev.evaluation_date, "%Y-%m-%d")
                 )
-                row = DeepEvaluationRow(
+                rows.append(DeepEvaluationRow(
                     pipeline_run_id=ctx.run_id,
                     ticker=ev.ticker,
                     backend=backend_name,
@@ -99,8 +86,8 @@ class DeepEvaluationStep(PipelineStep):
                     final_decision=ev.final_decision,
                     model_name=evaluator_cfg.get("model_name"),
                     **slot_kwargs,
-                )
-                session.add(row)
+                ))
+            session.add_all(rows)
             session.commit()
 
         ev_list = [

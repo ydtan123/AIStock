@@ -6,7 +6,7 @@ import pandas as pd
 from sqlalchemy import text
 
 from database import get_session
-from models import DailyPrice, ScheduledJobRun, SelectedStock, Stock, StockIndicator, StockNews, StockSnapshot, TechnicalIndicator
+from models import DailyPrice, ScheduledJobRun, SelectedStock, Stock, StockIndicator, StockSnapshot, TechnicalIndicator
 
 
 @dataclass
@@ -40,52 +40,57 @@ class StockRepository:
         """Override in test subclasses to inject a test session."""
         return get_session()
 
+    def _with_session(self, fn):
+        """Run *fn(session)* inside a managed session lifecycle."""
+        session = self._get_session()
+        try:
+            return fn(session)
+        finally:
+            session.close()
+
     # -- lookup ----------------------------------------------------------------
 
     def find_stock(self, symbol: str) -> Optional[Stock]:
-        session = self._get_session()
-        try:
-            return session.query(Stock).filter_by(symbol=symbol.upper()).first()
-        finally:
-            session.close()
+        return self._with_session(
+            lambda s: s.query(Stock).filter_by(symbol=symbol.upper()).first()
+        )
+
+    def find_stocks_batch(self, symbols: list[str]) -> dict[str, Stock]:
+        """Look up multiple stocks in a single query. Returns {SYMBOL: Stock}."""
+        def _query(s):
+            rows = s.query(Stock).filter(
+                Stock.symbol.in_([str(x).upper() for x in symbols])
+            ).all()
+            return {r.symbol: r for r in rows}
+        return self._with_session(_query)
 
     def get_prices(self, stock_id: int, start: date, end: date) -> pd.DataFrame:
-        session = self._get_session()
-        try:
-            rows = (
-                session.query(DailyPrice)
-                .filter(DailyPrice.stock_id == stock_id,
-                        DailyPrice.date >= start,
-                        DailyPrice.date <= end)
-                .order_by(DailyPrice.date)
-                .all()
-            )
-            return pd.DataFrame([{
-                "date": r.date, "open": r.open, "high": r.high, "low": r.low,
-                "close": r.close, "adj_close": r.adj_close, "volume": r.volume,
-            } for r in rows])
-        finally:
-            session.close()
+        return self._with_session(lambda s: pd.DataFrame([{
+            "date": r.date, "open": r.open, "high": r.high, "low": r.low,
+            "close": r.close, "adj_close": r.adj_close, "volume": r.volume,
+        } for r in (
+            s.query(DailyPrice)
+            .filter(DailyPrice.stock_id == stock_id,
+                    DailyPrice.date >= start,
+                    DailyPrice.date <= end)
+            .order_by(DailyPrice.date)
+            .all()
+        )]))
 
     def get_indicator(self, stock_id: int) -> Optional[StockIndicator]:
-        session = self._get_session()
-        try:
-            return session.query(StockIndicator).filter_by(stock_id=stock_id).first()
-        finally:
-            session.close()
+        return self._with_session(
+            lambda s: s.query(StockIndicator).filter_by(stock_id=stock_id).first()
+        )
 
     def get_snapshot(self, stock_id: int) -> Optional[StockSnapshot]:
-        session = self._get_session()
-        try:
-            return session.query(StockSnapshot).filter_by(stock_id=stock_id).first()
-        finally:
-            session.close()
+        return self._with_session(
+            lambda s: s.query(StockSnapshot).filter_by(stock_id=stock_id).first()
+        )
 
     def get_tech_indicators(self, stock_id: int, start: date, end: date) -> pd.DataFrame:
-        session = self._get_session()
-        try:
+        def _query(s):
             rows = (
-                session.query(TechnicalIndicator)
+                s.query(TechnicalIndicator)
                 .filter(TechnicalIndicator.stock_id == stock_id,
                         TechnicalIndicator.date >= start,
                         TechnicalIndicator.date <= end)
@@ -99,14 +104,12 @@ class StockRepository:
                     d.update(r.indicators)
                 records.append(d)
             return pd.DataFrame(records)
-        finally:
-            session.close()
+        return self._with_session(_query)
 
     # -- screener --------------------------------------------------------------
 
     def screen_stocks(self, criteria: ScreenCriteria) -> pd.DataFrame:
-        session = self._get_session()
-        try:
+        def _query(s):
             q = """
             SELECT s.symbol, s.name, ss.market_cap, ss.pe_ratio, ss.roe_ttm,
                    ss.rsi_14, ss.beta, ss.dividend_yield, ss.sector, ss.exchange
@@ -136,20 +139,17 @@ class StockRepository:
                 q += " AND ss.exchange = :exchange"
                 params["exchange"] = criteria.exchange
             q += " ORDER BY ss.market_cap DESC LIMIT 500"
-
-            rows = session.execute(text(q), params).fetchall()
+            rows = s.execute(text(q), params).fetchall()
             return pd.DataFrame(rows, columns=[
                 "Symbol", "Name", "Market Cap", "PE", "ROE %", "RSI",
                 "Beta", "Div Yield %", "Sector", "Exchange",
             ])
-        finally:
-            session.close()
+        return self._with_session(_query)
 
     # -- manager ---------------------------------------------------------------
 
     def list_stocks(self, filters: StockFilters) -> pd.DataFrame:
-        session = self._get_session()
-        try:
+        def _query(s):
             q = """
             SELECT s.id, s.symbol, s.name, si.market_cap, s.sector, si.pe_ratio,
                    si.roe_ttm, si.beta, s.is_active, s.exchange
@@ -181,59 +181,54 @@ class StockRepository:
             elif filters.status == "Inactive":
                 q += " AND s.is_active = 0"
             q += " ORDER BY si.market_cap DESC LIMIT 500"
-
-            rows = session.execute(text(q), params).fetchall()
+            rows = s.execute(text(q), params).fetchall()
             return pd.DataFrame(rows, columns=[
                 "id", "Symbol", "Name", "Mkt Cap", "Sector", "PE", "ROE %",
                 "Beta", "Active", "Exchange",
             ])
-        finally:
-            session.close()
+        return self._with_session(_query)
 
     def count_summary(self) -> dict:
-        session = self._get_session()
-        try:
-            total = session.query(Stock).count()
-            active = session.query(Stock).filter_by(is_active=True).count()
+        def _query(s):
+            total = s.query(Stock).count()
+            active = s.query(Stock).filter_by(is_active=True).count()
             return {"total": total, "active": active, "inactive": total - active}
-        finally:
-            session.close()
+        return self._with_session(_query)
 
     def bulk_set_active(self, ids: list[int], active: bool):
         if not ids:
             return
-        session = self._get_session()
-        try:
+        def _query(s):
             now = datetime.utcnow() if active else None
-            session.execute(
+            s.execute(
                 text("UPDATE stocks SET is_active=:a, activated_at=:t WHERE id IN :ids"),
                 {"a": active, "t": now, "ids": tuple(ids)},
             )
-            session.commit()
-        finally:
-            session.close()
+            s.commit()
+        self._with_session(_query)
 
     def get_sectors(self, table: str = "stock_snapshots") -> list[str]:
-        session = self._get_session()
-        try:
+        def _query(s):
             q = (
                 "SELECT DISTINCT sector FROM stock_snapshots WHERE sector IS NOT NULL ORDER BY sector"
                 if table == "stock_snapshots"
                 else "SELECT DISTINCT sector FROM stocks WHERE sector IS NOT NULL ORDER BY sector"
             )
-            return [r[0] for r in session.execute(text(q)).fetchall()]
-        finally:
-            session.close()
+            return [r[0] for r in s.execute(text(q)).fetchall()]
+        return self._with_session(_query)
 
-    def save_selected_stocks(self, records: list[dict]) -> int:
-        session = self._get_session()
-        try:
-            session.query(SelectedStock).delete()
+    def save_selected_stocks(self, records: list[dict], pipeline_run_id: int | None = None) -> int:
+        def _query(s):
+            # Only delete rows for this pipeline run (or all if no run_id).
+            if pipeline_run_id is not None:
+                s.query(SelectedStock).filter_by(pipeline_run_id=pipeline_run_id).delete()
+            else:
+                s.query(SelectedStock).delete()
             run_at = datetime.now()
-            inserted = 0
+            rows = []
             for rec in records:
                 ml_score = float(rec.get("ml_score", 0))
-                row = SelectedStock(
+                rows.append(SelectedStock(
                     ticker=rec["ticker"],
                     model_name=rec.get("model_name", ""),
                     ml_score=ml_score,
@@ -244,22 +239,20 @@ class StockRepository:
                     pipeline_run_at=run_at,
                     predicted_return=ml_score,
                     predicted_at=run_at,
-                )
-                session.add(row)
-                inserted += 1
-            session.commit()
-            return inserted
-        finally:
-            session.close()
+                    pipeline_run_id=pipeline_run_id,
+                ))
+            s.add_all(rows)
+            s.commit()
+            return len(rows)
+        return self._with_session(_query)
 
     def save_predict_only_results(self, predictions: list[dict]) -> int:
         """Persist FinRL predict-only results to selected_stocks table."""
-        session = self._get_session()
-        try:
-            inserted = 0
+        def _query(s):
             run_at = datetime.now()
+            rows = []
             for pred in predictions:
-                row = SelectedStock(
+                rows.append(SelectedStock(
                     ticker=pred["ticker"],
                     model_name=pred.get("model_name", ""),
                     ml_score=float(pred.get("ml_score", 0)),
@@ -270,19 +263,16 @@ class StockRepository:
                     pipeline_run_at=run_at,
                     predicted_return=float(pred.get("predicted_return", 0)),
                     predicted_at=run_at,
-                )
-                session.add(row)
-                inserted += 1
-            session.commit()
-            return inserted
-        finally:
-            session.close()
+                ))
+            s.add_all(rows)
+            s.commit()
+            return len(rows)
+        return self._with_session(_query)
 
     def get_latest_selected_stocks(self) -> list[dict]:
-        session = self._get_session()
-        try:
+        def _query(s):
             latest_run = (
-                session.query(SelectedStock.pipeline_run_at)
+                s.query(SelectedStock.pipeline_run_at)
                 .order_by(SelectedStock.pipeline_run_at.desc())
                 .limit(1)
                 .scalar()
@@ -290,7 +280,7 @@ class StockRepository:
             if not latest_run:
                 return []
             rows = (
-                session.query(SelectedStock)
+                s.query(SelectedStock)
                 .filter(SelectedStock.pipeline_run_at == latest_run)
                 .all()
             )
@@ -307,14 +297,12 @@ class StockRepository:
                 }
                 for r in rows
             ]
-        finally:
-            session.close()
+        return self._with_session(_query)
 
     def get_job_runs(self, limit: int = 100) -> pd.DataFrame:
-        session = self._get_session()
-        try:
+        def _query(s):
             rows = (
-                session.query(ScheduledJobRun)
+                s.query(ScheduledJobRun)
                 .order_by(ScheduledJobRun.started_at.desc())
                 .limit(limit)
                 .all()
@@ -331,45 +319,4 @@ class StockRepository:
             return pd.DataFrame(recs, columns=[
                 "id", "Job Name", "Start Time", "End Time", "Stocks Updated", "Status", "Error",
             ])
-        finally:
-            session.close()
-
-    def get_stock_news(self, ticker: str, days: int = 7) -> list[dict]:
-        """Return recent news for a ticker from the stock_news cache."""
-        session = self._get_session()
-        try:
-            from datetime import timedelta
-            cutoff = datetime.utcnow() - timedelta(days=days)
-            rows = (
-                session.query(StockNews)
-                .filter(
-                    StockNews.ticker == ticker.upper(),
-                    StockNews.tool_name == "get_news",
-                    StockNews.fetched_at >= cutoff,
-                )
-                .order_by(StockNews.fetched_at.desc())
-                .all()
-            )
-            return [{"fetched_at": r.fetched_at, "result": r.result} for r in rows]
-        finally:
-            session.close()
-
-    def get_insider_transactions(self, ticker: str, days: int = 7) -> list[dict]:
-        """Return recent insider transactions for a ticker from the stock_news cache."""
-        session = self._get_session()
-        try:
-            from datetime import timedelta
-            cutoff = datetime.utcnow() - timedelta(days=days)
-            rows = (
-                session.query(StockNews)
-                .filter(
-                    StockNews.ticker == ticker.upper(),
-                    StockNews.tool_name == "get_insider_transactions",
-                    StockNews.fetched_at >= cutoff,
-                )
-                .order_by(StockNews.fetched_at.desc())
-                .all()
-            )
-            return [{"fetched_at": r.fetched_at, "result": r.result} for r in rows]
-        finally:
-            session.close()
+        return self._with_session(_query)

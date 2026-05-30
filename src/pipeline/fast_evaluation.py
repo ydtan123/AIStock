@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import datetime as dt
 import traceback
-from contextlib import contextmanager
 
 from sqlalchemy import desc
 
@@ -13,20 +12,7 @@ from models import (
     SelectedStock,
 )
 from pipeline.backends.fast_evaluators import FAST_EVALUATOR_REGISTRY
-from pipeline.base import PipelineStep, StepContext, StepResult
-
-
-@contextmanager
-def _open_session(ctx: StepContext):
-    s = ctx.session_factory()
-    if hasattr(s, "__enter__"):
-        with s as session:
-            yield session
-    else:
-        try:
-            yield s
-        finally:
-            s.close()
+from pipeline.base import PipelineStep, StepContext, StepResult, open_session
 
 
 def _count_by_opinion(opinions):
@@ -54,7 +40,7 @@ class FastEvaluationStep(PipelineStep):
                 error=str(e),
             )
 
-        with _open_session(ctx) as session:
+        with open_session(ctx) as session:
             rows = (
                 session.query(SelectedStock)
                 .filter(SelectedStock.pipeline_run_id == ctx.run_id)
@@ -86,17 +72,22 @@ class FastEvaluationStep(PipelineStep):
 
         now = dt.datetime.utcnow()
         ranked: list[dict] = []
-        with _open_session(ctx) as session:
+
+        with open_session(ctx) as session:
             session.query(FastEvaluationAnalyst).filter_by(
                 pipeline_run_id=ctx.run_id
             ).delete()
             session.query(FastEvaluationConclusion).filter_by(
                 pipeline_run_id=ctx.run_id
             ).delete()
+
+            conclusions: list[FastEvaluationConclusion] = []
+            analysts: list[FastEvaluationAnalyst] = []
+
             for ev in evaluations:
                 pos, neg, neu = _count_by_opinion(ev.opinions)
                 total = pos + neg + neu
-                session.add(FastEvaluationConclusion(
+                conclusions.append(FastEvaluationConclusion(
                     pipeline_run_id=ctx.run_id,
                     ticker=ev.ticker,
                     backend=backend_name,
@@ -112,7 +103,7 @@ class FastEvaluationStep(PipelineStep):
                     model_provider=evaluator_cfg.get("model_provider", ""),
                 ))
                 for op in ev.opinions:
-                    session.add(FastEvaluationAnalyst(
+                    analysts.append(FastEvaluationAnalyst(
                         pipeline_run_id=ctx.run_id,
                         ticker=ev.ticker,
                         backend=backend_name,
@@ -124,20 +115,22 @@ class FastEvaluationStep(PipelineStep):
                         end_date=dt.date.fromisoformat(ev.end_date),
                         evaluation_date=now,
                     ))
+
+            session.add_all(conclusions)
+            session.add_all(analysts)
             session.commit()
 
-        evaluations_sorted = sorted(
-            evaluations, key=lambda e: e.consensus_score, reverse=True
-        )
-        for ev in evaluations_sorted:
-            pos, neg, neu = _count_by_opinion(ev.opinions)
-            ranked.append({
-                "ticker": ev.ticker,
-                "consensus_score": ev.consensus_score,
-                "positive": pos,
-                "negative": neg,
-                "neutral": neu,
-            })
+            conclusions_sorted = sorted(
+                conclusions, key=lambda c: c.consensus_score, reverse=True
+            )
+            for c in conclusions_sorted:
+                ranked.append({
+                    "ticker": c.ticker,
+                    "consensus_score": c.consensus_score,
+                    "positive": c.positive_count,
+                    "negative": c.negative_count,
+                    "neutral": c.neutral_count,
+                })
 
         return StepResult(
             step_name=self.name,
