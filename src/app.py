@@ -62,6 +62,7 @@ if "ml_start_time" not in st.session_state:
 if "ml_log_queue" not in st.session_state:
     st.session_state.ml_log_queue = queue.Queue()
 
+MAX_LOG_LINES = 1000
 
 # ── PageContext ───────────────────────────────────────────────────────────────
 
