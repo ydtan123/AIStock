@@ -22,6 +22,62 @@ def _count_by_opinion(opinions):
     return pos, neg, neu
 
 
+def _write_report(evaluations, report_dir, backend_name):
+    """Write per-agent detailed analysis as a markdown report."""
+    report_path = report_dir / "fast_evaluation.md"
+    lines = [
+        f"# Fast Evaluation Report — {backend_name}",
+        "",
+        f"**Date:** {dt.datetime.utcnow():%Y-%m-%d %H:%M} UTC",
+        f"**Tickers evaluated:** {len(evaluations)}",
+        "",
+        "---",
+        "",
+    ]
+
+    for ev in evaluations:
+        pos, neg, neu = _count_by_opinion(ev.opinions)
+        total = pos + neg + neu
+        consensus = ev.consensus_score
+        direction = (
+            "🟢 Bullish" if consensus > 0.1
+            else "🔴 Bearish" if consensus < -0.1
+            else "🟡 Neutral"
+        )
+
+        lines.append(f"## {ev.ticker} — Consensus: {direction} ({consensus:+.4f})")
+        lines.append("")
+        lines.append("| | Count | Pct |")
+        lines.append("|---|---|---|")
+        if total:
+            lines.append(f"| 🟢 Bullish | {pos} | {pos/total*100:.0f}% |")
+            lines.append(f"| 🔴 Bearish | {neg} | {neg/total*100:.0f}% |")
+            lines.append(f"| 🟡 Neutral | {neu} | {neu/total*100:.0f}% |")
+        lines.append("")
+        lines.append(f"**Period:** {ev.start_date} → {ev.end_date}")
+        lines.append("")
+
+        sorted_ops = sorted(ev.opinions, key=lambda o: (
+            {"bullish": 0, "bearish": 1, "neutral": 2}.get(o.opinion, 3),
+            -o.confidence
+        ))
+        for op in sorted_ops:
+            emoji = {"bullish": "🟢", "bearish": "🔴", "neutral": "🟡"}.get(op.opinion, "⚪")
+            lines.append(
+                f"### {emoji} {op.analyst_name} — {op.opinion.upper()}"
+                f" (confidence: {op.confidence:.0f}%)"
+            )
+            lines.append("")
+            if op.reasoning:
+                lines.append(op.reasoning.strip())
+            lines.append("")
+
+        lines.append("---")
+        lines.append("")
+
+    report_path.write_text("\n".join(lines), encoding="utf-8")
+
+
 class FastEvaluationStep(PipelineStep):
     name = "fast_evaluation"
 
@@ -132,6 +188,9 @@ class FastEvaluationStep(PipelineStep):
                     "neutral": c.neutral_count,
                 })
 
+        report_path = _write_report(evaluations, ctx.report_dir, backend_name)
+        ctx.logger.info("Fast evaluation report saved → %s", report_path)
+
         return StepResult(
             step_name=self.name,
             status="success",
@@ -142,5 +201,6 @@ class FastEvaluationStep(PipelineStep):
             payload={
                 "backend": backend_name,
                 "tickers_ranked_by_consensus": ranked,
+                "report": str(report_path),
             },
         )
