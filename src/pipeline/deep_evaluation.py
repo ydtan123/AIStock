@@ -35,17 +35,44 @@ _REPORT_SECTIONS: list[tuple[str, str]] = [
 ]
 
 
+def _extract_key_point(text: str, max_chars: int = 200) -> str:
+    """Extract the first meaningful sentence(s) from an agent's output."""
+    t = text.strip()
+    if len(t) <= max_chars:
+        return t
+    # Try breaking at sentence boundary within max_chars
+    cut = t[:max_chars]
+    for sep in (". ", ".\n", "! ", "?\n", "\n\n"):
+        idx = cut.rfind(sep)
+        if idx > 50:
+            return t[:idx + 1] + "..."
+    return cut.rsplit(" ", 1)[0] + "..."
+
+
 def _write_report(evaluations, report_dir, backend_name):
     """Write per-ticker deep evaluation as markdown reports.
 
     Creates:
-        deep_evaluation_<TICKER>.md  — per-ticker full report
+        deep_evaluation_<TICKER>.md  — per-ticker full report with summary + API stats
         deep_evaluation.md           — combined all-ticker report
     """
     for ev in evaluations:
         ticker = ev.ticker
         decision = ev.final_decision or "N/A"
         emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "🟡"}.get(decision.upper(), "⚪")
+
+        # Build summary table of key points from each analyst
+        summary_rows: list[tuple[str, str, str]] = []
+        for slot_key, section_title in _REPORT_SECTIONS:
+            content = ev.agent_outputs.get(slot_key, "").strip()
+            if not content:
+                continue
+            summary_rows.append((section_title, _extract_key_point(content), slot_key))
+
+        # Count sections as proxy for LLM API calls (each section = 1+ calls)
+        analyst_sections = [k for k, _ in _REPORT_SECTIONS[:4] if ev.agent_outputs.get(k, "").strip()]
+        debate_sections = [k for k, _ in _REPORT_SECTIONS[4:] if ev.agent_outputs.get(k, "").strip()]
+        total_sections = len(summary_rows)
 
         lines = [
             f"# Deep Evaluation: {ticker}",
@@ -56,7 +83,34 @@ def _write_report(evaluations, report_dir, backend_name):
             "",
             "---",
             "",
+            "## 📊 Summary of Key Points",
+            "",
+            "| Analyst | Key Point |",
+            "|---------|-----------|",
         ]
+        for title, point, _ in summary_rows:
+            # Escape pipes in content for markdown table
+            safe_point = point.replace("|", "\\|").replace("\n", " ")
+            lines.append(f"| {title} | {safe_point} |")
+
+        lines.extend([
+            "",
+            "## 📈 LLM API Call Statistics",
+            "",
+            f"| Category | Count |",
+            f"|----------|-------|",
+            f"| Analyst agents (market/social/news/fundamentals) | {len(analyst_sections)} completed |",
+            f"| Debate & decision agents | {len(debate_sections)} completed |",
+            f"| **Total agent sections** | **{total_sections}** |",
+            "",
+            "_Note: Each section represents 1+ LLM API calls. "
+            "Analysts may make multiple tool-calling rounds (API calls per round). "
+            "Debate rounds are configured via max_debate_rounds / max_risk_discuss_rounds._",
+            "",
+            "---",
+            "",
+        ])
+
         for slot_key, section_title in _REPORT_SECTIONS:
             content = ev.agent_outputs.get(slot_key, "").strip()
             if not content:
