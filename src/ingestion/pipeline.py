@@ -6,6 +6,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta
 from typing import Optional
 
+import pandas as pd
+
 from sqlalchemy import text
 from sqlalchemy.dialects.mysql import insert
 
@@ -24,14 +26,25 @@ NEWS_LOOKBACK_DAYS = 7
 
 
 def _last_trading_date() -> date:
-    """Return the most recent weekday (Mon–Fri). On weekends, returns Friday."""
-    today = date.today()
-    # Monday=0 ... Sunday=6
-    if today.weekday() == 5:       # Saturday → Friday
-        return today - timedelta(days=1)
-    if today.weekday() == 6:       # Sunday → Friday
-        return today - timedelta(days=2)
-    return today
+    """Return the most recent NYSE trading day.
+
+    Uses pandas_market_calendars for accurate holiday/weekend handling.
+    On a trading day before market close, returns the previous trading day
+    (today's data not yet available).
+    """
+    import pandas_market_calendars as mcal
+
+    nyse = mcal.get_calendar("NYSE")
+    today = pd.Timestamp.now(tz="America/New_York").normalize()
+    # Get all trading sessions up to today
+    schedule = nyse.schedule(start_date=today - pd.Timedelta(days=14), end_date=today)
+    valid_days = schedule.index.sort_values()
+    if valid_days.empty:
+        # Fallback: simple weekday check
+        if today.dayofweek >= 5:
+            return (today - pd.Timedelta(days=today.dayofweek - 4)).date()
+        return today.date()
+    return valid_days[-1].date()
 
 # Export API keys from config BEFORE any tradingagents imports.
 # tradingagents.dataflows.google reads os.getenv("GOOGLE_API_KEY").
