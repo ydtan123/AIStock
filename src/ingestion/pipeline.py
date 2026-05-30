@@ -386,6 +386,7 @@ def _fetch_stock_news_av(symbol: str, fetcher: FetcherBase) -> int:
 
 def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
                     prefetch: Optional[dict] = None) -> dict:
+    global _progress_count, _progress_total
     result = {"symbol": stock.symbol, "prices": 0, "fundamentals": False, "indicators": 0, "news": 0, "error": None}
     try:
         md = prefetch.get("max_price_dates", {}).get(stock.id) if prefetch else None
