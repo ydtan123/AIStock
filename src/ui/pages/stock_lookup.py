@@ -8,17 +8,7 @@ import streamlit as st
 from plotly.subplots import make_subplots
 
 from display import fmt_market_cap
-
-
-@st.cache_data(ttl=300, show_spinner=False)
-def _cached_find_stock(symbol: str) -> dict | None:
-    from repository import StockRepository
-    stock = StockRepository().find_stock(symbol)
-    if stock is None:
-        return None
-    return {"id": stock.id, "symbol": stock.symbol, "name": stock.name,
-            "exchange": stock.exchange, "sector": stock.sector,
-            "industry": stock.industry, "is_active": stock.is_active}
+from ui.cached_repo import cached_find_stock, cached_get_prices
 
 
 @st.cache_data(ttl=60, show_spinner=False)
@@ -28,12 +18,6 @@ def _cached_get_indicator(stock_id: int) -> dict | None:
     if ind is None:
         return None
     return {"pe_ratio": ind.pe_ratio, "market_cap": ind.market_cap}
-
-
-@st.cache_data(ttl=60, show_spinner=False)
-def _cached_get_prices(stock_id: int, start_str: str, end_str: str) -> pd.DataFrame:
-    from repository import StockRepository
-    return StockRepository().get_prices(stock_id, date.fromisoformat(start_str), date.fromisoformat(end_str))
 
 
 def render(ctx) -> None:
@@ -46,7 +30,7 @@ def render(ctx) -> None:
         start_date = ctx.st.date_input("Start date", value=date.today() - timedelta(days=365))
         end_date = ctx.st.date_input("End date", value=date.today())
 
-        stock = _cached_find_stock(symbol)
+        stock = cached_find_stock(symbol)
         if stock:
             status_color = "#16a34a" if stock["is_active"] else "#dc2626"
             status_label = "Active" if stock["is_active"] else "Inactive"
@@ -67,7 +51,7 @@ def render(ctx) -> None:
             return
 
         ind = _cached_get_indicator(stock["id"])
-        prices_df = _cached_get_prices(stock["id"], start_date.isoformat(), end_date.isoformat())
+        prices_df = cached_get_prices(stock["id"], start_date.isoformat(), end_date.isoformat())
 
         last_close = float(prices_df["close"].iloc[-1]) if not prices_df.empty else None
         prev_close = float(prices_df["close"].iloc[-2]) if len(prices_df) > 1 else None

@@ -130,11 +130,11 @@ def _pipeline_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> None
     import sys as _sys
     handler = _QueueHandler(log_queue)
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
-    root = logging.getLogger()
-    root.addHandler(handler)
+    pl = logging.getLogger("pipeline.thread")
+    pl.addHandler(handler)
+    pl.propagate = False
     orig_stdout = _sys.stdout
     _sys.stdout = _StdoutToQueue(log_queue, orig_stdout)
-    pl = logging.getLogger("pipeline.thread")
     pl.info("=== Pipeline thread started ===")
     pl.info("Config: %s", cfg_overrides)
     try:
@@ -147,18 +147,18 @@ def _pipeline_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> None
         log_queue.put_nowait(f"__ERROR__:{exc}")
     finally:
         _sys.stdout = orig_stdout
-        root.removeHandler(handler)
+        pl.removeHandler(handler)
 
 
 def _predict_only_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> None:
     import sys as _sys
     handler = _QueueHandler(log_queue)
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
-    root = logging.getLogger()
-    root.addHandler(handler)
+    pl = logging.getLogger("predict.thread")
+    pl.addHandler(handler)
+    pl.propagate = False
     orig_stdout = _sys.stdout
     _sys.stdout = _StdoutToQueue(log_queue, orig_stdout)
-    pl = logging.getLogger("predict.thread")
     pl.info("=== Predict-only thread started ===")
     try:
         from finrl_runner import run_predict_only, MODELS_DIR
@@ -174,12 +174,19 @@ def _predict_only_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> 
         pl.info("Predicting %d stocks from selected_stocks table", len(symbols))
         pred_df = run_predict_only(symbols=symbols, source=source)
 
-        # Compute actual returns from prediction date to today
+        # Compute actual returns from prediction date to today (batched)
         import pandas as _pd
         from datetime import date as _date
         actual_returns: list = []
         unique_symbols = pred_df["ticker"].dropna().unique().tolist()
         stock_map = _repo.find_stocks_batch(unique_symbols)
+        price_requests = [(stock_map[str(row.ticker).upper()].id,
+                           _pd.to_datetime(row.datadate).date(),
+                           _date.today())
+                          for row in pred_df.itertuples()
+                          if stock_map.get(str(row.ticker).upper())]
+        prices_batch = _repo.get_prices_batch(price_requests)
+
         for row in pred_df.itertuples():
             ticker = str(row.ticker).upper()
             dd = _pd.to_datetime(row.datadate).date()
@@ -187,7 +194,7 @@ def _predict_only_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> 
             if stock is None:
                 actual_returns.append(None)
                 continue
-            prices = _repo.get_prices(stock.id, dd, _date.today())
+            prices = prices_batch.get(stock.id, _pd.DataFrame())
             if prices.empty or len(prices) < 2:
                 actual_returns.append(None)
                 continue
@@ -219,7 +226,7 @@ def _predict_only_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> 
         log_queue.put_nowait(f"__ERROR__:{exc}")
     finally:
         _sys.stdout = orig_stdout
-        root.removeHandler(handler)
+        pl.removeHandler(handler)
 
 
 # ── Sidebar helpers ──────────────────────────────────────────────────────────
@@ -260,18 +267,21 @@ def page_stock_data(ctx: PageContext) -> None:
 
 
 def _build_ctx() -> PageContext:
-    return PageContext(
-        st=st,
-        repo=repo,
-        session_state=st.session_state,
-        pipeline_thread_target=_pipeline_thread_target,
-        predict_only_thread_target=_predict_only_thread_target,
-    )
+    if "ctx" not in st.session_state:
+        st.session_state.ctx = PageContext(
+            st=st,
+            repo=repo,
+            session_state=st.session_state,
+            pipeline_thread_target=_pipeline_thread_target,
+            predict_only_thread_target=_predict_only_thread_target,
+        )
+    return st.session_state.ctx
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
-def main() -> None:
+@st.fragment
+def sidebar_nav():
     with st.sidebar:
         st.markdown('<h2 style="color:#1e293b;margin:0 0 4px">📈 AIStock</h2>', unsafe_allow_html=True)
         st.markdown('<p style="color:#64748b;font-size:12px;margin:0 0 16px">Trading Platform</p>', unsafe_allow_html=True)
@@ -287,9 +297,11 @@ def main() -> None:
 
         st.divider()
         display_quick_stats(repo)
+    return page
 
-    ctx = _build_ctx()
 
+@st.fragment
+def render_page_content(page, ctx):
     if page == "Overview":
         render_overview(ctx)
     elif page == "Stock Data":
@@ -308,6 +320,12 @@ def main() -> None:
         render_settings(ctx)
     elif page == "Job History":
         render_job_history(ctx)
+
+
+def main() -> None:
+    page = sidebar_nav()
+    ctx = _build_ctx()
+    render_page_content(page, ctx)
 
 
 if __name__ == "__main__":

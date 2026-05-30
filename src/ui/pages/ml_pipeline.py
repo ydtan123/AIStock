@@ -11,11 +11,12 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from collections import deque
+
 import streamlit as st
 
 from ui.pages.stock_detail import render as render_stock_detail
 
-MAX_LOG_LINES = 1000
 
 
 @st.cache_data(ttl=3600, show_spinner="Loading ML results...")
@@ -88,10 +89,11 @@ def _show_ml_results(ctx) -> None:
         _repo = StockRepository()
         ticker_col = next((c for c in ["tic", "ticker", "gvkey"] if c in wdf.columns), None)
         if ticker_col:
-            name_map: dict = {}
-            for sym in wdf[ticker_col].dropna().unique():
-                stock = _repo.find_stock(str(sym))
-                name_map[sym] = stock.name if stock else ""
+            syms = wdf[ticker_col].dropna().unique().tolist()
+            stock_map = _repo.find_stocks_batch(syms)
+            name_map = {sym: (stock_map.get(str(sym).upper()).name
+                              if stock_map.get(str(sym).upper()) else "")
+                        for sym in syms}
             wdf["company"] = wdf[ticker_col].map(name_map)
     except Exception:
         pass
@@ -360,7 +362,7 @@ def render(ctx) -> None:
     ctx.st.markdown(f"**Status:** :{color}[{status}]  |  Elapsed: {elapsed:.0f}s")
 
     if run_clicked and status != "Running":
-        ctx.session_state.ml_log_lines = []
+        ctx.session_state.ml_log_lines = deque(maxlen=1000)
         ctx.session_state.ml_error = None
         ctx.session_state.ml_report_path = None
         # Clear stale sentinels from previous run
@@ -389,7 +391,7 @@ def render(ctx) -> None:
         ctx.st.rerun()
 
     if predict_only_clicked and status != "Running":
-        ctx.session_state.ml_log_lines = []
+        ctx.session_state.ml_log_lines = deque(maxlen=1000)
         ctx.session_state.ml_error = None
         ctx.session_state.ml_report_path = None
         ctx.session_state.ml_predict_only_df = None
@@ -409,47 +411,50 @@ def render(ctx) -> None:
                           args=(cfg, ctx.session_state.ml_log_queue), daemon=True).start()
         ctx.st.rerun()
 
-    while True:
-        try:
-            msg = ctx.session_state.ml_log_queue.get_nowait()
-        except queue.Empty:
-            break
-        if isinstance(msg, str) and msg.startswith("__PREDICT_DF__:"):
-            import json as _json
-            ctx.session_state.ml_predict_only_df = _json.loads(msg[len("__PREDICT_DF__:"):])
-        elif isinstance(msg, str) and msg.startswith("__REPORT__:"):
-            ctx.session_state.ml_report_path = msg[len("__REPORT__:"):]
-            ctx.session_state.ml_status = "Complete"
-        elif isinstance(msg, str) and msg.startswith("__ERROR__:"):
-            ctx.session_state.ml_error = msg[len("__ERROR__:"):]
-            ctx.session_state.ml_status = "Error"
+    @st.fragment(run_every=2)
+    def _show_pipeline_logs():
+        """Auto-refreshing log display fragment."""
+        # Drain queue in the fragment
+        while True:
+            try:
+                msg = ctx.session_state.ml_log_queue.get_nowait()
+            except queue.Empty:
+                break
+            if isinstance(msg, str) and msg.startswith("__PREDICT_DF__:"):
+                import json as _json
+                ctx.session_state.ml_predict_only_df = _json.loads(msg[len("__PREDICT_DF__:"):])
+            elif isinstance(msg, str) and msg.startswith("__REPORT__:"):
+                ctx.session_state.ml_report_path = msg[len("__REPORT__:"):]
+                ctx.session_state.ml_status = "Complete"
+            elif isinstance(msg, str) and msg.startswith("__ERROR__:"):
+                ctx.session_state.ml_error = msg[len("__ERROR__:"):]
+                ctx.session_state.ml_status = "Error"
+            else:
+                items = ctx.session_state.ml_log_lines
+                items.append(str(msg))
+                if not hasattr(items, 'maxlen') and len(items) > 1000:
+                    ctx.session_state.ml_log_lines = deque(list(items)[-1000:], maxlen=1000)
+
+        status = ctx.session_state.get("ml_status", "Idle")
+        ctx.st.subheader("Log Output")
+        if ctx.session_state.ml_log_lines:
+            log_text = "\n".join(list(ctx.session_state.ml_log_lines)[-200:])
+        elif status == "Running":
+            log_text = "Pipeline starting..."
         else:
-            ctx.session_state.ml_log_lines.append(str(msg))
-            if len(ctx.session_state.ml_log_lines) > MAX_LOG_LINES:
-                ctx.session_state.ml_log_lines = ctx.session_state.ml_log_lines[-MAX_LOG_LINES:]
+            log_text = "No runs yet. Configure and click Run Pipeline."
+        ctx.st.code(log_text, language=None)
 
-    ctx.st.subheader("Log Output")
-    if ctx.session_state.ml_log_lines:
-        log_text = "\n".join(ctx.session_state.ml_log_lines[-200:])
-    elif status == "Running":
-        log_text = "Pipeline starting..."
-    else:
-        log_text = "No runs yet. Configure and click Run Pipeline."
-    ctx.st.code(log_text, language=None)
+        if ctx.session_state.get("ml_status") == "Error" and ctx.session_state.get("ml_error"):
+            ctx.st.error(f"Pipeline failed: {ctx.session_state.ml_error}")
 
-    if status == "Running":
-        import time as _time
-        _time.sleep(1)
-        ctx.st.rerun()
+        if ctx.session_state.get("ml_report_path"):
+            ctx.st.success(f"Complete. Report: `{ctx.session_state.ml_report_path}`")
+            # Check if this is predict-only or full pipeline
+            if ctx.session_state.get("ml_predict_only_df"):
+                _show_predict_only_results(ctx, ctx.session_state.ml_predict_only_df)
+            else:
+                _show_ml_results(ctx)
+                _show_ml_backtest(ctx)
 
-    if ctx.session_state.get("ml_status") == "Error" and ctx.session_state.get("ml_error"):
-        ctx.st.error(f"Pipeline failed: {ctx.session_state.ml_error}")
-
-    if ctx.session_state.get("ml_report_path"):
-        ctx.st.success(f"Complete. Report: `{ctx.session_state.ml_report_path}`")
-        # Check if this is predict-only or full pipeline
-        if ctx.session_state.get("ml_predict_only_df"):
-            _show_predict_only_results(ctx, ctx.session_state.ml_predict_only_df)
-        else:
-            _show_ml_results(ctx)
-            _show_ml_backtest(ctx)
+    _show_pipeline_logs()

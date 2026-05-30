@@ -7,20 +7,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
-
-@st.cache_data(ttl=300, show_spinner=False)
-def _cached_find_stock_ta(symbol: str) -> dict | None:
-    from repository import StockRepository
-    stock = StockRepository().find_stock(symbol)
-    if stock is None:
-        return None
-    return {"id": stock.id, "symbol": stock.symbol}
-
-
-@st.cache_data(ttl=60, show_spinner=False)
-def _cached_get_prices_ta(stock_id: int, start_str: str, end_str: str) -> pd.DataFrame:
-    from repository import StockRepository
-    return StockRepository().get_prices(stock_id, date.fromisoformat(start_str), date.fromisoformat(end_str))
+from ui.cached_repo import cached_find_stock, cached_get_prices
 
 
 @st.cache_data(ttl=60, show_spinner=False)
@@ -51,12 +38,12 @@ def render(ctx) -> None:
         show_atr = ctx.st.checkbox("ATR (14)", value=False)
 
     with col_main:
-        stock = _cached_find_stock_ta(symbol)
+        stock = cached_find_stock(symbol)
         if not stock:
             ctx.st.warning(f"Symbol {symbol} not found.")
             return
 
-        prices_df = _cached_get_prices_ta(stock["id"], start_date.isoformat(), end_date.isoformat())
+        prices_df = cached_get_prices(stock["id"], start_date.isoformat(), end_date.isoformat())
         tech_df = _cached_get_tech_indicators(stock["id"], start_date.isoformat(), end_date.isoformat())
 
         if prices_df.empty:

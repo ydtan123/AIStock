@@ -4,6 +4,7 @@ import random
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta
+from functools import lru_cache
 from typing import Optional
 
 import pandas as pd
@@ -21,10 +22,11 @@ from models import DailyPrice, PipelineRun, Stock, StockIndicator, StockSnapshot
 logger = logging.getLogger(__name__)
 
 DEFAULT_START = date(2010, 1, 1)
-MAX_WORKERS = 5
+MAX_WORKERS = max(2, min(8, (os.cpu_count() or 4) + 2))
 NEWS_LOOKBACK_DAYS = 7
 
 
+@lru_cache(maxsize=1)
 def _last_trading_date() -> date:
     """Return the most recent NYSE trading day.
 
@@ -92,22 +94,18 @@ def _prefetch_stock_dates(stock_ids: list[int]) -> dict:
         ltd = _last_trading_date()
 
         rows = session.execute(
-            text("SELECT stock_id, MAX(date) FROM daily_prices WHERE stock_id IN :ids GROUP BY stock_id"),
+            text("SELECT stock_id, MAX(date), MIN(date) FROM daily_prices "
+                 "WHERE stock_id IN :ids GROUP BY stock_id"),
             {"ids": ids},
         ).fetchall()
         max_price_dates = {r[0]: r[1] for r in rows}
+        first_price_dates = {r[0]: r[2] for r in rows}
 
         rows = session.execute(
             text("SELECT stock_id, MIN(date) FROM technical_indicators WHERE stock_id IN :ids GROUP BY stock_id"),
             {"ids": ids},
         ).fetchall()
         first_indicator_dates = {r[0]: r[1] for r in rows}
-
-        rows = session.execute(
-            text("SELECT stock_id, MIN(date) FROM daily_prices WHERE stock_id IN :ids GROUP BY stock_id"),
-            {"ids": ids},
-        ).fetchall()
-        first_price_dates = {r[0]: r[1] for r in rows}
 
         rows = session.execute(
             text("SELECT stock_id, last_updated FROM stock_indicators WHERE stock_id IN :ids"),
@@ -213,15 +211,14 @@ def _fetch_and_store_prices(fetcher: FetcherBase, stock: Stock,
 
 
 def _upsert_fundamentals(fetcher: FetcherBase, stock: Stock, force: bool = False,
-                         indicator_last_updated: Optional[datetime] = None) -> bool:
+                         indicator_last_updated: Optional[datetime] = None,
+                         refresh_days: int = 7) -> bool:
     """Fetch and upsert OVERVIEW data. Skips if last_updated < refresh_days ago.
 
+    *refresh_days* is now passed from caller — no internal load_config().
     When *indicator_last_updated* is provided (from prefetch), the freshness check
     is in-memory — no DB query needed.
     """
-    config = load_config()
-    refresh_days = config.get("scheduler", {}).get("overview_refresh_days", 7)
-
     if not force and indicator_last_updated is not None:
         age = (datetime.utcnow() - indicator_last_updated).days
         if age < refresh_days:
@@ -444,7 +441,8 @@ def _fetch_stock_news_av(symbol: str, fetcher: FetcherBase) -> int:
 
 
 def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
-                    prefetch: Optional[dict] = None) -> dict:
+                    prefetch: Optional[dict] = None,
+                    refresh_days: int = 7) -> dict:
     global _progress_count, _progress_total
     result = {"symbol": stock.symbol, "prices": 0, "fundamentals": False, "indicators": 0, "news": 0, "error": None}
     try:
@@ -457,7 +455,8 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
         result["prices"] = prices_inserted
 
         refreshed = _upsert_fundamentals(fetcher, stock, force=force,
-                                         indicator_last_updated=ilu)
+                                         indicator_last_updated=ilu,
+                                         refresh_days=refresh_days)
         result["fundamentals"] = refreshed
 
         if _needs_full_backfill(first_indicator_date=fid, first_price_date=fpd):
@@ -503,6 +502,9 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False,
     processed_ids: list[int] = []
 
     try:
+        cfg = load_config()
+        refresh_days = cfg.get("scheduler", {}).get("overview_refresh_days", 7)
+
         session = get_session()
         q = (
             session.query(Stock)
@@ -536,7 +538,7 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False,
 
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
             futures = {
-                pool.submit(_process_symbol, fetcher, s, force, prefetch): s
+                pool.submit(_process_symbol, fetcher, s, force, prefetch, refresh_days): s
                 for s in stocks_to_process
             }
             for future in as_completed(futures):

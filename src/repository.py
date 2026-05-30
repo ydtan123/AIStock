@@ -65,17 +65,36 @@ class StockRepository:
         return self._with_session(_query)
 
     def get_prices(self, stock_id: int, start: date, end: date) -> pd.DataFrame:
-        return self._with_session(lambda s: pd.DataFrame([{
-            "date": r.date, "open": r.open, "high": r.high, "low": r.low,
-            "close": r.close, "adj_close": r.adj_close, "volume": r.volume,
-        } for r in (
-            s.query(DailyPrice)
-            .filter(DailyPrice.stock_id == stock_id,
-                    DailyPrice.date >= start,
-                    DailyPrice.date <= end)
-            .order_by(DailyPrice.date)
-            .all()
-        )]))
+        def _query(s):
+            return pd.read_sql(
+                text("SELECT date, open, high, low, close, adj_close, volume "
+                     "FROM daily_prices WHERE stock_id = :sid "
+                     "AND date >= :start AND date <= :end ORDER BY date"),
+                s.get_bind(),
+                params={"sid": stock_id, "start": start, "end": end},
+            )
+        return self._with_session(_query)
+
+    def get_prices_batch(self, stocks: list[tuple[int, date, date]]) -> dict[int, pd.DataFrame]:
+        """Fetch prices for multiple stocks in one query. Returns {stock_id: DataFrame}."""
+        if not stocks:
+            return {}
+        from sqlalchemy import or_, and_
+        conditions = [
+            and_(DailyPrice.stock_id == sid, DailyPrice.date >= s, DailyPrice.date <= e)
+            for sid, s, e in stocks
+        ]
+        def _query(s):
+            rows = s.query(DailyPrice).filter(or_(*conditions)).order_by(DailyPrice.date).all()
+            result: dict[int, list[dict]] = {}
+            for r in rows:
+                result.setdefault(r.stock_id, []).append({
+                    "date": r.date, "open": r.open, "high": r.high,
+                    "low": r.low, "close": r.close, "adj_close": r.adj_close,
+                    "volume": r.volume,
+                })
+            return {sid: pd.DataFrame(recs) for sid, recs in result.items()}
+        return self._with_session(_query)
 
     def get_indicator(self, stock_id: int) -> Optional[StockIndicator]:
         return self._with_session(
@@ -89,21 +108,18 @@ class StockRepository:
 
     def get_tech_indicators(self, stock_id: int, start: date, end: date) -> pd.DataFrame:
         def _query(s):
-            rows = (
-                s.query(TechnicalIndicator)
-                .filter(TechnicalIndicator.stock_id == stock_id,
-                        TechnicalIndicator.date >= start,
-                        TechnicalIndicator.date <= end)
-                .order_by(TechnicalIndicator.date)
-                .all()
+            df = pd.read_sql(
+                text("SELECT date, indicators FROM technical_indicators "
+                     "WHERE stock_id = :sid AND date >= :start AND date <= :end ORDER BY date"),
+                s.get_bind(),
+                params={"sid": stock_id, "start": start, "end": end},
             )
-            records = []
-            for r in rows:
-                d = {"date": r.date}
-                if r.indicators:
-                    d.update(r.indicators)
-                records.append(d)
-            return pd.DataFrame(records)
+            if df.empty:
+                return df
+            # Expand the JSON indicators column into separate columns
+            expanded = pd.json_normalize(df.pop("indicators").where(df["indicators"].notna(), {}))
+            result = pd.concat([df, expanded], axis=1)
+            return result
         return self._with_session(_query)
 
     # -- screener --------------------------------------------------------------
@@ -190,8 +206,10 @@ class StockRepository:
 
     def count_summary(self) -> dict:
         def _query(s):
-            total = s.query(Stock).count()
-            active = s.query(Stock).filter_by(is_active=True).count()
+            row = s.execute(text(
+                "SELECT COUNT(*), COALESCE(SUM(CASE WHEN is_active THEN 1 ELSE 0 END), 0) FROM stocks"
+            )).fetchone()
+            total, active = row[0], row[1]
             return {"total": total, "active": active, "inactive": total - active}
         return self._with_session(_query)
 
