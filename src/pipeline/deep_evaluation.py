@@ -19,6 +19,89 @@ _NAMED_SLOTS = (
     "trader_plan",
 )
 
+_REPORT_SECTIONS: list[tuple[str, str]] = [
+    ("market_report", "Market Analyst"),
+    ("social_report", "Social / Sentiment Analyst"),
+    ("news_report", "News Analyst"),
+    ("fundamentals_report", "Fundamentals Analyst"),
+    ("bull_argument", "Bull Researcher Debate"),
+    ("bear_argument", "Bear Researcher Debate"),
+    ("research_manager_decision", "Research Manager Decision"),
+    ("trader_plan", "Trader Investment Plan"),
+    ("risk_aggressive", "Risk Debate — Aggressive"),
+    ("risk_conservative", "Risk Debate — Conservative"),
+    ("risk_neutral", "Risk Debate — Neutral"),
+    ("risk_manager_decision", "Risk Manager Final Decision"),
+]
+
+
+def _write_report(evaluations, report_dir, backend_name):
+    """Write per-ticker deep evaluation as markdown reports.
+
+    Creates:
+        deep_evaluation_<TICKER>.md  — per-ticker full report
+        deep_evaluation.md           — combined all-ticker report
+    """
+    for ev in evaluations:
+        ticker = ev.ticker
+        decision = ev.final_decision or "N/A"
+        emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "🟡"}.get(decision.upper(), "⚪")
+
+        lines = [
+            f"# Deep Evaluation: {ticker}",
+            "",
+            f"**Backend:** {backend_name}",
+            f"**Date:** {ev.evaluation_date}",
+            f"**Final Decision:** {emoji} {decision}",
+            "",
+            "---",
+            "",
+        ]
+        for slot_key, section_title in _REPORT_SECTIONS:
+            content = ev.agent_outputs.get(slot_key, "").strip()
+            if not content:
+                continue
+            lines.append(f"## {section_title}")
+            lines.append("")
+            lines.append(content)
+            lines.append("")
+            lines.append("---")
+            lines.append("")
+
+        (report_dir / f"deep_evaluation_{ticker}.md").write_text(
+            "\n".join(lines), encoding="utf-8"
+        )
+
+    # Combined all-ticker report
+    combined = [
+        f"# Deep Evaluation Report — {backend_name}",
+        "",
+        f"**Date:** {dt.datetime.utcnow():%Y-%m-%d %H:%M} UTC",
+        f"**Tickers evaluated:** {len(evaluations)}",
+        "",
+        "---",
+        "",
+    ]
+    for ev in evaluations:
+        decision = ev.final_decision or "N/A"
+        emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "🟡"}.get(decision.upper(), "⚪")
+        combined.append(f"## {ev.ticker} — {emoji} {decision}")
+        combined.append("")
+        for slot_key, section_title in _REPORT_SECTIONS:
+            content = ev.agent_outputs.get(slot_key, "").strip()
+            if not content:
+                continue
+            combined.append(f"### {section_title}")
+            combined.append("")
+            combined.append(content)
+            combined.append("")
+        combined.append("---")
+        combined.append("")
+
+    combined_path = report_dir / "deep_evaluation.md"
+    combined_path.write_text("\n".join(combined), encoding="utf-8")
+    return combined_path
+
 
 class DeepEvaluationStep(PipelineStep):
     name = "deep_evaluation"
@@ -94,6 +177,9 @@ class DeepEvaluationStep(PipelineStep):
                 ))
             session.add_all(rows)
             session.commit()
+
+        report_path = _write_report(evaluations, ctx.report_dir, backend_name)
+        ctx.logger.info("Deep evaluation report saved → %s", report_path)
 
         ev_list = [
             {"ticker": ev.ticker, "final_decision": ev.final_decision}
