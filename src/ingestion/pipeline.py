@@ -302,50 +302,40 @@ def _batch_update_checkpoints(stock_ids: list[int]):
         session.close()
 
 
-def _needs_full_backfill(stock_id: int, first_indicator_date: Optional[date] = None,
+def _needs_full_backfill(first_indicator_date: Optional[date] = None,
                          first_price_date: Optional[date] = None) -> bool:
     """True if stock has no indicators or earliest indicator is far from earliest price.
 
-    When pre-fetched dates are provided, the check is in-memory — no DB queries.
+    All callers provide pre-fetched dates from `_prefetch_stock_dates()`,
+    so this is a pure in-memory check — no DB queries needed.
     """
-    if first_indicator_date is not None or first_price_date is not None:
-        if first_indicator_date is None:
-            return True
-        if first_price_date is None:
-            return False
-        return (first_indicator_date - first_price_date).days > 365
-
-    session = get_session()
-    try:
-        row = session.execute(text("""
-            SELECT MIN(ti.date)
-            FROM technical_indicators ti
-            WHERE ti.stock_id = :sid
-        """), {"sid": stock_id}).first()
-        first_ind = row[0] if row else None
-
-        if first_ind is None:
-            return True
-
-        first_px = session.execute(text("""
-            SELECT MIN(date) FROM daily_prices WHERE stock_id = :sid
-        """), {"sid": stock_id}).scalar()
-
-        if first_px is None:
-            return False
-
-        return (first_ind - first_px).days > 365
-    finally:
-        session.close()
+    if first_indicator_date is None:
+        return True
+    if first_price_date is None:
+        return False
+    return (first_indicator_date - first_price_date).days > 365
 
 
-def _fetch_stock_news(symbol: str) -> int:
-    """Fetch last week's news for *symbol* via TradingAgents get_news tool.
+# Module-level flag: set when Google Gemini news API returns rate-limit or quota error.
+# Once set, all subsequent news fetches use Alpha Vantage instead.
+_google_news_rate_limited = False
+
+
+def _fetch_stock_news(symbol: str, fetcher: FetcherBase | None = None) -> int:
+    """Fetch last week's news for *symbol*.
+
+    Primary path: TradingAgents → Google Gemini (via route_to_vendor, cached).
+    Fallback path: Alpha Vantage NEWS_SENTIMENT endpoint (when Google rate-limited).
 
     The call is intercepted by the news_cache layer, so results are automatically
     stored in the stock_news DB table with deduplication.
     Returns a rough character count if news was fetched, 0 otherwise.
     """
+    global _google_news_rate_limited
+
+    if _google_news_rate_limited and fetcher is not None:
+        return _fetch_stock_news_av(symbol, fetcher)
+
     try:
         from tradingagents.dataflows.interface import route_to_vendor
         trade_dt = date.today()
@@ -354,7 +344,37 @@ def _fetch_stock_news(symbol: str) -> int:
         result = route_to_vendor("get_news", symbol, news_start, news_end)
         return len(str(result)) if result else 0
     except Exception as exc:
-        logger.warning("news fetch failed for %s: %s", symbol, exc)
+        msg = str(exc).lower()
+        if any(kw in msg for kw in ("rate", "quota", "429", "limit", "exceeded", "resource", "capacity")):
+            logger.warning(
+                "Google news API rate-limited for %s — switching ALL remaining stocks to Alpha Vantage: %s",
+                symbol, exc,
+            )
+            _google_news_rate_limited = True
+            if fetcher is not None:
+                return _fetch_stock_news_av(symbol, fetcher)
+        else:
+            logger.warning("news fetch failed for %s: %s", symbol, exc)
+        return 0
+
+
+def _fetch_stock_news_av(symbol: str, fetcher: FetcherBase) -> int:
+    """Fallback: fetch news via Alpha Vantage NEWS_SENTIMENT. Returns char count."""
+    try:
+        items = fetcher.get_news_sentiment(symbol, days=NEWS_LOOKBACK_DAYS)
+        if not items:
+            return 0
+
+        # Cache via the same news_cache mechanism
+        from tradingagents.dataflows.interface import route_to_vendor
+        import json as _json
+        payload = _json.dumps(items, default=str)
+        sd = (date.today() - timedelta(days=NEWS_LOOKBACK_DAYS)).strftime("%Y-%m-%d")
+        ed = date.today().strftime("%Y-%m-%d")
+        route_to_vendor("get_news", symbol, sd, ed, _result_override=payload)
+        return len(payload)
+    except Exception as exc:
+        logger.warning("AV news fallback failed for %s: %s", symbol, exc)
         return 0
 
 
@@ -374,13 +394,13 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
                                          indicator_last_updated=ilu)
         result["fundamentals"] = refreshed
 
-        if _needs_full_backfill(stock.id, first_indicator_date=fid, first_price_date=fpd):
+        if _needs_full_backfill(first_indicator_date=fid, first_price_date=fpd):
             result["indicators"] = compute_indicators(stock.id, since_date=None)
         elif prices_inserted > 0 and new_max_date:
             result["indicators"] = compute_indicators(stock.id, since_date=new_max_date)
 
         if force or prices_inserted > 0:
-            result["news"] = _fetch_stock_news(stock.symbol)
+            result["news"] = _fetch_stock_news(stock.symbol, fetcher=fetcher)
 
         logger.info(
             "%-6s  prices=%-4d  indicators=%-4d  overview=%-9s  news=%-5d",

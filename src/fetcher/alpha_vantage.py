@@ -276,3 +276,42 @@ class AlphaVantageFetcher(FetcherBase):
         _LISTING_CACHE.parent.mkdir(parents=True, exist_ok=True)
         df.to_parquet(_LISTING_CACHE, index=False)
         return df
+
+    def get_news_sentiment(self, symbol: str, days: int = 7) -> list[dict]:
+        """Fetch news sentiment from Alpha Vantage NEWS_SENTIMENT endpoint.
+
+        Returns list of dicts with keys: title, url, summary, source,
+        topics (list), overall_sentiment_score, overall_sentiment_label.
+        Falls back to empty list on any error.
+        """
+        from datetime import date, timedelta
+        end = date.today()
+        start = end - timedelta(days=days)
+        try:
+            data = self._get({
+                "function": "NEWS_SENTIMENT",
+                "tickers": symbol,
+                "time_from": start.strftime("%Y%m%dT0000"),
+                "time_to": end.strftime("%Y%m%dT2359"),
+                "sort": "LATEST",
+                "limit": "50",
+            })
+        except Exception:
+            logger.warning("AV news sentiment failed for %s", symbol)
+            return []
+
+        items = []
+        for entry in data.get("feed", []):
+            items.append({
+                "title": entry.get("title", ""),
+                "url": entry.get("url", ""),
+                "summary": entry.get("summary", ""),
+                "source": entry.get("source", ""),
+                "published": entry.get("time_published", ""),
+                "topics": [t.get("topic", "") for t in entry.get("topics", [])],
+                "overall_sentiment_score": safe_float(
+                    entry.get("overall_sentiment_score", 0)
+                ),
+                "overall_sentiment_label": entry.get("overall_sentiment_label", ""),
+            })
+        return items
