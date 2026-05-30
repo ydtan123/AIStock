@@ -38,15 +38,20 @@ class DeepEvaluationStep(PipelineStep):
                 error=str(e),
             )
 
-        with open_session(ctx) as session:
-            rows = (
-                session.query(FastEvaluationConclusion)
-                .filter(FastEvaluationConclusion.pipeline_run_id == ctx.run_id)
-                .order_by(desc(FastEvaluationConclusion.consensus_score))
-                .limit(top_n)
-                .all()
-            )
-            tickers = [r.ticker for r in rows]
+        symbols = ctx.cfg.get("pipeline", {}).get("symbols", [])
+        if symbols:
+            tickers = symbols[:top_n]
+            ctx.logger.info("DeepEvaluationStep: using --symbols (%d tickers)", len(tickers))
+        else:
+            with open_session(ctx) as session:
+                rows = (
+                    session.query(FastEvaluationConclusion)
+                    .filter(FastEvaluationConclusion.pipeline_run_id == ctx.run_id)
+                    .order_by(desc(FastEvaluationConclusion.consensus_score))
+                    .limit(top_n)
+                    .all()
+                )
+                tickers = [r.ticker for r in rows]
 
         if not tickers:
             return StepResult(

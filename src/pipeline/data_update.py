@@ -7,21 +7,20 @@ import traceback
 from pipeline.base import PipelineStep, StepContext, StepResult
 
 
-def _run_pipeline(source: str, step_cfg: dict) -> dict:
+def _run_pipeline(source: str, step_cfg: dict, full_cfg: dict) -> dict:
     """Indirection seam — tests monkeypatch this."""
-    from config import load_config
     from fetcher import create_fetcher
     from ingestion.pipeline import run_daily_pipeline
 
-    cfg = load_config()
+    cfg = dict(full_cfg)  # shallow copy to avoid mutating orchestrator's config
     cfg["source"] = source
     # Bridge OOP namespaced config → flat format create_fetcher expects.
-    # step_cfg is the data_update namespace; alpha_vantage may live there.
     for key in ("alpha_vantage",):
         if key in step_cfg and key not in cfg:
             cfg[key] = step_cfg[key]
     fetcher = create_fetcher(cfg)
-    result = run_daily_pipeline(fetcher)
+    symbols = full_cfg.get("pipeline", {}).get("symbols") or None
+    result = run_daily_pipeline(fetcher, symbols=symbols)
     symbols = result.get("symbols", [])
     failed_symbols = [s["symbol"] for s in symbols if s.get("error")]
     return {
@@ -41,7 +40,7 @@ class DataUpdateStep(PipelineStep):
         start = time.monotonic()
 
         try:
-            stats = _run_pipeline(source, sub)
+            stats = _run_pipeline(source, sub, ctx.cfg)
         except Exception as e:
             return StepResult(
                 step_name=self.name,

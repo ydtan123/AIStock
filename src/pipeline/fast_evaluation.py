@@ -96,15 +96,20 @@ class FastEvaluationStep(PipelineStep):
                 error=str(e),
             )
 
-        with open_session(ctx) as session:
-            rows = (
-                session.query(SelectedStock)
-                .filter(SelectedStock.pipeline_run_id == ctx.run_id)
-                .order_by(desc(SelectedStock.ml_score))
-                .limit(top_n)
-                .all()
-            )
-            tickers = [r.ticker for r in rows]
+        symbols = ctx.cfg.get("pipeline", {}).get("symbols", [])
+        if symbols:
+            tickers = symbols[:top_n]
+            ctx.logger.info("FastEvaluationStep: using --symbols (%d tickers)", len(tickers))
+        else:
+            with open_session(ctx) as session:
+                rows = (
+                    session.query(SelectedStock)
+                    .filter(SelectedStock.pipeline_run_id == ctx.run_id)
+                    .order_by(desc(SelectedStock.ml_score))
+                    .limit(top_n)
+                    .all()
+                )
+                tickers = [r.ticker for r in rows]
 
         if not tickers:
             return StepResult(

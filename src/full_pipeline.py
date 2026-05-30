@@ -54,6 +54,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--log-level", default="INFO")
+    p.add_argument(
+        "--symbols", nargs="*", default=None,
+        metavar="TICKER",
+        help="Only process these symbols (comma/space separated). "
+             "stock_selection skips; data/fast/deep evaluation filter to these tickers.",
+    )
     return p.parse_args(argv)
 
 
@@ -98,6 +104,11 @@ def main(argv: list[str] | None = None) -> int:
 
     loader = ConfigLoader(args.config, overrides=args.set_)
     cfg = loader.load()
+
+    if args.symbols:
+        symbols = [s.strip().upper() for s in args.symbols if s.strip()]
+        cfg.setdefault("pipeline", {})["symbols"] = symbols
+        logger.info("Filtering to %d symbols: %s", len(symbols), symbols)
 
     report_root = Path("reports/full_pipeline")
     report_root.mkdir(parents=True, exist_ok=True)

@@ -452,8 +452,12 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
     return result
 
 
-def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
-    """Run the daily pipeline: prices, fundamentals, indicators, snapshots. Returns summary dict."""
+def run_daily_pipeline(fetcher: FetcherBase, force: bool = False,
+                        symbols: list[str] | None = None) -> dict:
+    """Run the daily pipeline: prices, fundamentals, indicators, snapshots. Returns summary dict.
+
+    When *symbols* is provided, only those tickers are processed (case-insensitive).
+    """
     session = get_session()
     run = PipelineRun(started_at=datetime.utcnow(), status="running")
     session.add(run)
@@ -466,13 +470,15 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
 
     try:
         session = get_session()
-        stocks = (
+        q = (
             session.query(Stock)
             .outerjoin(StockIndicator, Stock.id == StockIndicator.stock_id)
             .filter(Stock.is_active == True)
-            .order_by(StockIndicator.market_cap.desc())
-            .all()
         )
+        if symbols:
+            q = q.filter(Stock.symbol.in_([s.upper() for s in symbols]))
+            logger.info("Filtering to %d specified symbols", len(symbols))
+        stocks = q.order_by(StockIndicator.market_cap.desc()).all()
         session.close()
         logger.info("Pipeline starting: %d active symbols", len(stocks))
 
