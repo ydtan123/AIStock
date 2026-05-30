@@ -408,7 +408,7 @@ class DeepEvaluationRow(Base):
     market_report: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     bull_argument: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     bear_argument: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    research_manager_decision: Mapped[Optional[str]] = mapped_column(String(24), nullable=True)
+    research_manager_decision: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     trader_plan: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     final_decision: Mapped[Optional[str]] = mapped_column(String(24), nullable=True)
     model_name: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
