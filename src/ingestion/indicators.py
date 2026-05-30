@@ -94,14 +94,16 @@ def compute_indicators(stock_id: int, since_date: date | None = None) -> int:
 
     now = datetime.utcnow()
     values = []
-    for row_date, row in df.iterrows():
+    for row in df.itertuples():
         indicators = {}
-        for k, v in row.items():
+        for k, v in row._asdict().items():
+            if k == "Index":
+                continue
             val = float(v)
             indicators[k] = None if (pd.isna(val) or val == float("inf") or val == float("-inf")) else round(val, 6)
         values.append({
             "stock_id": stock_id,
-            "date": row_date,
+            "date": row.Index,
             "indicators": indicators,
             "computed_at": now,
         })

@@ -79,15 +79,20 @@ class PageContext:
 # ── ML Pipeline Thread Infrastructure ─────────────────────────────────────────
 
 class _QueueHandler(logging.Handler):
-    def __init__(self, log_queue: queue.Queue) -> None:
+    def __init__(self, log_queue: queue.Queue, max_size: int = 10000) -> None:
         super().__init__()
         self.log_queue = log_queue
+        self.max_size = max_size
+        self._dropped = 0
 
     def emit(self, record: logging.LogRecord) -> None:
         try:
+            if self.log_queue.qsize() >= self.max_size:
+                self._dropped += 1
+                return
             self.log_queue.put_nowait(self.format(record))
-        except (queue.Full, Exception):
-            pass
+        except queue.Full:
+            self._dropped += 1
 
 
 class _StdoutToQueue:

@@ -4,12 +4,13 @@ from __future__ import annotations
 import logging
 import os
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
 from pipeline.backends.selectors import _Registry
-from pipeline.base import StepContext
+from pipeline.base import RegisteredBackend, StepContext
 
 logger = logging.getLogger(__name__)
 
@@ -26,14 +27,8 @@ class DeepEvaluation:
 DEEP_EVALUATOR_REGISTRY = _Registry("deep_evaluator")
 
 
-class DeepEvaluator(ABC):
+class DeepEvaluator(RegisteredBackend):
     name: str = ""
-
-    def __init__(self):
-        if not self.name:
-            raise TypeError(
-                f"{type(self).__name__} must define a non-empty `name` class attribute"
-            )
 
     @abstractmethod
     def evaluate(self, tickers: list[str], ctx: StepContext) -> list[DeepEvaluation]: ...
@@ -150,39 +145,48 @@ class TradingAgentsDeepEvaluator(DeepEvaluator):
             config=ta_cfg,
         )
 
-        out: list[DeepEvaluation] = []
-        for ticker in tickers:
-            ctx.logger.info("TradingAgents evaluating %s on %s", ticker, eval_date)
+        def _evaluate_one(tkr: str):
+            """Evaluate a single ticker. Returns (ticker, result) or (ticker, None, error_str)."""
             try:
-                result = graph.propagate(ticker, eval_date)
+                result = graph.propagate(tkr, eval_date)
+                return tkr, result, None
             except Exception as e:
-                ctx.logger.exception("TradingAgents failed for %s: %s", ticker, e)
-                continue
+                return tkr, None, str(e)
 
-            if isinstance(result, tuple) and len(result) == 2:
-                final_state, decision = result
-            else:
-                final_state, decision = result, None
-            final_state = final_state or {}
+        out: list[DeepEvaluation] = []
+        max_workers = min(len(tickers), 3)
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            futures = {pool.submit(_evaluate_one, t): t for t in tickers}
+            for future in as_completed(futures):
+                ticker, result, error = future.result(timeout=300)
+                if error:
+                    ctx.logger.exception("TradingAgents failed for %s: %s", ticker, error)
+                    continue
 
-            agent_outputs: dict[str, str] = {}
-            extras: dict[str, Any] = {}
-            for src_key, value in final_state.items():
-                slot = _FINAL_STATE_TO_SLOT.get(src_key)
-                if slot:
-                    agent_outputs[slot] = value if isinstance(value, str) else str(value)
-                elif src_key == "messages":
-                    pass  # LangChain message objects are not JSON-serializable
-                elif isinstance(value, (str, int, float, bool)) or value is None:
-                    extras[src_key] = value
+                if isinstance(result, tuple) and len(result) == 2:
+                    final_state, decision = result
+                else:
+                    final_state, decision = result, None
+                final_state = final_state or {}
 
-            out.append(
-                DeepEvaluation(
-                    ticker=ticker,
-                    evaluation_date=eval_date,
-                    agent_outputs=agent_outputs,
-                    extra_outputs=extras,
-                    final_decision=_extract_decision(final_state, decision),
+                agent_outputs: dict[str, str] = {}
+                extras: dict[str, Any] = {}
+                for src_key, value in final_state.items():
+                    slot = _FINAL_STATE_TO_SLOT.get(src_key)
+                    if slot:
+                        agent_outputs[slot] = value if isinstance(value, str) else str(value)
+                    elif src_key == "messages":
+                        pass  # LangChain message objects are not JSON-serializable
+                    elif isinstance(value, (str, int, float, bool)) or value is None:
+                        extras[src_key] = value
+
+                out.append(
+                    DeepEvaluation(
+                        ticker=ticker,
+                        evaluation_date=eval_date,
+                        agent_outputs=agent_outputs,
+                        extra_outputs=extras,
+                        final_decision=_extract_decision(final_state, decision),
+                    )
                 )
-            )
         return out

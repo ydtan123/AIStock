@@ -1,7 +1,8 @@
 import io
 import time
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 from typing import Optional
 
 import pandas as pd
@@ -9,34 +10,13 @@ import requests
 
 from fetcher.base import FetcherBase
 from fetcher.rate_limiter import default_limiter
+from utils import safe_date, safe_float, safe_int
 
 logger = logging.getLogger(__name__)
 
 BASE_URL = "https://www.alphavantage.co/query"
 MAX_RETRIES = 3
-
-
-def _safe_float(val) -> Optional[float]:
-    try:
-        return float(val)
-    except (TypeError, ValueError):
-        return None
-
-
-def _safe_int(val) -> Optional[int]:
-    try:
-        return int(float(val))
-    except (TypeError, ValueError):
-        return None
-
-
-def _safe_date(val) -> Optional[date]:
-    if not val or val == "None":
-        return None
-    try:
-        return datetime.strptime(val, "%Y-%m-%d").date()
-    except ValueError:
-        return None
+_LISTING_CACHE = Path("data/cache/alpha_vantage_listing.parquet")
 
 
 class AlphaVantageFetcher(FetcherBase):
@@ -93,14 +73,14 @@ class AlphaVantageFetcher(FetcherBase):
                 continue
             rows.append({
                 "date": d,
-                "open": _safe_float(vals.get("1. open")),
-                "high": _safe_float(vals.get("2. high")),
-                "low": _safe_float(vals.get("3. low")),
-                "close": _safe_float(vals.get("4. close")),
-                "adj_close": _safe_float(vals.get("5. adjusted close")),
-                "volume": _safe_int(vals.get("6. volume")),
-                "dividend_amount": _safe_float(vals.get("7. dividend amount")),
-                "split_coefficient": _safe_float(vals.get("8. split coefficient")),
+                "open": safe_float(vals.get("1. open")),
+                "high": safe_float(vals.get("2. high")),
+                "low": safe_float(vals.get("3. low")),
+                "close": safe_float(vals.get("4. close")),
+                "adj_close": safe_float(vals.get("5. adjusted close")),
+                "volume": safe_int(vals.get("6. volume")),
+                "dividend_amount": safe_float(vals.get("7. dividend amount")),
+                "split_coefficient": safe_float(vals.get("8. split coefficient")),
             })
         df = pd.DataFrame(rows)
         if not df.empty:
@@ -126,48 +106,48 @@ class AlphaVantageFetcher(FetcherBase):
             "official_site": data.get("OfficialSite"),
             "address": data.get("Address"),
             "fiscal_year_end": data.get("FiscalYearEnd"),
-            "shares_outstanding": _safe_int(data.get("SharesOutstanding")),
-            "shares_float": _safe_int(data.get("SharesFloat")),
-            "latest_quarter": _safe_date(data.get("LatestQuarter")),
-            "market_cap": _safe_int(data.get("MarketCapitalization")),
-            "ebitda": _safe_int(data.get("EBITDA")),
-            "pe_ratio": _safe_float(data.get("PERatio")),
-            "peg_ratio": _safe_float(data.get("PEGRatio")),
-            "book_value": _safe_float(data.get("BookValue")),
-            "dividend_per_share": _safe_float(data.get("DividendPerShare")),
-            "dividend_yield": _safe_float(data.get("DividendYield")),
-            "eps": _safe_float(data.get("EPS")),
-            "diluted_eps_ttm": _safe_float(data.get("DilutedEPSTTM")),
-            "revenue_per_share_ttm": _safe_float(data.get("RevenuePerShareTTM")),
-            "profit_margin": _safe_float(data.get("ProfitMargin")),
-            "operating_margin_ttm": _safe_float(data.get("OperatingMarginTTM")),
-            "roa_ttm": _safe_float(data.get("ReturnOnAssetsTTM")),
-            "roe_ttm": _safe_float(data.get("ReturnOnEquityTTM")),
-            "revenue_ttm": _safe_int(data.get("RevenueTTM")),
-            "gross_profit_ttm": _safe_int(data.get("GrossProfitTTM")),
-            "qtr_earnings_growth_yoy": _safe_float(data.get("QuarterlyEarningsGrowthYOY")),
-            "qtr_revenue_growth_yoy": _safe_float(data.get("QuarterlyRevenueGrowthYOY")),
-            "analyst_target_price": _safe_float(data.get("AnalystTargetPrice")),
-            "analyst_strong_buy": _safe_int(data.get("AnalystRatingStrongBuy")),
-            "analyst_buy": _safe_int(data.get("AnalystRatingBuy")),
-            "analyst_hold": _safe_int(data.get("AnalystRatingHold")),
-            "analyst_sell": _safe_int(data.get("AnalystRatingSell")),
-            "analyst_strong_sell": _safe_int(data.get("AnalystRatingStrongSell")),
-            "trailing_pe": _safe_float(data.get("TrailingPE")),
-            "forward_pe": _safe_float(data.get("ForwardPE")),
-            "price_to_sales_ttm": _safe_float(data.get("PriceToSalesRatioTTM")),
-            "price_to_book": _safe_float(data.get("PriceToBookRatio")),
-            "ev_to_revenue": _safe_float(data.get("EVToRevenue")),
-            "ev_to_ebitda": _safe_float(data.get("EVToEBITDA")),
-            "beta": _safe_float(data.get("Beta")),
-            "week_52_high": _safe_float(data.get("52WeekHigh")),
-            "week_52_low": _safe_float(data.get("52WeekLow")),
-            "ma_50_day": _safe_float(data.get("50DayMovingAverage")),
-            "ma_200_day": _safe_float(data.get("200DayMovingAverage")),
-            "pct_insiders": _safe_float(data.get("PercentInsiders")),
-            "pct_institutions": _safe_float(data.get("PercentInstitutions")),
-            "dividend_date": _safe_date(data.get("DividendDate")),
-            "ex_dividend_date": _safe_date(data.get("ExDividendDate")),
+            "shares_outstanding": safe_int(data.get("SharesOutstanding")),
+            "shares_float": safe_int(data.get("SharesFloat")),
+            "latest_quarter": safe_date(data.get("LatestQuarter")),
+            "market_cap": safe_int(data.get("MarketCapitalization")),
+            "ebitda": safe_int(data.get("EBITDA")),
+            "pe_ratio": safe_float(data.get("PERatio")),
+            "peg_ratio": safe_float(data.get("PEGRatio")),
+            "book_value": safe_float(data.get("BookValue")),
+            "dividend_per_share": safe_float(data.get("DividendPerShare")),
+            "dividend_yield": safe_float(data.get("DividendYield")),
+            "eps": safe_float(data.get("EPS")),
+            "diluted_eps_ttm": safe_float(data.get("DilutedEPSTTM")),
+            "revenue_per_share_ttm": safe_float(data.get("RevenuePerShareTTM")),
+            "profit_margin": safe_float(data.get("ProfitMargin")),
+            "operating_margin_ttm": safe_float(data.get("OperatingMarginTTM")),
+            "roa_ttm": safe_float(data.get("ReturnOnAssetsTTM")),
+            "roe_ttm": safe_float(data.get("ReturnOnEquityTTM")),
+            "revenue_ttm": safe_int(data.get("RevenueTTM")),
+            "gross_profit_ttm": safe_int(data.get("GrossProfitTTM")),
+            "qtr_earnings_growth_yoy": safe_float(data.get("QuarterlyEarningsGrowthYOY")),
+            "qtr_revenue_growth_yoy": safe_float(data.get("QuarterlyRevenueGrowthYOY")),
+            "analyst_target_price": safe_float(data.get("AnalystTargetPrice")),
+            "analyst_strong_buy": safe_int(data.get("AnalystRatingStrongBuy")),
+            "analyst_buy": safe_int(data.get("AnalystRatingBuy")),
+            "analyst_hold": safe_int(data.get("AnalystRatingHold")),
+            "analyst_sell": safe_int(data.get("AnalystRatingSell")),
+            "analyst_strong_sell": safe_int(data.get("AnalystRatingStrongSell")),
+            "trailing_pe": safe_float(data.get("TrailingPE")),
+            "forward_pe": safe_float(data.get("ForwardPE")),
+            "price_to_sales_ttm": safe_float(data.get("PriceToSalesRatioTTM")),
+            "price_to_book": safe_float(data.get("PriceToBookRatio")),
+            "ev_to_revenue": safe_float(data.get("EVToRevenue")),
+            "ev_to_ebitda": safe_float(data.get("EVToEBITDA")),
+            "beta": safe_float(data.get("Beta")),
+            "week_52_high": safe_float(data.get("52WeekHigh")),
+            "week_52_low": safe_float(data.get("52WeekLow")),
+            "ma_50_day": safe_float(data.get("50DayMovingAverage")),
+            "ma_200_day": safe_float(data.get("200DayMovingAverage")),
+            "pct_insiders": safe_float(data.get("PercentInsiders")),
+            "pct_institutions": safe_float(data.get("PercentInstitutions")),
+            "dividend_date": safe_date(data.get("DividendDate")),
+            "ex_dividend_date": safe_date(data.get("ExDividendDate")),
         }
 
     def get_income_statement(self, symbol: str) -> pd.DataFrame:
@@ -179,19 +159,19 @@ class AlphaVantageFetcher(FetcherBase):
         rows = []
         for r in reports:
             rows.append({
-                "fiscal_date": _safe_date(r.get("fiscalDateEnding")),
-                "total_revenue": _safe_float(r.get("totalRevenue")),
-                "gross_profit": _safe_float(r.get("grossProfit")),
-                "cost_of_revenue": _safe_float(r.get("costOfRevenue")),
-                "operating_income": _safe_float(r.get("operatingIncome")),
-                "operating_expenses": _safe_float(r.get("operatingExpenses")),
-                "net_income": _safe_float(r.get("netIncome")),
-                "ebitda": _safe_float(r.get("ebitda")),
-                "ebit": _safe_float(r.get("ebit")),
-                "interest_expense": _safe_float(r.get("interestExpense")),
-                "income_tax_expense": _safe_float(r.get("incomeTaxExpense")),
-                "depreciation_amortization": _safe_float(r.get("depreciationAndAmortization")),
-                "shares_outstanding_is": _safe_float(r.get("commonStockSharesOutstanding")),
+                "fiscal_date": safe_date(r.get("fiscalDateEnding")),
+                "total_revenue": safe_float(r.get("totalRevenue")),
+                "gross_profit": safe_float(r.get("grossProfit")),
+                "cost_of_revenue": safe_float(r.get("costOfRevenue")),
+                "operating_income": safe_float(r.get("operatingIncome")),
+                "operating_expenses": safe_float(r.get("operatingExpenses")),
+                "net_income": safe_float(r.get("netIncome")),
+                "ebitda": safe_float(r.get("ebitda")),
+                "ebit": safe_float(r.get("ebit")),
+                "interest_expense": safe_float(r.get("interestExpense")),
+                "income_tax_expense": safe_float(r.get("incomeTaxExpense")),
+                "depreciation_amortization": safe_float(r.get("depreciationAndAmortization")),
+                "shares_outstanding_is": safe_float(r.get("commonStockSharesOutstanding")),
             })
         df = pd.DataFrame(rows).dropna(subset=["fiscal_date"])
         df.sort_values("fiscal_date", inplace=True)
@@ -206,21 +186,21 @@ class AlphaVantageFetcher(FetcherBase):
         rows = []
         for r in reports:
             rows.append({
-                "fiscal_date": _safe_date(r.get("fiscalDateEnding")),
-                "total_assets": _safe_float(r.get("totalAssets")),
-                "total_current_assets": _safe_float(r.get("totalCurrentAssets")),
-                "cash_and_equivalents": _safe_float(r.get("cashAndCashEquivalentsAtCarryingValue")),
-                "inventory": _safe_float(r.get("inventory")),
-                "current_receivables": _safe_float(r.get("currentNetReceivables")),
-                "total_current_liabilities": _safe_float(r.get("totalCurrentLiabilities")),
-                "total_liabilities": _safe_float(r.get("totalLiabilities")),
-                "short_term_debt": _safe_float(r.get("shortTermDebt")),
-                "long_term_debt": _safe_float(r.get("longTermDebt")),
-                "total_equity": _safe_float(r.get("totalShareholderEquity")),
-                "retained_earnings": _safe_float(r.get("retainedEarnings")),
-                "goodwill": _safe_float(r.get("goodwill")),
-                "intangible_assets": _safe_float(r.get("intangibleAssets")),
-                "shares_outstanding_bs": _safe_float(r.get("commonStockSharesOutstanding")),
+                "fiscal_date": safe_date(r.get("fiscalDateEnding")),
+                "total_assets": safe_float(r.get("totalAssets")),
+                "total_current_assets": safe_float(r.get("totalCurrentAssets")),
+                "cash_and_equivalents": safe_float(r.get("cashAndCashEquivalentsAtCarryingValue")),
+                "inventory": safe_float(r.get("inventory")),
+                "current_receivables": safe_float(r.get("currentNetReceivables")),
+                "total_current_liabilities": safe_float(r.get("totalCurrentLiabilities")),
+                "total_liabilities": safe_float(r.get("totalLiabilities")),
+                "short_term_debt": safe_float(r.get("shortTermDebt")),
+                "long_term_debt": safe_float(r.get("longTermDebt")),
+                "total_equity": safe_float(r.get("totalShareholderEquity")),
+                "retained_earnings": safe_float(r.get("retainedEarnings")),
+                "goodwill": safe_float(r.get("goodwill")),
+                "intangible_assets": safe_float(r.get("intangibleAssets")),
+                "shares_outstanding_bs": safe_float(r.get("commonStockSharesOutstanding")),
             })
         df = pd.DataFrame(rows).dropna(subset=["fiscal_date"])
         df.sort_values("fiscal_date", inplace=True)
@@ -235,10 +215,10 @@ class AlphaVantageFetcher(FetcherBase):
         rows = []
         for r in reports:
             rows.append({
-                "fiscal_date": _safe_date(r.get("fiscalDateEnding")),
-                "operating_cashflow": _safe_float(r.get("operatingCashflow")),
-                "capital_expenditures": _safe_float(r.get("capitalExpenditures")),
-                "dividend_payout": _safe_float(
+                "fiscal_date": safe_date(r.get("fiscalDateEnding")),
+                "operating_cashflow": safe_float(r.get("operatingCashflow")),
+                "capital_expenditures": safe_float(r.get("capitalExpenditures")),
+                "dividend_payout": safe_float(
                     r.get("dividendPayoutCommonStock") or r.get("dividendPayout")
                 ),
             })
@@ -264,17 +244,17 @@ class AlphaVantageFetcher(FetcherBase):
             except (TypeError, ValueError):
                 surp_pct_val = None
             rows.append({
-                "fiscal_date": _safe_date(r.get("fiscalDateEnding")),
-                "reported_eps": _safe_float(r.get("reportedEPS")),
-                "estimated_eps": _safe_float(r.get("estimatedEPS")),
-                "eps_surprise": _safe_float(r.get("surprise")),
+                "fiscal_date": safe_date(r.get("fiscalDateEnding")),
+                "reported_eps": safe_float(r.get("reportedEPS")),
+                "estimated_eps": safe_float(r.get("estimatedEPS")),
+                "eps_surprise": safe_float(r.get("surprise")),
                 "eps_surprise_pct": surp_pct_val,
             })
         df = pd.DataFrame(rows).dropna(subset=["fiscal_date"])
         df.sort_values("fiscal_date", inplace=True)
         return df
 
-    def get_listing(self) -> pd.DataFrame:
+    def _fetch_listing_from_api(self) -> pd.DataFrame:
         text = self._get({"function": "LISTING_STATUS", "datatype": "csv"})
         df = pd.read_csv(io.StringIO(text))
         df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
@@ -285,3 +265,14 @@ class AlphaVantageFetcher(FetcherBase):
         return df[["symbol", "name", "exchange", "assettype"]].rename(
             columns={"assettype": "asset_type"}
         )
+
+    def get_listing(self) -> pd.DataFrame:
+        ttl = timedelta(hours=6)
+        if _LISTING_CACHE.exists():
+            mtime = datetime.fromtimestamp(_LISTING_CACHE.stat().st_mtime, tz=timezone.utc)
+            if datetime.now(timezone.utc) - mtime < ttl:
+                return pd.read_parquet(_LISTING_CACHE)
+        df = self._fetch_listing_from_api()
+        _LISTING_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        df.to_parquet(_LISTING_CACHE, index=False)
+        return df

@@ -21,7 +21,7 @@ def get_engine():
     global _engine
     if _engine is None:
         url = _url or load_config()["database"]["url"]
-        _engine = create_engine(url, pool_pre_ping=True, pool_recycle=3600, pool_size=8, max_overflow=4)
+        _engine = create_engine(url, pool_pre_ping=True, pool_recycle=3600, pool_size=15, max_overflow=10)
     return _engine
 
 

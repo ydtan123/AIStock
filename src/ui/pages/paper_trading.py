@@ -47,7 +47,7 @@ def render(ctx) -> None:
         wdf = pd.read_csv(weights_path)
         wdf["date"] = pd.to_datetime(wdf["date"]).dt.date
         latest = wdf[wdf["date"] == wdf["date"].max()]
-        target_weights = {str(r["gvkey"]): float(r["weight"]) for _, r in latest.iterrows()}
+        target_weights = dict(zip(latest["gvkey"].astype(str), latest["weight"].astype(float)))
     except Exception as exc:
         ctx.st.error(f"Cannot read weights: {exc}")
         return

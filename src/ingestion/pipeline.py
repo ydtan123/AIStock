@@ -99,43 +99,30 @@ def _fetch_and_store_prices(fetcher: FetcherBase, stock: Stock,
     When *max_date* is provided (from prefetch), skips the per-stock MAX(date)
     query and skips opening a session entirely if no fetch is needed.
     """
-    if max_date is None:
-        session = get_session()
-        try:
+    start: date
+    end = date.today()
+
+    session = get_session()
+    try:
+        if max_date is None:
             max_date = session.execute(
                 text("SELECT MAX(date) FROM daily_prices WHERE stock_id = :sid"),
                 {"sid": stock.id},
             ).scalar()
-        finally:
-            session.close()
 
-    start = (max_date + timedelta(days=1)) if max_date else DEFAULT_START
-    end = date.today()
+        start = (max_date + timedelta(days=1)) if max_date else DEFAULT_START
 
-    if start > end:
-        return 0, max_date
-
-    session = get_session()
-    try:
+        if start > end:
+            return 0, max_date
 
         df = fetcher.get_daily(stock.symbol, start, end)
         if df.empty:
             return 0, max_date
 
         values = []
-        for _, row in df.iterrows():
-            values.append({
-                "stock_id": stock.id,
-                "date": row["date"],
-                "open": row.get("open"),
-                "high": row.get("high"),
-                "low": row.get("low"),
-                "close": row.get("close"),
-                "adj_close": row.get("adj_close"),
-                "volume": row.get("volume"),
-                "dividend_amount": row.get("dividend_amount"),
-                "split_coefficient": row.get("split_coefficient"),
-            })
+        for record in df.to_dict(orient="records"):
+            record["stock_id"] = stock.id
+            values.append(record)
 
         count = 0
         batch_size = 100

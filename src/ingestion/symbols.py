@@ -29,29 +29,31 @@ def refresh_symbols(fetcher: FetcherBase) -> int:
     df = fetcher.get_listing()
     logger.info("Got %d active symbols", len(df))
 
+    BATCH_SIZE = 200
+    all_values = []
+    for row in df.itertuples():
+        all_values.append({
+            "symbol": row.symbol,
+            "name": _clean(getattr(row, "name", None)),
+            "asset_type": _clean(getattr(row, "asset_type", None)),
+            "exchange": _clean(getattr(row, "exchange", None)),
+            "is_active": False,
+        })
+
     session = get_session()
     try:
-        count = 0
-        for _, row in df.iterrows():
-            name = _clean(row.get("name"))
-            asset_type = _clean(row.get("asset_type"))
-            exchange = _clean(row.get("exchange"))
-            stmt = insert(Stock).values(
-                symbol=row["symbol"],
-                name=name,
-                asset_type=asset_type,
-                exchange=exchange,
-                is_active=False,
-            ).on_duplicate_key_update(
-                name=name,
-                asset_type=asset_type,
-                exchange=exchange,
+        for i in range(0, len(all_values), BATCH_SIZE):
+            batch = all_values[i:i + BATCH_SIZE]
+            stmt = insert(Stock).values(batch)
+            stmt = stmt.on_duplicate_key_update(
+                name=stmt.inserted.name,
+                asset_type=stmt.inserted.asset_type,
+                exchange=stmt.inserted.exchange,
             )
             session.execute(stmt)
-            count += 1
         session.commit()
-        logger.info("Upserted %d symbols", count)
-        return count
+        logger.info("Upserted %d symbols", len(all_values))
+        return len(all_values)
     except Exception:
         session.rollback()
         raise
