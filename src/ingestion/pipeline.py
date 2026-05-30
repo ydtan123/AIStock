@@ -320,6 +320,12 @@ def _needs_full_backfill(first_indicator_date: Optional[date] = None,
 # Once set, all subsequent news fetches use Alpha Vantage instead.
 _google_news_rate_limited = False
 
+# Progress tracking for per-stock log lines.
+import threading as _threading  # noqa: E402 — needs to be after import block but before functions
+_progress_lock = _threading.Lock()
+_progress_count = 0
+_progress_total = 0
+
 
 def _fetch_stock_news(symbol: str, fetcher: FetcherBase | None = None) -> int:
     """Fetch last week's news for *symbol*.
@@ -402,8 +408,13 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
         if force or prices_inserted > 0:
             result["news"] = _fetch_stock_news(stock.symbol, fetcher=fetcher)
 
+        with _progress_lock:
+            _progress_count += 1
+            current = _progress_count
+
         logger.info(
-            "%-6s  prices=%-4d  indicators=%-4d  overview=%-9s  news=%-5d",
+            "[%d/%d] %-6s  prices=%-4d  indicators=%-4d  overview=%-9s  news=%-5d",
+            current, _progress_total,
             stock.symbol, prices_inserted, result["indicators"],
             "refreshed" if refreshed else "skipped",
             result["news"],
@@ -441,7 +452,12 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False) -> dict:
 
         prefetch = _prefetch_stock_dates([s.id for s in stocks])
 
-        total = len(stocks)
+        global _progress_count, _progress_total
+        with _progress_lock:
+            _progress_count = 0
+            _progress_total = len(stocks)
+        total = _progress_total
+
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
             futures = {
                 pool.submit(_process_symbol, fetcher, s, force, prefetch): s
