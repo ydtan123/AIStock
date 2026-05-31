@@ -202,3 +202,23 @@ Graph auto-updates on file changes via hooks. 7 communities, 0 cross-community e
 - Issues: GitHub Issues on `ydtan123/AIStock` — see `docs/agents/issue-tracker.md`
 - Triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`
 - Domain docs: `CONTEXT.md` + `docs/adr/` at repo root
+
+
+## Security Audit Checklist 
+
+## Security / Performance Audits — On-Demand Only
+
+Security audits and performance audits are **gated**: only run when the user explicitly requests them via `/security-audit`, `/performance-audit`, or an explicit "run a security audit" / "run a performance audit" command. Do NOT auto-trigger on code changes, edits, or session start.
+
+When explicitly requested:
+- **Security audit checklist**: hardcoded secrets in .yaml/.env/.py, XSS in Streamlit, .env in .gitignore. Output to docs/security-audit.md.
+- **Performance audit categories**: DB/N+1 queries, caching gaps, Streamlit re-renders, I/O blocking, algorithmic complexity. Output to docs/performance-audit.md with severity ratings.
+- **Test coverage**: `pytest --cov --cov-report=term-missing` → identify untested modules → docs/coverage-gap-analysis.md.
+
+## Output Conventions
+
+All reports write to docs/ as markdown, never chat-only. JSON alongside .md for structured outputs.
+
+## Project Overview
+
+Python/Streamlit (AIStock). Use pytest, Streamlit patterns, parallel agents for 50+ file exploration.
