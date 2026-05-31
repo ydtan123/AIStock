@@ -23,7 +23,12 @@ def _count_by_opinion(opinions):
 
 
 def _write_report(evaluations, report_dir, backend_name):
-    """Write per-agent detailed analysis as a markdown report."""
+    """Write per-ticker fast evaluation as markdown reports.
+
+    Creates:
+        <TICKER>/fast_evaluation/fast_evaluation.md  — per-ticker report
+        fast_evaluation.md                            — combined all-ticker report (legacy)
+    """
     report_path = report_dir / "fast_evaluation.md"
     lines = [
         f"# Fast Evaluation Report — {backend_name}",
@@ -45,6 +50,49 @@ def _write_report(evaluations, report_dir, backend_name):
             else "🟡 Neutral"
         )
 
+        sorted_ops = sorted(ev.opinions, key=lambda o: (
+            {"bullish": 0, "bearish": 1, "neutral": 2}.get(o.opinion, 3),
+            -o.confidence
+        ))
+
+        ticker_lines = [
+            f"# Fast Evaluation: {ev.ticker}",
+            "",
+            f"**Backend:** {backend_name}",
+            f"**Consensus:** {direction} ({consensus:+.4f})",
+            f"**Period:** {ev.start_date} → {ev.end_date}",
+            "",
+            "---",
+            "",
+            "## Analyst Opinions",
+            "",
+            "| | Count | Pct |",
+            "|---|---|---|",
+        ]
+        if total:
+            ticker_lines.append(f"| 🟢 Bullish | {pos} | {pos/total*100:.0f}% |")
+            ticker_lines.append(f"| 🔴 Bearish | {neg} | {neg/total*100:.0f}% |")
+            ticker_lines.append(f"| 🟡 Neutral | {neu} | {neu/total*100:.0f}% |")
+        ticker_lines.append("")
+        for op in sorted_ops:
+            emoji = {"bullish": "🟢", "bearish": "🔴", "neutral": "🟡"}.get(op.opinion, "⚪")
+            ticker_lines.append(
+                f"### {emoji} {op.analyst_name} — {op.opinion.upper()}"
+                f" (confidence: {op.confidence:.0f}%)"
+            )
+            ticker_lines.append("")
+            if op.reasoning:
+                ticker_lines.append(op.reasoning.strip())
+            ticker_lines.append("")
+
+        # Per-ticker output under <TICKER>/fast_evaluation/
+        ticker_dir = report_dir / ev.ticker / "fast_evaluation"
+        ticker_dir.mkdir(parents=True, exist_ok=True)
+        (ticker_dir / "fast_evaluation.md").write_text(
+            "\n".join(ticker_lines), encoding="utf-8"
+        )
+
+        # Combined report
         lines.append(f"## {ev.ticker} — Consensus: {direction} ({consensus:+.4f})")
         lines.append("")
         lines.append("| | Count | Pct |")
@@ -57,10 +105,6 @@ def _write_report(evaluations, report_dir, backend_name):
         lines.append(f"**Period:** {ev.start_date} → {ev.end_date}")
         lines.append("")
 
-        sorted_ops = sorted(ev.opinions, key=lambda o: (
-            {"bullish": 0, "bearish": 1, "neutral": 2}.get(o.opinion, 3),
-            -o.confidence
-        ))
         for op in sorted_ops:
             emoji = {"bullish": "🟢", "bearish": "🔴", "neutral": "🟡"}.get(op.opinion, "⚪")
             lines.append(

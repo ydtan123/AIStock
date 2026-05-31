@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import logging
 import traceback
 
 from sqlalchemy import desc
@@ -49,32 +50,140 @@ def _extract_key_point(text: str, max_chars: int = 200) -> str:
     return cut.rsplit(" ", 1)[0] + "..."
 
 
-def _write_report(evaluations, report_dir, backend_name):
-    """Write per-ticker deep evaluation as markdown reports.
+def _get_summary_llm(cfg: dict | None):
+    """Create a lightweight LLM for report summarisation.
 
-    Creates:
-        deep_evaluation_<TICKER>.md  — per-ticker full report with summary + API stats
-        deep_evaluation.md           — combined all-ticker report
+    Reads ``summary_model`` / ``summary_provider`` from the deep_evaluation
+    trading_agents config.  Defaults to ``deepseek-chat`` / ``deepseek`` so
+    no thinking-mode overhead is incurred.  Returns ``None`` if config is
+    missing or the LLM cannot be created — callers fall back to
+    ``_extract_key_point``.
     """
+    if cfg is None:
+        return None
+    ta_cfg = cfg.get("deep_evaluation", {}).get("trading_agents", {})
+    provider = ta_cfg.get("summary_provider", "deepseek")
+    model = ta_cfg.get("summary_model", "deepseek-chat")
+    try:
+        from tradingagents.llm_clients import create_llm_client
+        client = create_llm_client(provider, model)
+        return client.get_llm()
+    except Exception:
+        return None
+
+
+def _summarise_report(
+    report_text: str,
+    llm,
+    label: str,
+    logger: logging.Logger | None = None,
+) -> list[str]:
+    """Call the summarisation LLM and return exactly 3 bullet-point strings.
+
+    Mirrors ``_summarise_report`` in ``TradingAgents/cli/main.py``.
+    Falls back to text truncation on any failure.
+    """
+    if not report_text or not report_text.strip():
+        return ["• (no report generated)"]
+    prompt = (
+        "Summarize the following analyst report in exactly 3 concise bullet points.\n"
+        "Each bullet must be a single short sentence. "
+        "Use '•' as the bullet character. "
+        "Output only the 3 bullets — no preamble, no numbering, no extra text.\n\n"
+        f"{report_text}"
+    )
+    try:
+        response = llm.invoke(prompt)
+        raw = response.content if hasattr(response, "content") else str(response)
+    except Exception as exc:
+        if logger:
+            logger.warning("Summarisation failed for %s: %s", label, exc)
+        return [_extract_key_point(report_text)]
+    bullets = [ln.strip() for ln in raw.strip().splitlines() if ln.strip()]
+    bullets = [b if b.startswith("•") else f"• {b}" for b in bullets]
+    if len(bullets) < 3:
+        bullets += ["• (no additional data)"] * (3 - len(bullets))
+    return bullets[:3]
+
+
+# Per-section subfolder layout mirroring TradingAgents CLI's save_report_to_disk
+_SECTION_LAYOUT: dict[str, tuple[str, str]] = {
+    "market_report":              ("1_analysts", "market.md"),
+    "social_report":              ("1_analysts", "social.md"),
+    "news_report":                ("1_analysts", "news.md"),
+    "fundamentals_report":        ("1_analysts", "fundamentals.md"),
+    "bull_argument":              ("2_research", "bull_argument.md"),
+    "bear_argument":              ("2_research", "bear_argument.md"),
+    "research_manager_decision":  ("2_research", "manager_decision.md"),
+    "trader_plan":                ("3_trading", "trader_plan.md"),
+    "risk_aggressive":            ("4_risk", "aggressive.md"),
+    "risk_conservative":          ("4_risk", "conservative.md"),
+    "risk_neutral":               ("4_risk", "neutral.md"),
+    "risk_manager_decision":      ("4_risk", "risk_manager_decision.md"),
+}
+
+
+def _write_report(evaluations, report_dir, backend_name, cfg=None):
+    """Write per-ticker deep evaluation reports with organised subfolders.
+
+    Creates per-ticker directory structure::
+
+        <run_id>/<TICKER>/
+        ├── 1_analysts/       market.md, social.md, news.md, fundamentals.md
+        ├── 2_research/        bull_argument.md, bear_argument.md, manager_decision.md
+        ├── 3_trading/         trader_plan.md
+        ├── 4_risk/            aggressive.md, conservative.md, neutral.md,
+        │                      risk_manager_decision.md
+        ├── summary.md         ← 3-bullet per-section summary + decision + API stats
+        └── complete_report.md ← full concatenated report
+
+    Also writes legacy flat files (``deep_evaluation_<TICKER>.md``,
+    ``deep_evaluation.md``) at *report_dir* for backward compatibility.
+    """
+    summary_llm = _get_summary_llm(cfg)
+    logger = logging.getLogger(__name__)
+    summary_call_count = 0
+
+    _EMOJI = {"BUY": "\U0001f7e2", "SELL": "\U0001f534", "HOLD": "\U0001f7e1"}
+
     for ev in evaluations:
         ticker = ev.ticker
         decision = ev.final_decision or "N/A"
-        emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "🟡"}.get(decision.upper(), "⚪")
+        emoji = _EMOJI.get(decision.upper(), "⚪")
+        ticker_dir = report_dir / ticker / "deep_evaluation"
 
-        # Build summary table of key points from each analyst
-        summary_rows: list[tuple[str, str, str]] = []
+        # --- write per-section files into organised subfolders ---
+        for slot_key, (subdir, filename) in _SECTION_LAYOUT.items():
+            content = ev.agent_outputs.get(slot_key, "").strip()
+            if not content:
+                continue
+            folder = ticker_dir / subdir
+            folder.mkdir(parents=True, exist_ok=True)
+            (folder / filename).write_text(content, encoding="utf-8")
+
+        # --- LLM 3-bullet summary per section ---
+        bullet_rows: list[tuple[str, str, str]] = []
         for slot_key, section_title in _REPORT_SECTIONS:
             content = ev.agent_outputs.get(slot_key, "").strip()
             if not content:
                 continue
-            summary_rows.append((section_title, _extract_key_point(content), slot_key))
+            if summary_llm:
+                try:
+                    bullets = _summarise_report(content, summary_llm, f"{ticker}/{slot_key}", logger)
+                    summary_call_count += 1
+                except Exception:
+                    bullets = [_extract_key_point(content)]
+            else:
+                bullets = [_extract_key_point(content)]
+            bullet_rows.append((section_title, "  \n".join(bullets), slot_key))
 
-        # Count sections as proxy for LLM API calls (each section = 1+ calls)
-        analyst_sections = [k for k, _ in _REPORT_SECTIONS[:4] if ev.agent_outputs.get(k, "").strip()]
-        debate_sections = [k for k, _ in _REPORT_SECTIONS[4:] if ev.agent_outputs.get(k, "").strip()]
-        total_sections = len(summary_rows)
+        # --- API call stats ---
+        api_stats = ev.extra_outputs.get("api_call_stats", {})
+        per_node: dict = api_stats.get("per_node", {})
+        total_analysis_calls = api_stats.get("total_llm_calls", len(per_node))
 
-        lines = [
+        # --- summary.md ---
+        summary_lines = [
             f"# Deep Evaluation: {ticker}",
             "",
             f"**Backend:** {backend_name}",
@@ -85,48 +194,75 @@ def _write_report(evaluations, report_dir, backend_name):
             "",
             "## 📊 Summary of Key Points",
             "",
-            "| Analyst | Key Point |",
-            "|---------|-----------|",
+            "| Analyst | Key Points |",
+            "|---------|------------|",
         ]
-        for title, point, _ in summary_rows:
-            # Escape pipes in content for markdown table
-            safe_point = point.replace("|", "\\|").replace("\n", " ")
-            lines.append(f"| {title} | {safe_point} |")
+        for title, points, _ in bullet_rows:
+            safe = points.replace("|", "\\|").replace("\n", "  \n")
+            summary_lines.append(f"| {title} | {safe} |")
 
-        lines.extend([
+        summary_lines.extend([
             "",
             "## 📈 LLM API Call Statistics",
             "",
             f"| Category | Count |",
             f"|----------|-------|",
-            f"| Analyst agents (market/social/news/fundamentals) | {len(analyst_sections)} completed |",
-            f"| Debate & decision agents | {len(debate_sections)} completed |",
-            f"| **Total agent sections** | **{total_sections}** |",
+            f"| Analysis-phase LLM calls (per agent) | {total_analysis_calls} |",
+            f"| Summarisation LLM calls | {summary_call_count} |",
+            f"| **Total** | **{total_analysis_calls + summary_call_count}** |",
             "",
-            "_Note: Each section represents 1+ LLM API calls. "
-            "Analysts may make multiple tool-calling rounds (API calls per round). "
-            "Debate rounds are configured via max_debate_rounds / max_risk_discuss_rounds._",
+        ])
+        if per_node:
+            summary_lines.append("### Analysis-phase breakdown by agent")
+            summary_lines.append("")
+            summary_lines.append("| Agent / Node | Calls |")
+            summary_lines.append("|-------------|-------|")
+            for node, count in sorted(per_node.items(), key=lambda x: -x[1]):
+                summary_lines.append(f"| {node} | {count} |")
+            summary_lines.append("")
+        else:
+            sections_with_content = sum(1 for _, _, _ in bullet_rows)
+            summary_lines.extend([
+                "_Note: Per-agent breakdown unavailable. "
+                f"{sections_with_content} agent sections completed._",
+                "",
+            ])
+
+        (ticker_dir / "summary.md").write_text(
+            "\n".join(summary_lines), encoding="utf-8"
+        )
+
+        # --- complete_report.md (all sections concatenated) ---
+        complete = [
+            f"# {ticker} — Complete Analysis Report",
+            "",
+            f"**Backend:** {backend_name}",
+            f"**Date:** {ev.evaluation_date}",
+            f"**Final Decision:** {emoji} {decision}",
             "",
             "---",
             "",
-        ])
-
+        ]
         for slot_key, section_title in _REPORT_SECTIONS:
             content = ev.agent_outputs.get(slot_key, "").strip()
             if not content:
                 continue
-            lines.append(f"## {section_title}")
-            lines.append("")
-            lines.append(content)
-            lines.append("")
-            lines.append("---")
-            lines.append("")
-
-        (report_dir / f"deep_evaluation_{ticker}.md").write_text(
-            "\n".join(lines), encoding="utf-8"
+            complete.append(f"## {section_title}")
+            complete.append("")
+            complete.append(content)
+            complete.append("")
+            complete.append("---")
+            complete.append("")
+        (ticker_dir / "complete_report.md").write_text(
+            "\n".join(complete), encoding="utf-8"
         )
 
-    # Combined all-ticker report
+        # --- legacy flat per-ticker report ---
+        (report_dir / f"deep_evaluation_{ticker}.md").write_text(
+            "\n".join(complete), encoding="utf-8"
+        )
+
+    # --- legacy combined all-ticker report ---
     combined = [
         f"# Deep Evaluation Report — {backend_name}",
         "",
@@ -138,7 +274,7 @@ def _write_report(evaluations, report_dir, backend_name):
     ]
     for ev in evaluations:
         decision = ev.final_decision or "N/A"
-        emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "🟡"}.get(decision.upper(), "⚪")
+        emoji = _EMOJI.get(decision.upper(), "⚪")
         combined.append(f"## {ev.ticker} — {emoji} {decision}")
         combined.append("")
         for slot_key, section_title in _REPORT_SECTIONS:
@@ -232,7 +368,7 @@ class DeepEvaluationStep(PipelineStep):
             session.add_all(rows)
             session.commit()
 
-        report_path = _write_report(evaluations, ctx.report_dir, backend_name)
+        report_path = _write_report(evaluations, ctx.report_dir, backend_name, ctx.cfg)
         ctx.logger.info("Deep evaluation report saved → %s", report_path)
 
         ev_list = [

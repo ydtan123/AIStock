@@ -139,10 +139,15 @@ class TradingAgentsDeepEvaluator(DeepEvaluator):
         }
         ta_cfg = {k: v for k, v in ta_cfg.items() if v is not None}
 
+        from tradingagents.graph.call_tracker import PerAgentCallTracker
+
+        tracker = PerAgentCallTracker()
+
         graph = _build_graph(
             selected_analysts=analysts,
             debug=sub.get("debug", False),
             config=ta_cfg,
+            callbacks=[tracker],
         )
 
         def _evaluate_one(tkr: str):
@@ -189,4 +194,10 @@ class TradingAgentsDeepEvaluator(DeepEvaluator):
                         final_decision=_extract_decision(final_state, decision),
                     )
                 )
+
+        # Attach per-agent LLM call counts to each evaluation for reporting
+        snap = tracker.snapshot()
+        for ev in out:
+            ev.extra_outputs["api_call_stats"] = snap
+
         return out
