@@ -350,6 +350,8 @@ class DeepEvaluationStep(PipelineStep):
             rows: list[DeepEvaluationRow] = []
             for ev in evaluations:
                 slot_kwargs = {slot: ev.agent_outputs.get(slot) for slot in _NAMED_SLOTS}
+                overflow = {k: v for k, v in ev.agent_outputs.items() if k not in _NAMED_SLOTS}
+                merged_extras = {**overflow, **(ev.extra_outputs or {})}
                 eval_date = (
                     dt.datetime.fromisoformat(ev.evaluation_date)
                     if "T" in ev.evaluation_date
@@ -360,7 +362,7 @@ class DeepEvaluationStep(PipelineStep):
                     ticker=ev.ticker,
                     backend=backend_name,
                     evaluation_date=eval_date,
-                    extra_outputs=ev.extra_outputs,
+                    extra_outputs=merged_extras,
                     final_decision=ev.final_decision,
                     model_name=evaluator_cfg.get("model_name"),
                     **slot_kwargs,

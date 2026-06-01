@@ -55,7 +55,7 @@ def render(ctx) -> None:
         decision, ("#2a2a2a", "#cccccc", f"⚪ {de['final_decision'] or '—'}")
     )
 
-    # ── Summary ───────────────────────────────────────────────────────────────
+    # ── 1. Summary ────────────────────────────────────────────────────────────
     ctx.st.divider()
     ctx.st.subheader(f"{ticker} — Summary")
     ctx.st.markdown(
@@ -66,16 +66,32 @@ def render(ctx) -> None:
     )
     ctx.st.write("")
 
-    # ── Detail sections ───────────────────────────────────────────────────────
+    extra = de.get("extra_outputs") or {}
+
+    # ── 2. Research Manager Decision ──────────────────────────────────────────
     ctx.st.divider()
-    for title, content, expanded in [
-        ("📋 Research Manager Decision", de["research_manager_decision"], True),
-        ("📈 Trader Plan",               de["trader_plan"],               True),
-        ("📊 Market Report",             de["market_report"],             False),
-        ("🐂 Bull Argument",             de["bull_argument"],             False),
-        ("🐻 Bear Argument",             de["bear_argument"],             False),
-    ]:
-        if not content:
-            continue
-        with ctx.st.expander(title, expanded=expanded):
-            ctx.st.markdown(content)
+    _section(ctx, "📋 Research Manager Decision", de["research_manager_decision"], expanded=True)
+
+    # ── 3. Complete Report ────────────────────────────────────────────────────
+    ctx.st.divider()
+    _section(ctx, "📊 Market Report",      de["market_report"],              expanded=False)
+
+    # ── 4. Analysts' Opinions ─────────────────────────────────────────────────
+    ctx.st.divider()
+    _section(ctx, "🐂 Bull Argument",      de["bull_argument"],              expanded=False)
+    _section(ctx, "🐻 Bear Argument",      de["bear_argument"],              expanded=False)
+
+    # ── 5. Trader Plan & Risk ─────────────────────────────────────────────────
+    ctx.st.divider()
+    _section(ctx, "📈 Trader Plan",                   de["trader_plan"],                    expanded=True)
+    _section(ctx, "⚡ Risk Debate — Aggressive",      extra.get("risk_aggressive"),         expanded=False)
+    _section(ctx, "🛡️ Risk Debate — Conservative",   extra.get("risk_conservative"),       expanded=False)
+    _section(ctx, "⚖️ Risk Debate — Neutral",         extra.get("risk_neutral"),            expanded=False)
+    _section(ctx, "🏁 Risk Manager Final Decision",   extra.get("risk_manager_decision"),   expanded=True)
+
+
+def _section(ctx, title: str, content: str | None, *, expanded: bool) -> None:
+    if not content:
+        return
+    with ctx.st.expander(title, expanded=expanded):
+        ctx.st.markdown(content)

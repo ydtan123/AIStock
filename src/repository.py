@@ -418,10 +418,11 @@ class StockRepository:
                 r.ticker: {
                     "final_decision": r.final_decision,
                     "research_manager_decision": r.research_manager_decision,
-                    "trader_plan": r.trader_plan,
+                    "market_report": r.market_report,
                     "bull_argument": r.bull_argument,
                     "bear_argument": r.bear_argument,
-                    "market_report": r.market_report,
+                    "trader_plan": r.trader_plan,
+                    "extra_outputs": r.extra_outputs or {},
                 }
                 for r in rows
             }

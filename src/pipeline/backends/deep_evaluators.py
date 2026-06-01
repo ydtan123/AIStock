@@ -84,11 +84,12 @@ def _build_graph(**kwargs):
 
 
 def _extract_decision(final_state: dict, fallback_decision: str | None) -> str:
-    text = final_state.get("final_trade_decision", "") or ""
-    upper = text.upper()
-    for token in ("BUY", "SELL", "HOLD"):
-        if token in upper:
-            return token
+    for key in ("final_trade_decision", "trader_investment_plan"):
+        text = final_state.get(key, "") or ""
+        upper = text.upper()
+        for token in ("BUY", "SELL", "HOLD"):
+            if token in upper:
+                return token
     if fallback_decision:
         upper = fallback_decision.upper()
         for token in ("BUY", "SELL", "HOLD"):
@@ -184,6 +185,26 @@ class TradingAgentsDeepEvaluator(DeepEvaluator):
                         pass  # LangChain message objects are not JSON-serializable
                     elif isinstance(value, (str, int, float, bool)) or value is None:
                         extras[src_key] = value
+
+                # Extract bull/bear from nested investment_debate_state
+                invest_debate = final_state.get("investment_debate_state") or {}
+                if isinstance(invest_debate, dict):
+                    if invest_debate.get("bull_history"):
+                        agent_outputs["bull_argument"] = invest_debate["bull_history"]
+                    if invest_debate.get("bear_history"):
+                        agent_outputs["bear_argument"] = invest_debate["bear_history"]
+
+                # Extract risk analysts from nested risk_debate_state
+                risk_debate = final_state.get("risk_debate_state") or {}
+                if isinstance(risk_debate, dict):
+                    if risk_debate.get("aggressive_history"):
+                        agent_outputs.setdefault("risk_aggressive", risk_debate["aggressive_history"])
+                    if risk_debate.get("conservative_history"):
+                        agent_outputs.setdefault("risk_conservative", risk_debate["conservative_history"])
+                    if risk_debate.get("neutral_history"):
+                        agent_outputs.setdefault("risk_neutral", risk_debate["neutral_history"])
+                    if risk_debate.get("judge_decision"):
+                        agent_outputs.setdefault("risk_manager_decision", risk_debate["judge_decision"])
 
                 out.append(
                     DeepEvaluation(
