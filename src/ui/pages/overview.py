@@ -279,6 +279,101 @@ def _render_param(key: str, meta: dict, defaults: dict, session_key: str) -> Non
         )
 
 
+# ── pipeline log fragment (module-level so it is never re-decorated inside ────
+# ── a running @st.fragment — nested fragment definitions break Streamlit) ─────
+
+@st.fragment(run_every=2)
+def _pipeline_log_fragment(ctx) -> None:
+    fp_queue = ctx.session_state.get("fp_log_queue")
+    while fp_queue is not None:
+        try:
+            line = fp_queue.get_nowait()
+        except queue.Empty:
+            break
+        if line.startswith("__REPORT__:"):
+            ctx.session_state.fp_report_path = line.split(":", 1)[1]
+            ctx.session_state.fp_status = "Complete"
+            cur = ctx.session_state.get("fp_current_step")
+            if cur:
+                done = list(ctx.session_state.get("fp_completed_steps", []))
+                if cur not in done:
+                    done.append(cur)
+                ctx.session_state.fp_completed_steps = done
+            ctx.session_state.fp_current_step = None
+        elif line.startswith("__STOP__:"):
+            ctx.session_state.fp_status = "Idle"
+        elif line.startswith("__ERROR__:"):
+            ctx.session_state.fp_error = line.split(":", 1)[1]
+            ctx.session_state.fp_status = "Error"
+        else:
+            if "running step:" in line:
+                for step_def in _STEPS:
+                    if f"running step: {step_def['name']}" in line:
+                        prev = ctx.session_state.get("fp_current_step")
+                        if prev:
+                            done = list(ctx.session_state.get("fp_completed_steps", []))
+                            if prev not in done:
+                                done.append(prev)
+                            ctx.session_state.fp_completed_steps = done
+                        ctx.session_state.fp_current_step = step_def["name"]
+                        break
+            elif "step complete:" in line:
+                cur = ctx.session_state.get("fp_current_step")
+                if cur:
+                    done = list(ctx.session_state.get("fp_completed_steps", []))
+                    if cur not in done:
+                        done.append(cur)
+                    ctx.session_state.fp_completed_steps = done
+            ctx.session_state.fp_log_lines.append(line)
+
+    current_status = ctx.session_state.get("fp_status", "Idle")
+    if current_status == "Running":
+        elapsed = time.time() - ctx.session_state.get("fp_start_time", time.time())
+        ctx.st.info(f"Running...  Elapsed: {elapsed:.0f}s")
+
+        sel_steps = ctx.session_state.get("fp_selected_steps", [s["name"] for s in _STEPS])
+        current_step = ctx.session_state.get("fp_current_step")
+        completed_steps = set(ctx.session_state.get("fp_completed_steps", []))
+        sel_defs = [s for s in _STEPS if s["name"] in sel_steps]
+        if sel_defs:
+            step_cols = ctx.st.columns(len(sel_defs))
+            for i, sdef in enumerate(sel_defs):
+                with step_cols[i]:
+                    if sdef["name"] in completed_steps:
+                        ctx.st.markdown(f"✅ **{sdef['label']}**")
+                    elif sdef["name"] == current_step:
+                        ctx.st.markdown(f"⏳ **{sdef['label']}**")
+                    else:
+                        ctx.st.markdown(f"⬜ {sdef['label']}")
+
+        ctx.st.subheader("Log Output")
+        if ctx.session_state.fp_log_lines:
+            log_text = "\n".join(ctx.session_state.fp_log_lines)
+            _render_log(ctx.st, log_text)
+        else:
+            ctx.st.info("Pipeline starting...")
+
+    fp_report = ctx.session_state.get("fp_report_path")
+    if current_status == "Complete" and fp_report:
+        ctx.st.subheader("Log Output")
+        log_text = "\n".join(ctx.session_state.fp_log_lines)
+        _render_log(ctx.st, log_text)
+        report_dir = Path(fp_report)
+        if report_dir.exists():
+            ctx.st.subheader("Reports")
+            for ticker_dir in sorted(report_dir.iterdir()):
+                if ticker_dir.is_dir():
+                    with ctx.st.expander(str(ticker_dir.name)):
+                        deep_eval = ticker_dir / "deep_evaluation" / "summary.md"
+                        fast_eval = ticker_dir / "fast_evaluation" / "fast_evaluation.md"
+                        if deep_eval.exists():
+                            with open(deep_eval) as f:
+                                ctx.st.markdown(f.read())
+                        if fast_eval.exists():
+                            with open(fast_eval) as f:
+                                ctx.st.markdown(f.read())
+
+
 # ── main render ──────────────────────────────────────────────────────────────
 
 def render(ctx) -> None:
@@ -370,99 +465,4 @@ def render(ctx) -> None:
         ctx.st.rerun()
 
     # ── real-time log + results fragment ─────────────────────────────────
-    @st.fragment(run_every=2)
-    def _pipeline_log_fragment():
-        fp_queue = ctx.session_state.get("fp_log_queue")
-        while fp_queue is not None:
-            try:
-                line = fp_queue.get_nowait()
-            except queue.Empty:
-                break
-            if line.startswith("__REPORT__:"):
-                ctx.session_state.fp_report_path = line.split(":", 1)[1]
-                ctx.session_state.fp_status = "Complete"
-                # Finalize step progress on completion
-                cur = ctx.session_state.get("fp_current_step")
-                if cur:
-                    done = list(ctx.session_state.get("fp_completed_steps", []))
-                    if cur not in done:
-                        done.append(cur)
-                    ctx.session_state.fp_completed_steps = done
-                ctx.session_state.fp_current_step = None
-            elif line.startswith("__STOP__:"):
-                ctx.session_state.fp_status = "Idle"
-            elif line.startswith("__ERROR__:"):
-                ctx.session_state.fp_error = line.split(":", 1)[1]
-                ctx.session_state.fp_status = "Error"
-            else:
-                # Parse step transitions from orchestrator log lines
-                if "running step:" in line:
-                    for step_def in _STEPS:
-                        if f"running step: {step_def['name']}" in line:
-                            prev = ctx.session_state.get("fp_current_step")
-                            if prev:
-                                done = list(ctx.session_state.get("fp_completed_steps", []))
-                                if prev not in done:
-                                    done.append(prev)
-                                ctx.session_state.fp_completed_steps = done
-                            ctx.session_state.fp_current_step = step_def["name"]
-                            break
-                elif "step complete:" in line:
-                    cur = ctx.session_state.get("fp_current_step")
-                    if cur:
-                        done = list(ctx.session_state.get("fp_completed_steps", []))
-                        if cur not in done:
-                            done.append(cur)
-                        ctx.session_state.fp_completed_steps = done
-                ctx.session_state.fp_log_lines.append(line)
-
-        current_status = ctx.session_state.get("fp_status", "Idle")
-        if current_status == "Running":
-            elapsed = time.time() - ctx.session_state.get("fp_start_time", time.time())
-            ctx.st.info(f"Running...  Elapsed: {elapsed:.0f}s")
-
-            # Step progress indicator
-            sel_steps = ctx.session_state.get("fp_selected_steps", [s["name"] for s in _STEPS])
-            current_step = ctx.session_state.get("fp_current_step")
-            completed_steps = set(ctx.session_state.get("fp_completed_steps", []))
-            sel_defs = [s for s in _STEPS if s["name"] in sel_steps]
-            if sel_defs:
-                step_cols = ctx.st.columns(len(sel_defs))
-                for i, sdef in enumerate(sel_defs):
-                    with step_cols[i]:
-                        if sdef["name"] in completed_steps:
-                            ctx.st.markdown(f"✅ **{sdef['label']}**")
-                        elif sdef["name"] == current_step:
-                            ctx.st.markdown(f"⏳ **{sdef['label']}**")
-                        else:
-                            ctx.st.markdown(f"⬜ {sdef['label']}")
-
-            ctx.st.subheader("Log Output")
-            if ctx.session_state.fp_log_lines:
-                log_text = "\n".join(ctx.session_state.fp_log_lines)
-                _render_log(ctx.st, log_text)
-            else:
-                ctx.st.info("Pipeline starting...")
-
-        # Completion — show reports
-        fp_report = ctx.session_state.get("fp_report_path")
-        if current_status == "Complete" and fp_report:
-            ctx.st.subheader("Log Output")
-            log_text = "\n".join(ctx.session_state.fp_log_lines)
-            _render_log(ctx.st, log_text)
-            report_dir = Path(fp_report)
-            if report_dir.exists():
-                ctx.st.subheader("Reports")
-                for ticker_dir in sorted(report_dir.iterdir()):
-                    if ticker_dir.is_dir():
-                        with ctx.st.expander(str(ticker_dir.name)):
-                            deep_eval = ticker_dir / "deep_evaluation" / "summary.md"
-                            fast_eval = ticker_dir / "fast_evaluation" / "fast_evaluation.md"
-                            if deep_eval.exists():
-                                with open(deep_eval) as f:
-                                    ctx.st.markdown(f.read())
-                            if fast_eval.exists():
-                                with open(fast_eval) as f:
-                                    ctx.st.markdown(f.read())
-
-    _pipeline_log_fragment()
+    _pipeline_log_fragment(ctx)
