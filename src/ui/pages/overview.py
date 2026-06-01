@@ -176,6 +176,9 @@ _STEPS = [
         "label": "4. Deep Evaluation",
         "help": "Multi-agent LLM trading firm simulation with debate & risk analysis.",
         "params": {
+            "deep_evaluation.symbols": {
+                "label": "Symbols (overrides Top N, comma-separated)", "type": "text",
+            },
             "deep_evaluation.top_n": {
                 "label": "Top N stocks (from Step 3)", "type": "number",
                 "min": 1, "max": 20, "step": 1,
@@ -272,9 +275,13 @@ def _render_param(key: str, meta: dict, defaults: dict, session_key: str) -> Non
             meta["label"], value=bool(default_val), key=f"fp_{session_key}",
         )
     else:
+        if isinstance(default_val, list):
+            display_val = ", ".join(str(s) for s in default_val)
+        else:
+            display_val = str(default_val) if default_val is not None else ""
         st.session_state[session_key] = st.text_input(
             meta["label"],
-            value=str(default_val) if default_val is not None else "",
+            value=display_val,
             key=f"fp_{session_key}",
         )
 

@@ -311,20 +311,38 @@ class DeepEvaluationStep(PipelineStep):
                 error=str(e),
             )
 
-        symbols = ctx.cfg.get("pipeline", {}).get("symbols", [])
-        if symbols:
-            tickers = symbols[:top_n]
-            ctx.logger.info("DeepEvaluationStep: using --symbols (%d tickers)", len(tickers))
+        # deep_evaluation.symbols overrides top_n when non-empty.
+        # Accepts a list (from config.yaml) or comma-separated string (from web app).
+        symbols_cfg = sub.get("symbols", None)
+        if isinstance(symbols_cfg, str):
+            symbols_override = [s.strip().upper() for s in symbols_cfg.split(",") if s.strip()]
+        elif isinstance(symbols_cfg, list):
+            symbols_override = [s.strip().upper() for s in symbols_cfg if s.strip()]
         else:
-            with open_session(ctx) as session:
-                rows = (
-                    session.query(FastEvaluationConclusion)
-                    .filter(FastEvaluationConclusion.pipeline_run_id == ctx.run_id)
-                    .order_by(desc(FastEvaluationConclusion.consensus_score))
-                    .limit(top_n)
-                    .all()
-                )
-                tickers = [r.ticker for r in rows]
+            symbols_override = []
+
+        if symbols_override:
+            tickers = symbols_override
+            ctx.logger.info(
+                "DeepEvaluationStep: symbols override — %d tickers: %s",
+                len(tickers), tickers,
+            )
+        else:
+            # Fall back to pipeline-level --symbols flag (CLI), then top_n from DB.
+            pipeline_symbols = ctx.cfg.get("pipeline", {}).get("symbols", [])
+            if pipeline_symbols:
+                tickers = pipeline_symbols[:top_n]
+                ctx.logger.info("DeepEvaluationStep: using --symbols (%d tickers)", len(tickers))
+            else:
+                with open_session(ctx) as session:
+                    rows = (
+                        session.query(FastEvaluationConclusion)
+                        .filter(FastEvaluationConclusion.pipeline_run_id == ctx.run_id)
+                        .order_by(desc(FastEvaluationConclusion.consensus_score))
+                        .limit(top_n)
+                        .all()
+                    )
+                    tickers = [r.ticker for r in rows]
 
         if not tickers:
             return StepResult(
