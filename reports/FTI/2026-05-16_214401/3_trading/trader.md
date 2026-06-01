@@ -1,3 +1,0 @@
-**Recommendation: HOLD**
-
-The analysis aligns with a clear hold rating. The bear case is more compelling in the current environment, as technicals point to a correction that is likely not yet complete, valuation leaves no room for error, and insider selling patterns raise caution. The risk/reward at $71.28 is skewed unfavorably, with a ~12% upside to the median target versus 5–15% immediate downside if support breaks. Existing positions should be maintained, but no new capital should be committed until a confirmed technical bottom—specifically, a daily close above $73.35 or a successful hold at the $69.50–$70.56 zone with a bullish MACD crossover—materializes. A break below $69.00 would invalidate the near-term bounce case and shift the bias to a deeper decline.

@@ -1,5 +1,0 @@
-Based on the provided investment plan and analysis, the clear course of action is to reduce exposure to AAPL. The bear arguments are compelling, highlighting unsustainable growth math, poor risk/reward at current levels, real legal overhangs, negative insider/Buffett signals, and macro/regulatory headwinds. The stock is overbought with significant near-term downside risk and no clear catalyst for further upside.
-
-**Recommendation: Sell (Reduce position by 33–50%)**
-
-Execute limit sell orders at $295+ to trim the position. This locks in gains, lowers capital at risk, and aligns with the Underweight rating. Capital should be preserved for a better entry opportunity around the $275 level, which would offer a more favorable risk/reward profile once the current uncertainties are resolved or the stock corrects to its 50-day SMA. A hard stop-loss at $258 further protects against a structural breakdown. This tactical move prioritizes capital preservation while keeping the door open to re-own a premier company at a more attractive price.
