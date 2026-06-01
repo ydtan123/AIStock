@@ -1,0 +1,25 @@
+- generic [active]:
+  - generic [ref=e3]:
+    - banner [ref=e6]:
+      - generic [ref=e9]:
+        - button "Deploy" [ref=e11] [cursor=pointer]:
+          - generic [ref=e13]: Deploy
+        - button "Main menu" [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+    - alert [ref=e22]:
+      - generic [ref=e25]:
+        - generic [ref=e26]: "ImportError: cannot import name 'load_config' from 'config' (/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/config/__init__.py)"
+        - generic [ref=e27]:
+          - generic [ref=e28]: "Traceback:"
+          - code [ref=e31]:
+            - generic [ref=e32]: File "/Users/yudongtan/projects/AIStock/src/app.py", line 15, in <module> from repository import ScreenCriteria, StockFilters, StockRepository
+            - generic [ref=e33]: File "/Users/yudongtan/projects/AIStock/src/repository.py", line 8, in <module> from database import get_session
+            - generic [ref=e34]: File "/Users/yudongtan/projects/AIStock/src/database.py", line 4, in <module> from config import load_config
+        - generic [ref=e35]:
+          - button "Copy" [ref=e36] [cursor=pointer]
+          - link "Ask Google" [ref=e37] [cursor=pointer]:
+            - /url: https://www.google.com/search?q=ImportError%3A%20cannot%20import%20name%20'load_config'%20from%20'config'%20(%2FUsers%2Fyudongtan%2Fprojects%2FAIStock%2Fexternal%2FFinRL-Trading%2Fsrc%2Fconfig%2F__init__.py)
+          - link "Ask ChatGPT" [ref=e38] [cursor=pointer]:
+            - /url: https://chatgpt.com/?q=ImportError%3A%20cannot%20import%20name%20'load_config'%20from%20'config'%20(%2FUsers%2Fyudongtan%2Fprojects%2FAIStock%2Fexternal%2FFinRL-Trading%2Fsrc%2Fconfig%2F__init__.py)%0A%0AFile%20%22%2FUsers%2Fyudongtan%2Fprojects%2FAIStock%2Fsrc%2Fapp.py%22%2C%20line%2015%2C%20in%20%3Cmodule%3E%0A%20%20%20%20from%20repository%20import%20ScreenCriteria%2C%20StockFilters%2C%20StockRepository%0AFile%20%22%2FUsers%2Fyudongtan%2Fprojects%2FAIStock%2Fsrc%2Frepository.py%22%2C%20line%208%2C%20in%20%3Cmodule%3E%0A%20%20%20%20from%20database%20import%20get_session%0AFile%20%22%2FUsers%2Fyudongtan%2Fprojects%2FAIStock%2Fsrc%2Fdatabase.py%22%2C%20line%204%2C%20in%20%3Cmodule%3E%0A%20%20%20%20from%20config%20import%20load_config
+  - generic:
+    - document

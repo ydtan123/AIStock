@@ -1,0 +1,84 @@
+- generic [active]:
+  - generic [ref=e2]:
+    - generic [ref=e8]:
+      - heading "📈 AIStock" [level=2] [ref=e55]
+      - paragraph [ref=e56]: Trading Platform
+      - separator [ref=e23]
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - generic [ref=e61]: Full Pipeline
+          - combobox "Selected Full Pipeline. Navigation" [ref=e63]
+        - img "open" [ref=e65]
+      - separator [ref=e30]
+      - heading "Quick Stats" [level=3] [ref=e70]
+      - generic [ref=e72]:
+        - generic [ref=e77]:
+          - paragraph [ref=e80]: Total
+          - paragraph [ref=e83]: "8991"
+        - generic [ref=e88]:
+          - paragraph [ref=e91]: Active
+          - paragraph [ref=e94]: "3062"
+    - generic [ref=e33]:
+      - banner [ref=e34]:
+        - generic [ref=e37]:
+          - button "Deploy" [ref=e39] [cursor=pointer]:
+            - generic [ref=e41]: Deploy
+          - button "Main menu" [ref=e43] [cursor=pointer]:
+            - img [ref=e44]
+      - generic [ref=e96]:
+        - heading "Full Pipeline" [level=2] [ref=e101]:
+          - text: Full Pipeline
+          - generic [ref=e102]:
+            - link "Link to heading":
+              - /url: "#full-pipeline"
+              - img
+        - generic [ref=e104]:
+          - generic [ref=e109] [cursor=pointer]:
+            - checkbox "1. Data Update" [checked]
+            - paragraph [ref=e114]: 1. Data Update
+          - generic [ref=e119] [cursor=pointer]:
+            - checkbox "2. Stock Selection" [checked]
+            - paragraph [ref=e124]: 2. Stock Selection
+          - generic [ref=e129] [cursor=pointer]:
+            - checkbox "3. Fast Evaluation" [checked]
+            - paragraph [ref=e134]: 3. Fast Evaluation
+          - generic [ref=e139] [cursor=pointer]:
+            - checkbox "4. Deep Evaluation" [checked]
+            - paragraph [ref=e144]: 4. Deep Evaluation
+        - separator [ref=e149]
+        - group [ref=e152]:
+          - generic "keyboard_arrow_right 1. Data Update" [ref=e153] [cursor=pointer]:
+            - generic [ref=e154]:
+              - generic [ref=e156]: keyboard_arrow_right
+              - paragraph [ref=e159]: 1. Data Update
+        - group [ref=e162]:
+          - generic "keyboard_arrow_right 2. Stock Selection" [ref=e163] [cursor=pointer]:
+            - generic [ref=e164]:
+              - generic [ref=e166]: keyboard_arrow_right
+              - paragraph [ref=e169]: 2. Stock Selection
+        - group [ref=e172]:
+          - generic "keyboard_arrow_right 3. Fast Evaluation" [ref=e173] [cursor=pointer]:
+            - generic [ref=e174]:
+              - generic [ref=e176]: keyboard_arrow_right
+              - paragraph [ref=e179]: 3. Fast Evaluation
+        - group [ref=e182]:
+          - generic "keyboard_arrow_right 4. Deep Evaluation" [ref=e183] [cursor=pointer]:
+            - generic [ref=e184]:
+              - generic [ref=e186]: keyboard_arrow_right
+              - paragraph [ref=e189]: 4. Deep Evaluation
+        - separator [ref=e194]
+        - button "Run Pipeline" [disabled] [ref=e201]:
+          - paragraph [ref=e205]: Run Pipeline
+        - generic [ref=e209]:
+          - alert [ref=e212]:
+            - paragraph [ref=e217]: "Running... Elapsed: 16s"
+          - heading "Log Output" [level=3] [ref=e222]:
+            - text: Log Output
+            - generic [ref=e223]:
+              - link "Link to heading":
+                - /url: "#log-output"
+                - img
+          - alert [ref=e226]:
+            - paragraph [ref=e231]: Pipeline starting...
+  - generic:
+    - document

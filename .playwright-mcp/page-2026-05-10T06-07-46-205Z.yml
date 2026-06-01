@@ -1,0 +1,45 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - button "keyboard_double_arrow_left" [ref=e307] [cursor=pointer]:
+        - generic [ref=e309]: keyboard_double_arrow_left
+      - generic [ref=e8]:
+        - heading "📈 AIStock" [level=2] [ref=e13]
+        - paragraph [ref=e18]: Trading Platform
+        - separator [ref=e23]
+        - generic [ref=e156]:
+          - generic [ref=e157]:
+            - generic [ref=e158]: Paper Trading
+            - combobox "Selected Paper Trading. Navigation" [active] [ref=e1962]
+          - img "open" [ref=e162]
+        - separator [ref=e30]
+        - heading "Quick Stats" [level=3] [ref=e34]
+        - generic [ref=e36]:
+          - generic [ref=e165]:
+            - paragraph [ref=e168]: Total
+            - paragraph [ref=e171]: "8991"
+          - generic [ref=e173]:
+            - paragraph [ref=e176]: Active
+            - paragraph [ref=e179]: "3062"
+        - generic [ref=e181]:
+          - paragraph [ref=e184]: Bullish
+          - paragraph [ref=e187]: "829"
+    - generic [ref=e49]:
+      - banner [ref=e50]:
+        - generic [ref=e53]:
+          - button "Deploy" [ref=e55] [cursor=pointer]:
+            - generic [ref=e57]: Deploy
+          - button "Main menu" [ref=e59] [cursor=pointer]:
+            - img [ref=e60]
+      - generic [ref=e65]:
+        - heading "Paper Trading" [level=2] [ref=e1963]:
+          - text: Paper Trading
+          - generic [ref=e71]:
+            - link "Link to heading":
+              - /url: "#platform-overview"
+              - img
+        - alert [ref=e1903]:
+          - paragraph [ref=e1908]: Paper trading not configured. Set APCA_API_KEY / APCA_API_SECRET and restart.
+  - img [ref=e304]
+  - generic:
+    - document

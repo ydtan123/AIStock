@@ -1,0 +1,213 @@
+{
+  "audit_date": "2026-05-30T23:26:00+08:00",
+  "project": "AIStock",
+  "branch": "main",
+  "commit": "17d376c",
+  "scanner": "manual code review + grep/pattern analysis + config inspection + external .env audit",
+  "riskScore": 86,
+  "riskBreakdown": {
+    "critical": 4,
+    "high": 5,
+    "medium": 6,
+    "low": 3
+  },
+  "vulnerabilities": [
+    {
+      "id": "SEC-001",
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "file": "config.yaml",
+      "line": 5,
+      "description": "Hardcoded DeepSeek API key. Live credential in plaintext config. Used by fast_evaluation and deep_evaluation backends for LLM calls.",
+      "impact": "Full API access to DeepSeek LLM services. Attacker can consume credits, access model outputs, and exfiltrate financial analysis data.",
+      "remediation": "Rotate key immediately via DeepSeek dashboard. Replace with empty string placeholder. Load from DEEPSEEK_API_KEY environment variable at runtime."
+    },
+    {
+      "id": "SEC-002",
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "file": "config.yaml",
+      "line": 9,
+      "description": "Hardcoded Google API key. Duplicated at lines 9 (common) and 18 (google section). Used by TradingAgents news fetching.",
+      "impact": "Unauthorized access to Google Cloud APIs. Attacker can consume API quota and access associated Google Cloud resources.",
+      "remediation": "Rotate key in Google Cloud Console. Remove from both config locations. Use GOOGLE_API_KEY env var."
+    },
+    {
+      "id": "SEC-003",
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "file": "config.yaml",
+      "line": 15,
+      "description": "Hardcoded Alpha Vantage API key. Live market data credential. Used for all stock price/fundamental/indicator data fetching.",
+      "impact": "Unauthorized Alpha Vantage API access. Attacker consumes daily request quotas, disrupting all data ingestion.",
+      "remediation": "Rotate via Alpha Vantage. Use ALPHA_VANTAGE_API_KEY env variable."
+    },
+    {
+      "id": "SEC-004",
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "file": "config.yaml",
+      "line": 57,
+      "description": "Hardcoded MySQL database credentials. Full connection string with username and password in plaintext.",
+      "impact": "Complete database compromise. Attacker with network access can read, modify, or delete all financial data, ML model outputs, and pipeline results.",
+      "remediation": "Change DB password immediately. Build connection URL from environment variables at runtime."
+    },
+    {
+      "id": "SEC-005",
+      "severity": "high",
+      "cwe": "CWE-798",
+      "file": "external/ai-hedge-fund/.env",
+      "line": 3,
+      "description": "Live API keys in external submodule .env file: FINANCIAL_DATASETS_API_KEY, ALPHA_VANTAGE_API_KEY, GOOGLE_API_KEY, DEEPSEEK_API_KEY — all with real working values.",
+      "impact": "Four separate API services compromised if this file is committed or exposed. Submodule .env files are outside main repo .gitignore scope.",
+      "remediation": "Remove all real values from external .env files. Create .env.example with placeholders only. Verify each submodule has .env in its own .gitignore."
+    },
+    {
+      "id": "SEC-006",
+      "severity": "high",
+      "cwe": "CWE-502",
+      "file": "src/finrl_runner.py",
+      "line": 149,
+      "description": "Insecure deserialization via joblib.load(). joblib uses pickle internally — malicious .pkl file enables arbitrary code execution (RCE). No file origin verification, signature check, or hash validation.",
+      "impact": "Remote Code Execution if attacker places malicious .pkl file in models/ directory. Complete system compromise possible.",
+      "remediation": "Compute SHA-256 hash of expected model files. Verify hash before loading. Migrate to safer serialization (ONNX, safetensors, or JSON for metadata-only artifacts)."
+    },
+    {
+      "id": "SEC-007",
+      "severity": "high",
+      "cwe": "CWE-502",
+      "file": "src/finrl_runner.py",
+      "line": 359,
+      "description": "Second instance of insecure deserialization: joblib.load() in _build_selection_summary(). Same unvalidated pickle RCE vector.",
+      "impact": "Same RCE risk as SEC-006. Both code paths load .pkl files from disk without validation.",
+      "remediation": "Apply same hash verification and format migration as SEC-006."
+    },
+    {
+      "id": "SEC-008",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 37,
+      "description": "Stored XSS risk: f-string interpolates database values (stock name, exchange, sector, industry) directly into HTML via st.markdown(..., unsafe_allow_html=True). Dynamic DB-origin strings rendered without HTML escaping.",
+      "impact": "Stored XSS — if malicious data enters database via ingestion pipeline (e.g., company name containing <script>), JavaScript executes in all dashboard user sessions.",
+      "remediation": "Use st.write() or st.markdown() without unsafe_allow_html. If HTML formatting required, use html.escape() on all dynamic values before interpolation."
+    },
+    {
+      "id": "SEC-009",
+      "severity": "high",
+      "cwe": "CWE-526",
+      "file": "src/ingestion/pipeline.py",
+      "line": 62,
+      "description": "API keys exported to os.environ at module import time. Three injection sites: pipeline.py:62, fast_evaluators.py:89, deep_evaluators.py:71. Keys become globally readable by any imported module or spawned subprocess.",
+      "impact": "Secrets exposed to entire Python process and child processes. Third-party libraries, logging handlers, or error reporters can accidentally capture and exfiltrate credentials.",
+      "remediation": "Pass credentials via explicit context/dict parameter to backends. Scope environment variables to subprocess.Popen(env={...}) only when spawning external processes."
+    },
+    {
+      "id": "SEC-010",
+      "severity": "medium",
+      "cwe": "CWE-306",
+      "file": "src/app.py",
+      "line": 1,
+      "description": "Missing authentication on Streamlit dashboard. No login, session management, CSRF protection, or access control. Anyone with network access can view financial data, trigger ML pipeline runs incurring LLM API costs.",
+      "impact": "Unauthorized access to financial analytics platform. Attacker can trigger expensive LLM API calls, corrupt data, or exfiltrate ML model outputs and trading signals.",
+      "remediation": "Add Streamlit-Authenticator or OAuth2 proxy (nginx + oauth2-proxy). Implement session timeout and CSRF protection."
+    },
+    {
+      "id": "SEC-011",
+      "severity": "medium",
+      "cwe": "CWE-319",
+      "file": "config.yaml",
+      "line": 57,
+      "description": "MySQL connection has no SSL/TLS parameters. Database credentials and all financial data transmitted in cleartext over network.",
+      "impact": "Man-in-the-middle attacker on same network can intercept database traffic including credentials and financial data.",
+      "remediation": "Add SSL parameters to connection URL or set connect_args={'ssl': {'ssl_mode': 'REQUIRED'}} in create_engine() in src/database.py."
+    },
+    {
+      "id": "SEC-012",
+      "severity": "medium",
+      "cwe": "CWE-256",
+      "file": "src/ui/pages/settings.py",
+      "line": 25,
+      "description": "Non-functional credential UI: Alpaca API Key/Secret inputs with type='password' accept values but 'Save API Settings' button performs no storage, validation, or encryption. Creates false sense of security.",
+      "impact": "Users may believe credentials are securely stored when they are discarded. Encourages credential re-entry increasing exposure risk.",
+      "remediation": "Implement actual secure credential storage (keyring library or Streamlit secrets). Or remove non-functional UI until storage is implemented."
+    },
+    {
+      "id": "SEC-013",
+      "severity": "medium",
+      "cwe": "CWE-209",
+      "file": "src/repository.py",
+      "line": 335,
+      "description": "Job error messages from database (error_message column) displayed directly in UI without sanitization. Stack traces or internal paths could leak implementation details.",
+      "impact": "Information disclosure — attacker can learn internal file paths, library versions, or query structures from database error messages.",
+      "remediation": "Sanitize error messages before UI display. Show user-friendly messages, log full details server-side only."
+    },
+    {
+      "id": "SEC-014",
+      "severity": "medium",
+      "cwe": "CWE-200",
+      "file": ".gitignore",
+      "line": 1,
+      "description": "reports/ directory not in .gitignore. Pipeline output files in reports/full_pipeline/ may contain inline config dumps with API keys and financial data.",
+      "impact": "Accidental commit of pipeline reports containing sensitive financial data, possibly with credentials in inline configuration dumps.",
+      "remediation": "Add reports/ to .gitignore. Verify no report files exist in git history: git log --all -- reports/"
+    },
+    {
+      "id": "SEC-015",
+      "severity": "low",
+      "cwe": "CWE-598",
+      "file": "src/fetcher/alpha_vantage.py",
+      "line": 28,
+      "description": "Alpha Vantage API key passed as URL query parameter (params['apikey']). Exposed in HTTP request logs, proxy logs, and packet capture.",
+      "impact": "Low — internal server-to-server calls, but key appears in any HTTP-level logging or packet capture.",
+      "remediation": "Use HTTP header (X-API-Key) instead of query parameter if API supports it. Ensure request logging redacts query strings."
+    },
+    {
+      "id": "SEC-016",
+      "severity": "low",
+      "cwe": "CWE-79",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 65,
+      "description": "XSS pattern risk: metric card f-strings with unsafe_allow_html=True (lines 65, 68, 71, 74). Currently numeric values only — low immediate risk but dangerous pattern easily copy-pasted to user-input contexts.",
+      "impact": "Pattern normalization risk — developers may apply same pattern to unsanitized user-controlled strings elsewhere.",
+      "remediation": "Replace metric cards with st.metric() native component. If HTML required, always apply html.escape() to dynamic values."
+    },
+    {
+      "id": "SEC-017",
+      "severity": "low",
+      "cwe": "CWE-79",
+      "file": "src/app.py",
+      "line": 47,
+      "description": "Static CSS injected via st.markdown(..., unsafe_allow_html=True). No dynamic content — currently safe but normalizes the unsafe_allow_html pattern throughout codebase.",
+      "impact": "Low — precedent risk. Developers see this pattern at top of main app file and replicate it with dynamic content.",
+      "remediation": "Use Streamlit's native st.html() or inject CSS via a dedicated helper function that rejects dynamic interpolation."
+    }
+  ],
+  "sql_injection_assessment": {
+    "verdict": "NOT VULNERABLE — MITIGATED",
+    "details": "All 12 SQL queries in repository.py use SQLAlchemy 2.0 parameterized queries via text() with named :params or ORM filter methods. Zero instances of string concatenation, f-string interpolation, or format() in SQL statements.",
+    "query_count": 12,
+    "parameterized": 12,
+    "concatenated": 0
+  },
+  "recommendations": [
+    "IMMEDIATE: Rotate all 3 hardcoded API keys (DeepSeek, Google, Alpha Vantage). These are LIVE credentials in config.yaml and external/ai-hedge-fund/.env.",
+    "IMMEDIATE: Change database password from default. Build connection URL from DATABASE_URL environment variable.",
+    "IMMEDIATE: Run `git log --all --full-history -- config.yaml` to verify config was never committed. If found in history, purge with git filter-repo.",
+    "IMMEDIATE: Strip real API key values from external/ai-hedge-fund/.env and external/TradingAgents/.env. Replace with .env.example template files.",
+    "HIGH: Replace all st.markdown(f'...{var}...', unsafe_allow_html=True) with safe Streamlit components. Use html.escape() if raw HTML is unavoidable.",
+    "HIGH: Add SHA-256 hash verification before all joblib.load() calls. Migrate model serialization to safetensors or ONNX format.",
+    "HIGH: Replace os.environ credential injection (3 sites) with explicit parameter passing or subprocess env= scoping.",
+    "MEDIUM: Add Streamlit authentication (OAuth2 proxy, basic auth, or Streamlit-Authenticator).",
+    "MEDIUM: Add MySQL SSL/TLS. Set connect_args={'ssl': {'ssl_mode': 'REQUIRED'}} in database.py create_engine().",
+    "MEDIUM: Sanitize database error messages before UI display. Log full details server-side only.",
+    "MEDIUM: Implement credential persistence in settings page or remove non-functional UI.",
+    "LOW: Add reports/ to .gitignore to prevent accidental data exposure.",
+    "LOW: Move Alpha Vantage API key from URL query parameter to HTTP header if supported.",
+    "LOW: Replace static CSS unsafe_allow_html pattern with st.html() or dedicated CSS helper.",
+    "PROCESS: Add `bandit -r src/` to CI/CD pipeline for automated Python security scanning.",
+    "PROCESS: Create .env.example with template values; document all required environment variables in README.",
+    "PROCESS: Install pre-commit hook (detect-secrets or git-secrets) to block future credential leaks.",
+    "PROCESS: Implement quarterly API key rotation policy with documented runbook."
+  ]
+}

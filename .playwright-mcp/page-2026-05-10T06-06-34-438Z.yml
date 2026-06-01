@@ -1,0 +1,122 @@
+- generic:
+  - generic:
+    - generic [ref=e2]:
+      - generic [ref=e4]:
+        - button "keyboard_double_arrow_left" [ref=e307] [cursor=pointer]:
+          - generic [ref=e309]: keyboard_double_arrow_left
+        - generic [ref=e8]:
+          - heading "📈 AIStock" [level=2] [ref=e13]
+          - paragraph [ref=e18]: Trading Platform
+          - separator [ref=e23]
+          - generic [ref=e156]:
+            - generic [ref=e157]:
+              - generic [ref=e158]: Stock Data
+              - combobox "Selected Stock Data. Navigation" [expanded] [active] [ref=e356]
+            - img "open" [ref=e162]
+          - separator [ref=e30]
+          - heading "Quick Stats" [level=3] [ref=e34]
+          - generic [ref=e36]:
+            - generic [ref=e165]:
+              - paragraph [ref=e168]: Total
+              - paragraph [ref=e171]: "8991"
+            - generic [ref=e173]:
+              - paragraph [ref=e176]: Active
+              - paragraph [ref=e179]: "3062"
+          - generic [ref=e181]:
+            - paragraph [ref=e184]: Bullish
+            - paragraph [ref=e187]: "829"
+      - generic [ref=e49]:
+        - banner [ref=e50]:
+          - generic [ref=e53]:
+            - button "Deploy" [ref=e55] [cursor=pointer]:
+              - generic [ref=e57]: Deploy
+            - button "Main menu" [ref=e59] [cursor=pointer]:
+              - img [ref=e60]
+        - generic [ref=e65]:
+          - heading "Stock Data" [level=2] [ref=e357]:
+            - text: Stock Data
+            - generic [ref=e71]:
+              - link "Link to heading":
+                - /url: "#platform-overview"
+                - img
+          - generic [ref=e359]:
+            - tablist [ref=e361]:
+              - tab "Lookup" [ref=e362] [cursor=pointer]:
+                - paragraph [ref=e364]: Lookup
+              - tab "Technical Analysis" [ref=e365] [cursor=pointer]:
+                - paragraph [ref=e367]: Technical Analysis
+              - tab "Screener" [ref=e368] [cursor=pointer]:
+                - paragraph [ref=e370]: Screener
+              - tab "Manager" [ref=e371] [cursor=pointer]:
+                - paragraph [ref=e373]: Manager
+              - tab "Predictions" [selected] [ref=e374] [cursor=pointer]:
+                - paragraph [ref=e376]: Predictions
+            - tabpanel "Predictions" [ref=e1292]:
+              - generic [ref=e1293]:
+                - generic [ref=e1298]: PREDICTIONS
+                - generic [ref=e1300]:
+                  - generic [ref=e1304]:
+                    - paragraph [ref=e1308]: Sector
+                    - generic [ref=e1310]:
+                      - generic [ref=e1311]:
+                        - generic [ref=e1312]: All
+                        - combobox "Selected All. Sector" [ref=e1314]
+                      - img "open" [ref=e1316]
+                  - generic [ref=e1321]:
+                    - paragraph [ref=e1325]: Search symbol / name
+                    - textbox "Search symbol / name" [ref=e1328]:
+                      - /placeholder: ""
+                  - generic [ref=e1332]:
+                    - paragraph [ref=e1336]: Market Cap
+                    - generic [ref=e1338]:
+                      - generic [ref=e1339]:
+                        - generic [ref=e1340]: All
+                        - combobox "Selected All. Market Cap" [ref=e1342]
+                      - img "open" [ref=e1344]
+                - generic [ref=e1347]:
+                  - generic [ref=e1352]:
+                    - paragraph [ref=e1355]: Total
+                    - paragraph [ref=e1358]: "3061"
+                  - generic [ref=e1363]:
+                    - paragraph [ref=e1366]: Bullish (≥65%)
+                    - paragraph [ref=e1369]: "829"
+                  - generic [ref=e1374]:
+                    - paragraph [ref=e1377]: Bearish (<35%)
+                    - paragraph [ref=e1380]: "1133"
+                  - generic [ref=e1385]:
+                    - paragraph [ref=e1388]: Last updated
+                    - paragraph [ref=e1391]: 2026-05-07 13:35
+                - separator [ref=e1396]
+                - button "Export CSV" [ref=e1403] [cursor=pointer]:
+                  - paragraph [ref=e1407]: Export CSV
+                - paragraph [ref=e1414]: 💡 Click any row to view signal attribution.
+                - generic [ref=e1419]:
+                  - button "Show/hide columns" [ref=e1423] [cursor=pointer]:
+                    - img [ref=e1424]
+                  - button "Download as CSV" [ref=e1429] [cursor=pointer]:
+                    - img [ref=e1430]
+                  - button "Search" [ref=e1435] [cursor=pointer]:
+                    - img [ref=e1436]
+                  - button "Fullscreen" [ref=e1441] [cursor=pointer]:
+                    - img [ref=e1442]
+    - list [ref=e1456]:
+      - generic [ref=e1458]:
+        - option "Overview" [ref=e1459] [cursor=pointer]:
+          - generic [ref=e1463]: Overview
+        - option "Stock Data" [selected] [ref=e1464] [cursor=pointer]:
+          - generic [ref=e1468]: Stock Data
+        - option "ML Pipeline" [ref=e1469] [cursor=pointer]:
+          - generic [ref=e1473]: ML Pipeline
+        - option "Strategy Backtesting" [ref=e1474] [cursor=pointer]:
+          - generic [ref=e1478]: Strategy Backtesting
+        - option "Live Trading" [ref=e1479] [cursor=pointer]:
+          - generic [ref=e1483]: Live Trading
+        - option "Paper Trading" [ref=e1484] [cursor=pointer]:
+          - generic [ref=e1488]: Paper Trading
+        - option "Portfolio Analysis" [ref=e1489] [cursor=pointer]:
+          - generic [ref=e1493]: Portfolio Analysis
+        - option "Settings" [ref=e1494] [cursor=pointer]:
+          - generic [ref=e1498]: Settings
+  - img [ref=e304]
+  - generic:
+    - document

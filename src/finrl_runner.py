@@ -2,7 +2,7 @@
 ML pipeline runner — wraps external/FinRL-Trading for stock selection + backtest.
 
 Extracted from the former finrl_pipeline.py entry point. Used by:
-- app.py (ML Pipeline page, predict-only mode)
+- app.py (ML Pipeline page via Full Pipeline)
 - pipeline/backends/selectors.py (FinrlStockSelector)
 """
 from __future__ import annotations

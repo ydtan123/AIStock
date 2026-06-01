@@ -1,0 +1,182 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e8]:
+      - heading "📈 AIStock" [level=2] [ref=e13]
+      - paragraph [ref=e18]: Trading Platform
+      - separator [ref=e23]
+      - generic [ref=e156]:
+        - generic [ref=e157]:
+          - generic [ref=e158]: Stock Data
+          - combobox "Selected Stock Data. Navigation" [ref=e356]
+        - img "open" [ref=e162]
+      - separator [ref=e30]
+      - heading "Quick Stats" [level=3] [ref=e34]
+      - generic [ref=e36]:
+        - generic [ref=e165]:
+          - paragraph [ref=e168]: Total
+          - paragraph [ref=e171]: "8991"
+        - generic [ref=e173]:
+          - paragraph [ref=e176]: Active
+          - paragraph [ref=e179]: "3062"
+      - generic [ref=e181]:
+        - paragraph [ref=e184]: Bullish
+        - paragraph [ref=e187]: "829"
+    - generic [ref=e49]:
+      - banner [ref=e50]:
+        - generic [ref=e53]:
+          - button "Deploy" [ref=e55] [cursor=pointer]:
+            - generic [ref=e57]: Deploy
+          - button "Main menu" [ref=e59] [cursor=pointer]:
+            - img [ref=e60]
+      - generic [ref=e65]:
+        - heading "Stock Data" [level=2] [ref=e357]:
+          - text: Stock Data
+          - generic [ref=e71]:
+            - link "Link to heading":
+              - /url: "#platform-overview"
+              - img
+        - generic [ref=e359]:
+          - tablist [ref=e361]:
+            - tab "Lookup" [ref=e362] [cursor=pointer]:
+              - paragraph [ref=e364]: Lookup
+            - tab "Technical Analysis" [active] [selected] [ref=e365] [cursor=pointer]:
+              - paragraph [ref=e367]: Technical Analysis
+            - tab "Screener" [ref=e368] [cursor=pointer]:
+              - paragraph [ref=e370]: Screener
+            - tab "Manager" [ref=e371] [cursor=pointer]:
+              - paragraph [ref=e373]: Manager
+            - tab "Predictions" [ref=e374] [cursor=pointer]:
+              - paragraph [ref=e376]: Predictions
+          - tabpanel "Technical Analysis" [ref=e602]:
+            - generic [ref=e603]:
+              - generic [ref=e608]: TECHNICAL ANALYSIS
+              - generic [ref=e610]:
+                - generic [ref=e612]:
+                  - generic [ref=e614]:
+                    - paragraph [ref=e618]: Symbol
+                    - textbox "Symbol" [ref=e621]:
+                      - /placeholder: ""
+                      - text: AAPL
+                  - generic [ref=e623]:
+                    - paragraph [ref=e627]: Start date
+                    - textbox "Select a date." [ref=e631]:
+                      - /placeholder: YYYY/MM/DD
+                      - text: 2025/05/10
+                    - paragraph: Press the down arrow key to interact with the calendar and select a date. Press the escape button to close the calendar.
+                    - paragraph: Selected date is 2025/05/10. Select the second date.
+                  - generic [ref=e633]:
+                    - paragraph [ref=e637]: End date
+                    - textbox "Select a date." [ref=e641]:
+                      - /placeholder: YYYY/MM/DD
+                      - text: 2026/05/10
+                    - paragraph: Press the down arrow key to interact with the calendar and select a date. Press the escape button to close the calendar.
+                    - paragraph: Selected date is 2026/05/10. Select the second date.
+                  - paragraph [ref=e646]:
+                    - strong [ref=e647]: Overlays
+                  - generic [ref=e650] [cursor=pointer]:
+                    - checkbox "SMA 20" [checked]
+                    - paragraph [ref=e655]: SMA 20
+                  - generic [ref=e658] [cursor=pointer]:
+                    - checkbox "SMA 50" [checked]
+                    - paragraph [ref=e663]: SMA 50
+                  - generic [ref=e666] [cursor=pointer]:
+                    - checkbox "SMA 200"
+                    - paragraph [ref=e671]: SMA 200
+                  - generic [ref=e674] [cursor=pointer]:
+                    - checkbox "EMA 12/26" [checked]
+                    - paragraph [ref=e679]: EMA 12/26
+                  - generic [ref=e682] [cursor=pointer]:
+                    - checkbox "Bollinger Bands" [checked]
+                    - paragraph [ref=e687]: Bollinger Bands
+                  - paragraph [ref=e692]:
+                    - strong [ref=e693]: Oscillators
+                  - generic [ref=e696] [cursor=pointer]:
+                    - checkbox "RSI (14)" [checked]
+                    - paragraph [ref=e701]: RSI (14)
+                  - generic [ref=e704] [cursor=pointer]:
+                    - checkbox "MACD" [checked]
+                    - paragraph [ref=e709]: MACD
+                  - generic [ref=e712] [cursor=pointer]:
+                    - checkbox "Stochastic"
+                    - paragraph [ref=e717]: Stochastic
+                  - generic [ref=e720] [cursor=pointer]:
+                    - checkbox "ATR (14)"
+                    - paragraph [ref=e725]: ATR (14)
+                - generic [ref=e733]:
+                  - img:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic: "200"
+                          - generic:
+                            - generic: "220"
+                          - generic:
+                            - generic: "240"
+                          - generic:
+                            - generic: "260"
+                          - generic:
+                            - generic: "280"
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic: "20"
+                          - generic:
+                            - generic: "40"
+                          - generic:
+                            - generic: "60"
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic: Jul 2025
+                          - generic:
+                            - generic: Sep 2025
+                          - generic:
+                            - generic: Nov 2025
+                          - generic:
+                            - generic: Jan 2026
+                          - generic:
+                            - generic: Mar 2026
+                          - generic:
+                            - generic: May 2026
+                        - generic:
+                          - generic:
+                            - generic: −5
+                          - generic:
+                            - generic: "0"
+                          - generic:
+                            - generic: "5"
+                  - img:
+                    - generic [ref=e774]:
+                      - generic [ref=e776]: OHLC
+                      - generic [ref=e784]: SMA20
+                      - generic [ref=e787]: SMA50
+                      - generic [ref=e790]: EMA12
+                      - generic [ref=e793]: EMA26
+                      - generic [ref=e796]: RSI
+                      - generic [ref=e799]: MACD
+                      - generic [ref=e802]: Signal
+                      - generic [ref=e805]: Histogram
+                  - toolbar [ref=e811]:
+                    - button "Download plot as a PNG" [ref=e813] [cursor=pointer]:
+                      - img [ref=e814]
+                    - generic [ref=e816]:
+                      - button "Zoom" [ref=e817] [cursor=pointer]:
+                        - img [ref=e818]
+                      - button "Pan" [ref=e820] [cursor=pointer]:
+                        - img [ref=e821]
+                    - generic [ref=e823]:
+                      - button "Zoom in" [ref=e824] [cursor=pointer]:
+                        - img [ref=e825]
+                      - button "Zoom out" [ref=e827] [cursor=pointer]:
+                        - img [ref=e828]
+                      - button "Autoscale" [ref=e830] [cursor=pointer]:
+                        - img [ref=e831]
+                      - button "Reset axes" [ref=e833] [cursor=pointer]:
+                        - img [ref=e834]
+                    - button "Fullscreen" [ref=e837] [cursor=pointer]:
+                      - img [ref=e838]
+                  - img
+  - img [ref=e304]
+  - generic:
+    - document

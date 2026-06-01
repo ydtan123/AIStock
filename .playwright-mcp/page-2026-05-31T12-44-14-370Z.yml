@@ -1,0 +1,13 @@
+- generic [active]:
+  - generic [ref=e2]:
+    - generic [ref=e8]:
+      - separator [ref=e23]
+      - separator [ref=e30]
+    - banner [ref=e34]:
+      - generic [ref=e37]:
+        - button "Deploy" [ref=e39] [cursor=pointer]:
+          - generic [ref=e41]: Deploy
+        - button "Main menu" [ref=e43] [cursor=pointer]:
+          - img [ref=e44]
+  - generic:
+    - document

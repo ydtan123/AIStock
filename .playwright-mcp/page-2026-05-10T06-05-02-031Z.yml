@@ -1,0 +1,53 @@
+- generic [ref=e2]:
+  - generic [ref=e8]:
+    - heading "📈 AIStock" [level=2] [ref=e13]
+    - paragraph [ref=e18]: Trading Platform
+    - separator [ref=e23]
+    - separator [ref=e30]
+    - heading "Quick Stats" [level=3] [ref=e34]
+  - generic [ref=e49]:
+    - banner [ref=e50]:
+      - generic [ref=e53]:
+        - button "Deploy" [ref=e55] [cursor=pointer]:
+          - generic [ref=e57]: Deploy
+        - button "Main menu" [ref=e59] [cursor=pointer]:
+          - img [ref=e60]
+    - generic [ref=e65]:
+      - heading "Platform Overview" [level=2] [ref=e70]:
+        - text: Platform Overview
+        - generic [ref=e71]:
+          - link "Link to heading":
+            - /url: "#platform-overview"
+            - img
+      - separator [ref=e94]
+      - generic [ref=e96]:
+        - heading "Prediction Distribution" [level=3] [ref=e103]:
+          - text: Prediction Distribution
+          - generic [ref=e104]:
+            - link "Link to heading":
+              - /url: "#prediction-distribution"
+              - img
+        - generic [ref=e108]:
+          - heading "Signal Breakdown" [level=3] [ref=e113]:
+            - text: Signal Breakdown
+            - generic [ref=e114]:
+              - link "Link to heading":
+                - /url: "#signal-breakdown"
+                - img
+          - generic [ref=e119]:
+            - generic [ref=e120]: Bullish
+            - generic [ref=e121]: 829 (27.1%)
+          - generic [ref=e126]:
+            - generic [ref=e127]: Neutral
+            - generic [ref=e128]: 1099 (35.9%)
+          - generic [ref=e133]:
+            - generic [ref=e134]: Bearish
+            - generic [ref=e135]: 1133 (37.0%)
+      - separator [ref=e140]
+      - heading "Recent Predictions" [level=3] [ref=e145]:
+        - text: Recent Predictions
+        - generic [ref=e146]:
+          - link "Link to heading":
+            - /url: "#recent-predictions"
+            - img
+      - paragraph [ref=e151]: "Last updated: 2026-05-07 13:35"

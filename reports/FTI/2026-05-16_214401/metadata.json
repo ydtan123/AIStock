@@ -1,0 +1,34 @@
+{
+  "ticker": "FTI",
+  "date": "2026-05-16",
+  "decision": "Hold",
+  "llm_calls": 23,
+  "generated_at": "2026-05-16 21:45:24",
+  "bullet_summaries": {
+    "Market Analysis": [
+      "\u2022 FTI is in a strong long-term uptrend with a wide and widening 50-day/200-day SMA spread.",
+      "\u2022 Short-term momentum has turned bearish, with a confirmed MACD crossover and deteriorating RSI signaling an ongoing correction.",
+      "\u2022 The stock is testing critical 50-day SMA support, warranting a hold and placing a stop-loss just below this level."
+    ],
+    "Social Sentiment": [
+      "\u2022 FTI is consolidating near $71 with critical support at $70\u2013$71 after a post-earnings pullback.",
+      "\u2022 Institutional investors and analysts remain bullish, while retail sentiment has cooled due to insider sales and order intake worries.",
+      "\u2022 Reacceleration in subsea orders toward the $10 billion target is the key catalyst to confirm the bullish case."
+    ],
+    "News Analysis": [
+      "\u2022 FTI's subsea division achieved record margins and targets $10 billion in awards from a $30 billion pipeline.",
+      "\u2022 Elevated energy prices and geopolitical instability structurally drive upstream capex, benefiting FTI.",
+      "\u2022 Strong free cash flow, aggressive buybacks, and a 4.2% T. Rowe Price stake support ~20% upside to Street-high targets."
+    ],
+    "Fundamentals": [
+      "\u2022 TechnipFMC achieved a dramatic financial turnaround from deep losses to nearly $1B in annual net income, with Q1 2026 earnings per share surging 94% year-over-year.",
+      "\u2022 Exceptional free cash flow of $1.45 billion in FY2025 funds aggressive share buybacks, a new dividend, and maintains a net cash position excluding leases.",
+      "\u2022 The stock appears fully valued at 27 times trailing earnings with limited analyst upside, while energy sector cyclicality and negative retained earnings pose key risks."
+    ],
+    "Final Decision": [
+      "\u2022 The portfolio holds FTI with no changes, as risk/reward at $71.28 is unfavorable for new capital.",
+      "\u2022 The long-term bull case remains intact, but near-term technical weakness and insider selling warrant caution.",
+      "\u2022 A hard stop at $69.00 is set; a break below triggers exit, while a close above $73.35 would turn the posture constructive."
+    ]
+  }
+}

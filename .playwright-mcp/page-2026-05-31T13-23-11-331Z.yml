@@ -1,0 +1,93 @@
+- generic [active]:
+  - generic [ref=e2]:
+    - generic [ref=e24]:
+      - heading "📈 AIStock" [level=2] [ref=e29]
+      - paragraph [ref=e34]: Trading Platform
+      - separator [ref=e39]
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e45]: Full Pipeline
+          - combobox "Selected Full Pipeline. Navigation" [ref=e47]
+        - img "open" [ref=e49]
+      - separator [ref=e55]
+      - heading "Quick Stats" [level=3] [ref=e59]
+      - generic [ref=e61]:
+        - generic [ref=e66]:
+          - paragraph [ref=e69]: Total
+          - paragraph [ref=e72]: "8991"
+        - generic [ref=e77]:
+          - paragraph [ref=e80]: Active
+          - paragraph [ref=e83]: "3062"
+    - generic [ref=e3]:
+      - banner [ref=e4]:
+        - generic [ref=e7]:
+          - button "Deploy" [ref=e9] [cursor=pointer]:
+            - generic [ref=e11]: Deploy
+          - button "Main menu" [ref=e13] [cursor=pointer]:
+            - img [ref=e14]
+      - generic [ref=e88]:
+        - heading "Full Pipeline" [level=2] [ref=e93]:
+          - text: Full Pipeline
+          - generic [ref=e94]:
+            - link "Link to heading":
+              - /url: "#full-pipeline"
+              - img
+        - generic [ref=e96]:
+          - generic [ref=e101] [cursor=pointer]:
+            - checkbox "1. Data Update" [checked]
+            - paragraph [ref=e106]: 1. Data Update
+          - generic [ref=e111] [cursor=pointer]:
+            - checkbox "2. Stock Selection" [checked]
+            - paragraph [ref=e116]: 2. Stock Selection
+          - generic [ref=e121] [cursor=pointer]:
+            - checkbox "3. Fast Evaluation" [checked]
+            - paragraph [ref=e126]: 3. Fast Evaluation
+          - generic [ref=e131] [cursor=pointer]:
+            - checkbox "4. Deep Evaluation" [checked]
+            - paragraph [ref=e136]: 4. Deep Evaluation
+        - separator [ref=e141]
+        - group [ref=e144]:
+          - generic "keyboard_arrow_right 1. Data Update" [ref=e145] [cursor=pointer]:
+            - generic [ref=e146]:
+              - generic [ref=e148]: keyboard_arrow_right
+              - paragraph [ref=e151]: 1. Data Update
+        - group [ref=e154]:
+          - generic "keyboard_arrow_right 2. Stock Selection" [ref=e155] [cursor=pointer]:
+            - generic [ref=e156]:
+              - generic [ref=e158]: keyboard_arrow_right
+              - paragraph [ref=e161]: 2. Stock Selection
+        - group [ref=e164]:
+          - generic "keyboard_arrow_right 3. Fast Evaluation" [ref=e165] [cursor=pointer]:
+            - generic [ref=e166]:
+              - generic [ref=e168]: keyboard_arrow_right
+              - paragraph [ref=e171]: 3. Fast Evaluation
+        - group [ref=e174]:
+          - generic "keyboard_arrow_right 4. Deep Evaluation" [ref=e175] [cursor=pointer]:
+            - generic [ref=e176]:
+              - generic [ref=e178]: keyboard_arrow_right
+              - paragraph [ref=e181]: 4. Deep Evaluation
+        - separator [ref=e186]
+        - generic [ref=e188]:
+          - button "Run Pipeline" [disabled] [ref=e193]:
+            - paragraph [ref=e197]: Run Pipeline
+          - button "Stop" [ref=e202] [cursor=pointer]:
+            - paragraph [ref=e206]: Stop
+        - generic [ref=e208]:
+          - alert [ref=e211]:
+            - paragraph [ref=e216]: "Running... Elapsed: 28s"
+          - generic [ref=e218]:
+            - paragraph [ref=e225]:
+              - text: ⏳
+              - strong [ref=e258]: 1. Data Update
+            - paragraph [ref=e232]: ⬜ 2. Stock Selection
+            - paragraph [ref=e239]: ⬜ 3. Fast Evaluation
+            - paragraph [ref=e246]: ⬜ 4. Deep Evaluation
+          - heading "Log Output" [level=3] [ref=e251]:
+            - text: Log Output
+            - generic [ref=e252]:
+              - link "Link to heading":
+                - /url: "#log-output"
+                - img
+          - code [ref=e257]: "2026-05-31 21:22:41,718 INFO pipeline.thread: === Full Pipeline thread started === 2026-05-31 21:22:41,718 INFO pipeline.thread: Steps: ['data_update', 'stock_selection', 'fast_evaluation', 'deep_evaluation'] 2026-05-31 21:22:41,816 INFO pipeline.thread: === running step: data_update === 2026-05-31 21:22:42,054 INFO news_cache: [CACHE] stock_news table ready 2026-05-31 21:22:42,517 INFO news_cache: [CACHE] route_to_vendor patched — news calls cached in stock_news 2026-05-31 21:22:42,588 INFO ingestion.pipeline: Pipeline starting: 3062 active symbols 2026-05-31 21:22:44,202 INFO ingestion.pipeline: Skipping 3031/3062 stocks (already up-to-date), processing 31 2026-05-31 21:22:44,794 INFO ingestion.pipeline: [1/31] CUK prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:44,952 INFO ingestion.pipeline: [2/31] CTRA prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:45,249 INFO ingestion.pipeline: [3/31] MAPSW prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:46,236 INFO ingestion.pipeline: [4/31] MCW prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:48,661 INFO ingestion.pipeline: [5/31] APLS prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:50,017 INFO ingestion.pipeline: [6/31] TERN prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:51,117 INFO ingestion.pipeline: [7/31] CWEN-A prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:51,940 INFO ingestion.pipeline: [8/31] VRE prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:52,674 INFO ingestion.pipeline: [9/31] CSGS prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:53,443 INFO ingestion.pipeline: [10/31] RCB prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:55,649 INFO ingestion.pipeline: [11/31] FOLD prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:56,454 INFO ingestion.pipeline: [12/31] TPH prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:57,538 INFO ingestion.pipeline: [13/31] CTLP prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:58,894 INFO ingestion.pipeline: [14/31] EXPI prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:22:59,921 INFO ingestion.pipeline: [15/31] MEG prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:23:01,321 INFO ingestion.pipeline: [16/31] DAWN prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:23:02,104 INFO ingestion.pipeline: [17/31] GLPG prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:23:02,852 INFO ingestion.pipeline: [18/31] SEMR prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:23:03,598 INFO ingestion.pipeline: [19/31] SLNO prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:23:05,200 INFO ingestion.pipeline: [20/31] PKST prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:23:05,499 INFO ingestion.pipeline: [21/31] NRXPW prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:23:06,226 INFO ingestion.pipeline: [22/31] EHAB prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:23:07,096 INFO ingestion.pipeline: [23/31] GDEN prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:23:07,918 INFO ingestion.pipeline: [24/31] CVGW prices=0 indicators=0 overview=skipped news=0 2026-05-31 21:23:08,676 INFO ingestion.pipeline: [25/31] AMWD prices=0 indicators=0 overview=skipped news=0"
+  - generic:
+    - document

@@ -1,0 +1,2697 @@
+{
+  "/Users/yudongtan/projects/AIStock/tests/test_e2e_dashboard.py": {
+    "mtime": 1779372691.9859457,
+    "ast_hash": "f0b097e67fdfc4b6f7294fb6464b9b48",
+    "semantic_hash": "f0b097e67fdfc4b6f7294fb6464b9b48"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_config_backcompat.py": {
+    "mtime": 1779372684.876494,
+    "ast_hash": "316b633c173c278e091e8bdad79f68e2",
+    "semantic_hash": "316b633c173c278e091e8bdad79f68e2"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_config.py": {
+    "mtime": 1779372684.8763695,
+    "ast_hash": "6389f2a923493e4aaa11829b825e31c5",
+    "semantic_hash": "6389f2a923493e4aaa11829b825e31c5"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_backends.py": {
+    "mtime": 1779461396.2787,
+    "ast_hash": "68fd7d9c450d38f5db2e6d784b1ca439",
+    "semantic_hash": "68fd7d9c450d38f5db2e6d784b1ca439"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_full_pipeline_e2e.py": {
+    "mtime": 1779977266.8797224,
+    "ast_hash": "1d789ed49bef22ef719d30898270b160",
+    "semantic_hash": "1d789ed49bef22ef719d30898270b160"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_data_update.py": {
+    "mtime": 1779977266.8800073,
+    "ast_hash": "5f7ea4d9b8f5977e41bd8f5d8be4bc95",
+    "semantic_hash": "5f7ea4d9b8f5977e41bd8f5d8be4bc95"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_deep_evaluation.py": {
+    "mtime": 1779372684.8769083,
+    "ast_hash": "d91ad4fd87957119b09ed3b8e27f845e",
+    "semantic_hash": "d91ad4fd87957119b09ed3b8e27f845e"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_stock_selection.py": {
+    "mtime": 1779372684.8779023,
+    "ast_hash": "b89b26c19b1dad595acb20526823601e",
+    "semantic_hash": "b89b26c19b1dad595acb20526823601e"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_base.py": {
+    "mtime": 1779372684.8762395,
+    "ast_hash": "8cd9412d47ced6431aec499eda53b223",
+    "semantic_hash": "8cd9412d47ced6431aec499eda53b223"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_orchestrator.py": {
+    "mtime": 1779372684.8775234,
+    "ast_hash": "a41d154f95e9032a8fd1c5c3080bb145",
+    "semantic_hash": "a41d154f95e9032a8fd1c5c3080bb145"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_schema.py": {
+    "mtime": 1779372684.8776991,
+    "ast_hash": "81449c387abfc71db11e52a3af6ea680",
+    "semantic_hash": "81449c387abfc71db11e52a3af6ea680"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_migrations.py": {
+    "mtime": 1779372684.877377,
+    "ast_hash": "0eb9b6d42276715941c6127d7729d7db",
+    "semantic_hash": "0eb9b6d42276715941c6127d7729d7db"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_fast_evaluation.py": {
+    "mtime": 1779372684.8772638,
+    "ast_hash": "e968c31e26a5467362890669ab168442",
+    "semantic_hash": "e968c31e26a5467362890669ab168442"
+  },
+  "/Users/yudongtan/projects/AIStock/tests/test_pipeline_deps_smoke.py": {
+    "mtime": 1779372684.8770335,
+    "ast_hash": "7a24b946f50f8a35a6d1f60d4af89810",
+    "semantic_hash": "7a24b946f50f8a35a6d1f60d4af89810"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/setup.py": {
+    "mtime": 1778375668.615505,
+    "ast_hash": "5842fedfaed1a392690fdc0df62002eb",
+    "semantic_hash": "5842fedfaed1a392690fdc0df62002eb"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/deploy.sh": {
+    "mtime": 1778375668.6000571,
+    "ast_hash": "74f584f782c2ff2076a10d81681709f3",
+    "semantic_hash": "74f584f782c2ff2076a10d81681709f3"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/__init__.py": {
+    "mtime": 1778375668.615591,
+    "ast_hash": "fc2437962cac27826122c8439695d74e",
+    "semantic_hash": "fc2437962cac27826122c8439695d74e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/main.py": {
+    "mtime": 1778375668.6176937,
+    "ast_hash": "062147ee07f2a158eeeff6578950f85f",
+    "semantic_hash": "062147ee07f2a158eeeff6578950f85f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/tools/dashboard.py": {
+    "mtime": 1778375668.621708,
+    "ast_hash": "6f774ad75b9842918725ea0e63ec4156",
+    "semantic_hash": "6f774ad75b9842918725ea0e63ec4156"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/config/__init__.py": {
+    "mtime": 1778375668.6158357,
+    "ast_hash": "16e79707e6800b01734cb3ac74660a81",
+    "semantic_hash": "16e79707e6800b01734cb3ac74660a81"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/config/settings.py": {
+    "mtime": 1778375668.6159453,
+    "ast_hash": "36c56a5dfdc29bcc17e95f8eb2dd9197",
+    "semantic_hash": "36c56a5dfdc29bcc17e95f8eb2dd9197"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/web/__init__.py": {
+    "mtime": 1778375668.6222146,
+    "ast_hash": "ec2ad685c8d36a6e8faa2e611da63047",
+    "semantic_hash": "ec2ad685c8d36a6e8faa2e611da63047"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/web/pages.py": {
+    "mtime": 1778503985.6209974,
+    "ast_hash": "24a547332788252c40851dfa8cb54ff2",
+    "semantic_hash": "24a547332788252c40851dfa8cb54ff2"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/web/app.py": {
+    "mtime": 1778381691.975828,
+    "ast_hash": "0b7c3b5474c174a4684d4c1598c9ba91",
+    "semantic_hash": "0b7c3b5474c174a4684d4c1598c9ba91"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/web/components.py": {
+    "mtime": 1778375668.6223948,
+    "ast_hash": "ae90e77dd93eb6d3e4ca3efd425ef881",
+    "semantic_hash": "ae90e77dd93eb6d3e4ca3efd425ef881"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/universe_manager.py": {
+    "mtime": 1778375668.6215656,
+    "ast_hash": "c5c30b854b9b5ab931e331b4d1c3e152",
+    "semantic_hash": "c5c30b854b9b5ab931e331b4d1c3e152"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/ml_strategy.py": {
+    "mtime": 1778375668.6209197,
+    "ast_hash": "107934a4c3e42846b9c5bfdc9358d57d",
+    "semantic_hash": "107934a4c3e42846b9c5bfdc9358d57d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/base_signal.py": {
+    "mtime": 1778375668.6202972,
+    "ast_hash": "527f8ae8327d3fc229a3b6f5486264a0",
+    "semantic_hash": "527f8ae8327d3fc229a3b6f5486264a0"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/fundamental_portfolio_drl.py": {
+    "mtime": 1778375668.6205938,
+    "ast_hash": "668078aa132f3b7888bcd745ba7e4a56",
+    "semantic_hash": "668078aa132f3b7888bcd745ba7e4a56"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/execution_engine.py": {
+    "mtime": 1778375668.6204615,
+    "ast_hash": "bd6a431fd00a62d806ee211635a171ee",
+    "semantic_hash": "bd6a431fd00a62d806ee211635a171ee"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/base_strategy.py": {
+    "mtime": 1778375668.6203616,
+    "ast_hash": "33ca24c92520f64a8e51dc2ffd5ed614",
+    "semantic_hash": "33ca24c92520f64a8e51dc2ffd5ed614"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/group_selection_by_gics.py": {
+    "mtime": 1778375668.620682,
+    "ast_hash": "1aa9b47c3031e2f33e46110061b8cea2",
+    "semantic_hash": "1aa9b47c3031e2f33e46110061b8cea2"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/strategylogger.py": {
+    "mtime": 1778375668.6213756,
+    "ast_hash": "3146037c67e8812c661d5e12158da5fd",
+    "semantic_hash": "3146037c67e8812c661d5e12158da5fd"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/__init__.py": {
+    "mtime": 1778375668.6180146,
+    "ast_hash": "a92503369e0ff9ed833b0e3c3c5f3359",
+    "semantic_hash": "a92503369e0ff9ed833b0e3c3c5f3359"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/tsmomsignal.py": {
+    "mtime": 1778375668.621437,
+    "ast_hash": "a9f1e1a634a1b530573acd40e10a1f77",
+    "semantic_hash": "a9f1e1a634a1b530573acd40e10a1f77"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/ml_bucket_selection.py": {
+    "mtime": 1778501401.521888,
+    "ast_hash": "0d7be4a524888664e52a587aaa96c3a5",
+    "semantic_hash": "0d7be4a524888664e52a587aaa96c3a5"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/rl_model.py": {
+    "mtime": 1778375668.6211472,
+    "ast_hash": "6b7058a45cb70ffdd8bdb248275e3546",
+    "semantic_hash": "6b7058a45cb70ffdd8bdb248275e3546"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/run_adaptive_rotation_strategy.py": {
+    "mtime": 1778375668.6212373,
+    "ast_hash": "4dfbc1ec933bd06ef95beb7e8f8a6657",
+    "semantic_hash": "4dfbc1ec933bd06ef95beb7e8f8a6657"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/market_regime.py": {
+    "mtime": 1778375668.6187851,
+    "ast_hash": "4a3e65da32e1ca0f924471b14d633331",
+    "semantic_hash": "4a3e65da32e1ca0f924471b14d633331"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/config_loader.py": {
+    "mtime": 1778375668.6183066,
+    "ast_hash": "e5d4c4974ba805ad4f6dd8c87dae7af8",
+    "semantic_hash": "e5d4c4974ba805ad4f6dd8c87dae7af8"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/portfolio_builder.py": {
+    "mtime": 1778375668.6188805,
+    "ast_hash": "b88352cc847bd471e2223c0c9cadc8a6",
+    "semantic_hash": "b88352cc847bd471e2223c0c9cadc8a6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/intra_group_ranking.py": {
+    "mtime": 1778375668.6186872,
+    "ast_hash": "5d94e1a67374a7a723ac0fe7c6e38147",
+    "semantic_hash": "5d94e1a67374a7a723ac0fe7c6e38147"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/exception_framework.py": {
+    "mtime": 1778375668.618506,
+    "ast_hash": "831096c51cc62ee901820d8a5355a284",
+    "semantic_hash": "831096c51cc62ee901820d8a5355a284"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/__init__.py": {
+    "mtime": 1778375668.6181068,
+    "ast_hash": "c6e2d783ec67e2ca377a942dd27b3fef",
+    "semantic_hash": "c6e2d783ec67e2ca377a942dd27b3fef"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/adaptive_rotation_engine.py": {
+    "mtime": 1778375668.6182065,
+    "ast_hash": "c7382e29b333815f98ba832d6e2f0dc7",
+    "semantic_hash": "c7382e29b333815f98ba832d6e2f0dc7"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/walk_forward.py": {
+    "mtime": 1778375668.6201696,
+    "ast_hash": "d731f3629caa25cabb7bedc038ba1e5c",
+    "semantic_hash": "d731f3629caa25cabb7bedc038ba1e5c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/risk_manager.py": {
+    "mtime": 1778375668.6189725,
+    "ast_hash": "723df82e269a500322096aac45ac59cd",
+    "semantic_hash": "723df82e269a500322096aac45ac59cd"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/group_strength.py": {
+    "mtime": 1778375668.6185951,
+    "ast_hash": "2bceaec40d8f0e0043f1d29d02ec4206",
+    "semantic_hash": "2bceaec40d8f0e0043f1d29d02ec4206"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/data_preprocessor.py": {
+    "mtime": 1778375668.6184068,
+    "ast_hash": "574b44cb2fe57ea784de589319ae5d6f",
+    "semantic_hash": "574b44cb2fe57ea784de589319ae5d6f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/utils/robust_stats.py": {
+    "mtime": 1778375668.62006,
+    "ast_hash": "cb6bdae02fe7a5af309613c70ba50e02",
+    "semantic_hash": "cb6bdae02fe7a5af309613c70ba50e02"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/utils/calendar_utils.py": {
+    "mtime": 1778375668.6198862,
+    "ast_hash": "3a7cbd154c1d679d8f4e16edd9eaf4c6",
+    "semantic_hash": "3a7cbd154c1d679d8f4e16edd9eaf4c6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/adaptive_rotation/utils/__init__.py": {
+    "mtime": 1778375668.6190598,
+    "ast_hash": "2d87594e3caae8ec6f021f6271681d8b",
+    "semantic_hash": "2d87594e3caae8ec6f021f6271681d8b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/utils/__init__.py": {
+    "mtime": 1778375668.622135,
+    "ast_hash": "02501b3d740280fd85106fec8c3bfdaa",
+    "semantic_hash": "02501b3d740280fd85106fec8c3bfdaa"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/utils/logging_utils.py": {
+    "mtime": 1778500904.5613005,
+    "ast_hash": "ebca08bd913e908875daafaee7841ca2",
+    "semantic_hash": "ebca08bd913e908875daafaee7841ca2"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/backtest/__init__.py": {
+    "mtime": 1778375668.6156473,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/backtest/backtest_engine.py": {
+    "mtime": 1778503996.5313814,
+    "ast_hash": "1fd06133aac559a4d45eb56021650b6e",
+    "semantic_hash": "1fd06133aac559a4d45eb56021650b6e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/data/data_store.py": {
+    "mtime": 1778375668.6172302,
+    "ast_hash": "07744b634aa2d6c185526d3cb23c6d9d",
+    "semantic_hash": "07744b634aa2d6c185526d3cb23c6d9d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/data/trading_calendar.py": {
+    "mtime": 1778375668.6176407,
+    "ast_hash": "b29d4cff8213dfeeca0f4885fff5c755",
+    "semantic_hash": "b29d4cff8213dfeeca0f4885fff5c755"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/data/data_processor.py": {
+    "mtime": 1778375668.6171062,
+    "ast_hash": "3012a7a70b3b107a786478dbde66467c",
+    "semantic_hash": "3012a7a70b3b107a786478dbde66467c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/data/fetch_and_store_fundamentals.py": {
+    "mtime": 1778375668.6172972,
+    "ast_hash": "fe662c83b7bde931d67f90de2c010aa4",
+    "semantic_hash": "fe662c83b7bde931d67f90de2c010aa4"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/data/fill_recent_yreturn.py": {
+    "mtime": 1778375668.6174192,
+    "ast_hash": "9a6b87b7e3ea69a7c6f95b26fede96b3",
+    "semantic_hash": "9a6b87b7e3ea69a7c6f95b26fede96b3"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/data/__init__.py": {
+    "mtime": 1778375668.6160316,
+    "ast_hash": "a3cc1bfee1474bf43d462978c48ddefe",
+    "semantic_hash": "a3cc1bfee1474bf43d462978c48ddefe"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/data/fix_adj_close.py": {
+    "mtime": 1778375668.6175432,
+    "ast_hash": "81718cf3e9408e78c6482ef1cbb8a4c4",
+    "semantic_hash": "81718cf3e9408e78c6482ef1cbb8a4c4"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/data/data_fetcher.py": {
+    "mtime": 1778381741.9348698,
+    "ast_hash": "9c1aeafb7ec3bd71c755171919d30bc4",
+    "semantic_hash": "9c1aeafb7ec3bd71c755171919d30bc4"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/data/backfill_historical_sp500.py": {
+    "mtime": 1778375668.6161087,
+    "ast_hash": "a9859fe394b8b314d0d3d0dcc51c4960",
+    "semantic_hash": "a9859fe394b8b314d0d3d0dcc51c4960"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/trading/performance_analyzer.py": {
+    "mtime": 1778375668.6219714,
+    "ast_hash": "94ceb7e6f969500909b45cc78746e0ea",
+    "semantic_hash": "94ceb7e6f969500909b45cc78746e0ea"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/trading/__init__.py": {
+    "mtime": 1778375668.6218047,
+    "ast_hash": "9ff0c1d4daa9514baf4bf182230b4329",
+    "semantic_hash": "9ff0c1d4daa9514baf4bf182230b4329"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/trading/alpaca_manager.py": {
+    "mtime": 1778375668.6218874,
+    "ast_hash": "175b2f95f32dfd61dc0d0870b03818c5",
+    "semantic_hash": "175b2f95f32dfd61dc0d0870b03818c5"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/trading/trade_executor.py": {
+    "mtime": 1778375668.6220498,
+    "ast_hash": "bcab71a50811d5dacd79e8c096c8045c",
+    "semantic_hash": "bcab71a50811d5dacd79e8c096c8045c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/main_non_interactive.py": {
+    "mtime": 1778933869.4977343,
+    "ast_hash": "f38e4ffbd087f8fac9aa80a054c52de7",
+    "semantic_hash": "f38e4ffbd087f8fac9aa80a054c52de7"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/docker/run.sh": {
+    "mtime": 1778854832.4294872,
+    "ast_hash": "7f94aacd84fa86be3ad05f239cc9bfd0",
+    "semantic_hash": "7f94aacd84fa86be3ad05f239cc9bfd0"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/run.sh": {
+    "mtime": 1778854832.4289734,
+    "ast_hash": "8730a5c4bd6e859d004aad3fb16b1164",
+    "semantic_hash": "8730a5c4bd6e859d004aad3fb16b1164"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/tsconfig.node.json": {
+    "mtime": 1778854832.42875,
+    "ast_hash": "767b2e9abe6452170cdc399ca052cfbc",
+    "semantic_hash": "767b2e9abe6452170cdc399ca052cfbc"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/postcss.config.mjs": {
+    "mtime": 1778854832.4152262,
+    "ast_hash": "c56b5f3c12f777a86e2513f45daab56a",
+    "semantic_hash": "c56b5f3c12f777a86e2513f45daab56a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/tailwind.config.ts": {
+    "mtime": 1778854832.4286063,
+    "ast_hash": "a378a7d73976e3c36bbf6aaddac10f04",
+    "semantic_hash": "a378a7d73976e3c36bbf6aaddac10f04"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/package.json": {
+    "mtime": 1778854832.4148712,
+    "ast_hash": "3a9686a4d44ddbdbe4736aa26aa64d3a",
+    "semantic_hash": "3a9686a4d44ddbdbe4736aa26aa64d3a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/components.json": {
+    "mtime": 1778854832.4143786,
+    "ast_hash": "d15a87d772ab4a9c3abf653a4050373b",
+    "semantic_hash": "d15a87d772ab4a9c3abf653a4050373b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/tsconfig.json": {
+    "mtime": 1778854832.4286826,
+    "ast_hash": "8b75d0e886be22d259f25f5dd3e3bdce",
+    "semantic_hash": "8b75d0e886be22d259f25f5dd3e3bdce"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/vite.config.ts": {
+    "mtime": 1778854832.4288182,
+    "ast_hash": "93651a86ac1ba58053f9de026e47f812",
+    "semantic_hash": "93651a86ac1ba58053f9de026e47f812"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/App.tsx": {
+    "mtime": 1778854832.4155214,
+    "ast_hash": "60d10f05ffe50476f4453892b8eec2a5",
+    "semantic_hash": "60d10f05ffe50476f4453892b8eec2a5"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/main.tsx": {
+    "mtime": 1778854832.4238088,
+    "ast_hash": "944850bdb5eb2c25a2e33d5cf3208327",
+    "semantic_hash": "944850bdb5eb2c25a2e33d5cf3208327"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/vite-env.d.ts": {
+    "mtime": 1778854832.42854,
+    "ast_hash": "0352474ba2918efe13895edbc3780d94",
+    "semantic_hash": "0352474ba2918efe13895edbc3780d94"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/types/flow.ts": {
+    "mtime": 1778854832.428258,
+    "ast_hash": "9c9c409750ac7570d31e8609f8a8a121",
+    "semantic_hash": "9c9c409750ac7570d31e8609f8a8a121"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/contexts/flow-context.tsx": {
+    "mtime": 1778854832.4214916,
+    "ast_hash": "11a4def7627fbfd2696837cc1dab09b3",
+    "semantic_hash": "11a4def7627fbfd2696837cc1dab09b3"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/contexts/layout-context.tsx": {
+    "mtime": 1778854832.4215586,
+    "ast_hash": "87271b587c80ffae99ca75302485e311",
+    "semantic_hash": "87271b587c80ffae99ca75302485e311"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/contexts/tabs-context.tsx": {
+    "mtime": 1778854832.421728,
+    "ast_hash": "de0f324ed6b9d8c7766833d1f81cc87d",
+    "semantic_hash": "de0f324ed6b9d8c7766833d1f81cc87d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/contexts/node-context.tsx": {
+    "mtime": 1778854832.421652,
+    "ast_hash": "fe949bb42ac0da39cd0d1e5c1d435313",
+    "semantic_hash": "fe949bb42ac0da39cd0d1e5c1d435313"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/utils.ts": {
+    "mtime": 1778854832.426988,
+    "ast_hash": "b668b6fff2ccc9a3b115c7b26fd8e9d8",
+    "semantic_hash": "b668b6fff2ccc9a3b115c7b26fd8e9d8"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/types.ts": {
+    "mtime": 1778854832.4269226,
+    "ast_hash": "f0a6b3d07265bde9e251a266f7fb7f0e",
+    "semantic_hash": "f0a6b3d07265bde9e251a266f7fb7f0e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/index.ts": {
+    "mtime": 1778854832.4268122,
+    "ast_hash": "e6bfd18eeb845144fcd5162ba32cce48",
+    "semantic_hash": "e6bfd18eeb845144fcd5162ba32cce48"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/components/json-output-node.tsx": {
+    "mtime": 1778854832.425549,
+    "ast_hash": "c3096aad39efd5976a19198b079fd2b1",
+    "semantic_hash": "c3096aad39efd5976a19198b079fd2b1"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/components/node-shell.tsx": {
+    "mtime": 1778854832.4256673,
+    "ast_hash": "6eccfd5a8df498f4729d1b45b238cd10",
+    "semantic_hash": "6eccfd5a8df498f4729d1b45b238cd10"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/components/stock-analyzer-node.tsx": {
+    "mtime": 1778854832.4264932,
+    "ast_hash": "9032939f6492130f5bf16f4fc4b1cd63",
+    "semantic_hash": "9032939f6492130f5bf16f4fc4b1cd63"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/components/json-output-dialog.tsx": {
+    "mtime": 1778854832.425308,
+    "ast_hash": "149c2919d4a34f5ce434a37e979f70d0",
+    "semantic_hash": "149c2919d4a34f5ce434a37e979f70d0"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/components/investment-report-node.tsx": {
+    "mtime": 1778854832.4251666,
+    "ast_hash": "8ccc6bd1ce9a9c58dd1611fef94a236c",
+    "semantic_hash": "8ccc6bd1ce9a9c58dd1611fef94a236c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/components/portfolio-start-node.tsx": {
+    "mtime": 1778854832.4260786,
+    "ast_hash": "8752dbac214b53bb83f473511f1e65bc",
+    "semantic_hash": "8752dbac214b53bb83f473511f1e65bc"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/components/output-node-status.tsx": {
+    "mtime": 1778854832.425776,
+    "ast_hash": "94d37c462c021208bdb2e4b9702e7138",
+    "semantic_hash": "94d37c462c021208bdb2e4b9702e7138"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/components/agent-node.tsx": {
+    "mtime": 1778854832.4239962,
+    "ast_hash": "a40514053990402697140207b9346882",
+    "semantic_hash": "a40514053990402697140207b9346882"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/components/agent-output-dialog.tsx": {
+    "mtime": 1778854832.424077,
+    "ast_hash": "3689f7ba39436d7d0f6658017dbb6d33",
+    "semantic_hash": "3689f7ba39436d7d0f6658017dbb6d33"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/components/portfolio-manager-node.tsx": {
+    "mtime": 1778854832.425965,
+    "ast_hash": "fad518f20c6e9aa05cd742e9c26c872a",
+    "semantic_hash": "fad518f20c6e9aa05cd742e9c26c872a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/nodes/components/investment-report-dialog.tsx": {
+    "mtime": 1778854832.4241483,
+    "ast_hash": "54322770c105cb87265da338c766c76f",
+    "semantic_hash": "54322770c105cb87265da338c766c76f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/providers/theme-provider.tsx": {
+    "mtime": 1778854832.4271302,
+    "ast_hash": "a61436db12f9fba7461c6b6c4ca22d66",
+    "semantic_hash": "a61436db12f9fba7461c6b6c4ca22d66"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/utils/date-utils.ts": {
+    "mtime": 1778854832.428384,
+    "ast_hash": "300d7d6cba37b4db9209a64b70a87d93",
+    "semantic_hash": "300d7d6cba37b4db9209a64b70a87d93"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/utils/text-utils.ts": {
+    "mtime": 1778854832.4284697,
+    "ast_hash": "dfab07232486ee4fe5d9c325b5e1b79c",
+    "semantic_hash": "dfab07232486ee4fe5d9c325b5e1b79c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/custom-controls.tsx": {
+    "mtime": 1778854832.4158533,
+    "ast_hash": "5b60e6c5b4fab646ce2de94ffb7d1bff",
+    "semantic_hash": "5b60e6c5b4fab646ce2de94ffb7d1bff"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/Layout.tsx": {
+    "mtime": 1778854832.4157853,
+    "ast_hash": "02ae0dbc2fcf33d09488203fd005f415",
+    "semantic_hash": "02ae0dbc2fcf33d09488203fd005f415"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/Flow.tsx": {
+    "mtime": 1778854832.4156656,
+    "ast_hash": "47c0b1f83fa6314ca7fcb71caaa9a155",
+    "semantic_hash": "47c0b1f83fa6314ca7fcb71caaa9a155"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/tabs/tab-content.tsx": {
+    "mtime": 1778854832.4195683,
+    "ast_hash": "4627b6a54d0b40e70e557a3b5fe1e593",
+    "semantic_hash": "4627b6a54d0b40e70e557a3b5fe1e593"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/tabs/tab-bar.tsx": {
+    "mtime": 1778854832.4194944,
+    "ast_hash": "8788b6abf63b95f574184e9c971450cb",
+    "semantic_hash": "8788b6abf63b95f574184e9c971450cb"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/tabs/flow-tab-content.tsx": {
+    "mtime": 1778854832.419377,
+    "ast_hash": "3bd554587611ca8139234902b6debb33",
+    "semantic_hash": "3bd554587611ca8139234902b6debb33"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/llm-selector.tsx": {
+    "mtime": 1778854832.4206226,
+    "ast_hash": "b01493a0668c0498f7d8ea00dd23402b",
+    "semantic_hash": "b01493a0668c0498f7d8ea00dd23402b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/tabs.tsx": {
+    "mtime": 1778854832.421275,
+    "ast_hash": "be4b5ccbade73d9a4cff130dca4fa088",
+    "semantic_hash": "be4b5ccbade73d9a4cff130dca4fa088"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/card.tsx": {
+    "mtime": 1778854832.4202027,
+    "ast_hash": "d5b94371f6ef29810cbd778f83fd5106",
+    "semantic_hash": "d5b94371f6ef29810cbd778f83fd5106"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/popover.tsx": {
+    "mtime": 1778854832.420693,
+    "ast_hash": "e392cc89eb45322af9653c60f51f778e",
+    "semantic_hash": "e392cc89eb45322af9653c60f51f778e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/sheet.tsx": {
+    "mtime": 1778854832.4209237,
+    "ast_hash": "37e7a8592c3402cc56568d9f59d7db68",
+    "semantic_hash": "37e7a8592c3402cc56568d9f59d7db68"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/resizable.tsx": {
+    "mtime": 1778854832.4207606,
+    "ast_hash": "cf5896bc9f1524c3f3fb2d4f24eb54bf",
+    "semantic_hash": "cf5896bc9f1524c3f3fb2d4f24eb54bf"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/sonner.tsx": {
+    "mtime": 1778854832.4211452,
+    "ast_hash": "40fb0178b48327aacb4f9393e54c618c",
+    "semantic_hash": "40fb0178b48327aacb4f9393e54c618c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/accordion.tsx": {
+    "mtime": 1778854832.4199681,
+    "ast_hash": "400c2f0e9db19a141055ac6c979305bc",
+    "semantic_hash": "400c2f0e9db19a141055ac6c979305bc"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/tooltip.tsx": {
+    "mtime": 1778854832.421349,
+    "ast_hash": "964c3dd435f501f1ba3e4c622466e610",
+    "semantic_hash": "964c3dd435f501f1ba3e4c622466e610"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/command.tsx": {
+    "mtime": 1778854832.4203944,
+    "ast_hash": "4daf370b2be7d3ebbd9d815b08e20200",
+    "semantic_hash": "4daf370b2be7d3ebbd9d815b08e20200"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/dialog.tsx": {
+    "mtime": 1778854832.4204707,
+    "ast_hash": "445520810faba09147b2c075479cf093",
+    "semantic_hash": "445520810faba09147b2c075479cf093"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/badge.tsx": {
+    "mtime": 1778854832.4200442,
+    "ast_hash": "aa13673c3ce8a5793f34d47b803558ef",
+    "semantic_hash": "aa13673c3ce8a5793f34d47b803558ef"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/sidebar.tsx": {
+    "mtime": 1778854832.4210064,
+    "ast_hash": "adf7675dc6bf84d09fd9bcaecf0c64a5",
+    "semantic_hash": "adf7675dc6bf84d09fd9bcaecf0c64a5"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/table.tsx": {
+    "mtime": 1778854832.4212077,
+    "ast_hash": "0ae7dbae059df3f7e3faa6a93e81267f",
+    "semantic_hash": "0ae7dbae059df3f7e3faa6a93e81267f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/separator.tsx": {
+    "mtime": 1778854832.4208262,
+    "ast_hash": "e970901b62fe8b73d2b9254fad77f583",
+    "semantic_hash": "e970901b62fe8b73d2b9254fad77f583"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/button.tsx": {
+    "mtime": 1778854832.420134,
+    "ast_hash": "2af0d1a672bca3caea510bd5b0ed409a",
+    "semantic_hash": "2af0d1a672bca3caea510bd5b0ed409a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/checkbox.tsx": {
+    "mtime": 1778854832.4202769,
+    "ast_hash": "e2bfc1f3547a6ae318f5a4519df7f656",
+    "semantic_hash": "e2bfc1f3547a6ae318f5a4519df7f656"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/input.tsx": {
+    "mtime": 1778854832.4205465,
+    "ast_hash": "07970da113915d9e52c5d9e46577fffc",
+    "semantic_hash": "07970da113915d9e52c5d9e46577fffc"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/ui/skeleton.tsx": {
+    "mtime": 1778854832.42108,
+    "ast_hash": "c16d8ac1e08656426fb248b601772ad1",
+    "semantic_hash": "c16d8ac1e08656426fb248b601772ad1"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/settings/settings.tsx": {
+    "mtime": 1778854832.4192405,
+    "ast_hash": "3d5d9ffe8c718f6c3f5a989770f544c3",
+    "semantic_hash": "3d5d9ffe8c718f6c3f5a989770f544c3"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/settings/models.tsx": {
+    "mtime": 1778854832.4188066,
+    "ast_hash": "8978ac4354bdabc3ce975b1744b8776e",
+    "semantic_hash": "8978ac4354bdabc3ce975b1744b8776e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/settings/appearance.tsx": {
+    "mtime": 1778854832.418648,
+    "ast_hash": "0a6b6e2be1464ca306a690a82c89800f",
+    "semantic_hash": "0a6b6e2be1464ca306a690a82c89800f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/settings/index.ts": {
+    "mtime": 1778854832.4187384,
+    "ast_hash": "58bb854f9da977515ea48480f4384aec",
+    "semantic_hash": "58bb854f9da977515ea48480f4384aec"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/settings/api-keys.tsx": {
+    "mtime": 1778855838.1500304,
+    "ast_hash": "1ad094655f161b4f430d05e2e3b75a98",
+    "semantic_hash": "1ad094655f161b4f430d05e2e3b75a98"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/settings/models/ollama.tsx": {
+    "mtime": 1778854832.4190657,
+    "ast_hash": "18f14fe010775aa7b619301b270d8561",
+    "semantic_hash": "18f14fe010775aa7b619301b270d8561"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/settings/models/cloud.tsx": {
+    "mtime": 1778854832.4189525,
+    "ast_hash": "899ae05fb7511c918e9f6d1a653e927f",
+    "semantic_hash": "899ae05fb7511c918e9f6d1a653e927f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/layout/top-bar.tsx": {
+    "mtime": 1778854832.4159734,
+    "ast_hash": "cfc90cb5f95ca478a099c8e07b70760b",
+    "semantic_hash": "cfc90cb5f95ca478a099c8e07b70760b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/search-box.tsx": {
+    "mtime": 1778854832.4184363,
+    "ast_hash": "a2c343271629676785b4d9216620d4b7",
+    "semantic_hash": "a2c343271629676785b4d9216620d4b7"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/right/component-item.tsx": {
+    "mtime": 1778854832.418233,
+    "ast_hash": "b76c0f6dbe9cfe816781c2c9e60eb3f8",
+    "semantic_hash": "b76c0f6dbe9cfe816781c2c9e60eb3f8"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/right/component-item-group.tsx": {
+    "mtime": 1778854832.4181426,
+    "ast_hash": "5873df74992a285764be5bf430a5e99f",
+    "semantic_hash": "5873df74992a285764be5bf430a5e99f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/right/component-actions.tsx": {
+    "mtime": 1778854832.4180639,
+    "ast_hash": "78cb16a372fe86b6055b8a546c706839",
+    "semantic_hash": "78cb16a372fe86b6055b8a546c706839"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/right/component-list.tsx": {
+    "mtime": 1778854832.4183097,
+    "ast_hash": "620c489a2f0a634669cdb9f7a93c43da",
+    "semantic_hash": "620c489a2f0a634669cdb9f7a93c43da"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/right/right-sidebar.tsx": {
+    "mtime": 1778854832.4183705,
+    "ast_hash": "5737410b1b1711351d9613372c6642c7",
+    "semantic_hash": "5737410b1b1711351d9613372c6642c7"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/left/flow-edit-dialog.tsx": {
+    "mtime": 1778854832.4174552,
+    "ast_hash": "4c4b327a1719c7c88d3dca260e4da998",
+    "semantic_hash": "4c4b327a1719c7c88d3dca260e4da998"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/left/flow-create-dialog.tsx": {
+    "mtime": 1778854832.4173777,
+    "ast_hash": "3659bf78872783a842b2dac6e636ae0c",
+    "semantic_hash": "3659bf78872783a842b2dac6e636ae0c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/left/flow-list.tsx": {
+    "mtime": 1778854832.4178462,
+    "ast_hash": "f79ef3cb97c77b5767462f46ee65e5ac",
+    "semantic_hash": "f79ef3cb97c77b5767462f46ee65e5ac"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/left/flow-item-group.tsx": {
+    "mtime": 1778854832.4176667,
+    "ast_hash": "27d9348c650704507ecf00153f74b89a",
+    "semantic_hash": "27d9348c650704507ecf00153f74b89a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/left/flow-item.tsx": {
+    "mtime": 1778854832.4177737,
+    "ast_hash": "1e7f6fa7ba070cd6adaad41dc9a19b4b",
+    "semantic_hash": "1e7f6fa7ba070cd6adaad41dc9a19b4b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/left/flow-actions.tsx": {
+    "mtime": 1778854832.4172258,
+    "ast_hash": "af89f1ad5764d0390e11b29ba7623225",
+    "semantic_hash": "af89f1ad5764d0390e11b29ba7623225"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/left/flow-context-menu.tsx": {
+    "mtime": 1778854832.4173028,
+    "ast_hash": "b1ec73b29494e28b8ee21741f8b4543d",
+    "semantic_hash": "b1ec73b29494e28b8ee21741f8b4543d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/left/left-sidebar.tsx": {
+    "mtime": 1778854832.4179354,
+    "ast_hash": "ff7c6d2fe4afadf4cf14f3360224a7a9",
+    "semantic_hash": "ff7c6d2fe4afadf4cf14f3360224a7a9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/bottom/bottom-panel.tsx": {
+    "mtime": 1778854832.4161723,
+    "ast_hash": "7515f67082a8b5c2f30507e9284c4b9c",
+    "semantic_hash": "7515f67082a8b5c2f30507e9284c4b9c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/bottom/tabs/regular-output.tsx": {
+    "mtime": 1778854832.4170368,
+    "ast_hash": "fdf8316663bb58a97f665b9fbf668869",
+    "semantic_hash": "fdf8316663bb58a97f665b9fbf668869"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/bottom/tabs/problems-tab.tsx": {
+    "mtime": 1778854832.4168775,
+    "ast_hash": "a46a876879e6cedc031f66f1650810cf",
+    "semantic_hash": "a46a876879e6cedc031f66f1650810cf"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/bottom/tabs/terminal-tab.tsx": {
+    "mtime": 1778854832.4171095,
+    "ast_hash": "2ca95339d6d11119dc44553a2e11ab95",
+    "semantic_hash": "2ca95339d6d11119dc44553a2e11ab95"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/bottom/tabs/debug-console-tab.tsx": {
+    "mtime": 1778854832.416388,
+    "ast_hash": "f5e2b27dc2b0df55393f6c82de3a7524",
+    "semantic_hash": "f5e2b27dc2b0df55393f6c82de3a7524"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/bottom/tabs/backtest-output.tsx": {
+    "mtime": 1778854832.4163113,
+    "ast_hash": "517d80af258be82fc6ec1042636d6449",
+    "semantic_hash": "517d80af258be82fc6ec1042636d6449"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/bottom/tabs/output-tab-utils.ts": {
+    "mtime": 1778854832.4165137,
+    "ast_hash": "174da281459af50b96150ad086dd342e",
+    "semantic_hash": "174da281459af50b96150ad086dd342e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/bottom/tabs/output-tab.tsx": {
+    "mtime": 1778854832.4168127,
+    "ast_hash": "191c9fa445b80593d46d459c85401109",
+    "semantic_hash": "191c9fa445b80593d46d459c85401109"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/bottom/tabs/index.ts": {
+    "mtime": 1778854832.4164484,
+    "ast_hash": "b6bd4ecc9e480aaf30216676929c1815",
+    "semantic_hash": "b6bd4ecc9e480aaf30216676929c1815"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/components/panels/bottom/tabs/reasoning-content.tsx": {
+    "mtime": 1778854832.416947,
+    "ast_hash": "c40b9284ff9b9efb5e63b3934eb082d4",
+    "semantic_hash": "c40b9284ff9b9efb5e63b3934eb082d4"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-mobile.tsx": {
+    "mtime": 1778854832.4232361,
+    "ast_hash": "209b5193af16624cdd89d3591480dd48",
+    "semantic_hash": "209b5193af16624cdd89d3591480dd48"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-resizable.ts": {
+    "mtime": 1778854832.4234676,
+    "ast_hash": "4f625ef46ac20103b5f0e918e2722dff",
+    "semantic_hash": "4f625ef46ac20103b5f0e918e2722dff"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-toast-manager.ts": {
+    "mtime": 1778854832.423545,
+    "ast_hash": "7d9cc002d05dea83d0b5ccfd161dd4c1",
+    "semantic_hash": "7d9cc002d05dea83d0b5ccfd161dd4c1"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-keyboard-shortcuts.ts": {
+    "mtime": 1778854832.4231608,
+    "ast_hash": "237436e4ac4df2c633795c9b5534564e",
+    "semantic_hash": "237436e4ac4df2c633795c9b5534564e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-enhanced-flow-actions.ts": {
+    "mtime": 1778854832.4226856,
+    "ast_hash": "6d561a70694350344b233a1b788354b1",
+    "semantic_hash": "6d561a70694350344b233a1b788354b1"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-flow-management-tabs.ts": {
+    "mtime": 1778854832.4229805,
+    "ast_hash": "1d511e46abe79cbfa21cb5af4082f50a",
+    "semantic_hash": "1d511e46abe79cbfa21cb5af4082f50a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-component-groups.ts": {
+    "mtime": 1778854832.4224727,
+    "ast_hash": "92fdc14d9748f1930b35ad29a0339d0f",
+    "semantic_hash": "92fdc14d9748f1930b35ad29a0339d0f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-flow-management.ts": {
+    "mtime": 1778854832.423058,
+    "ast_hash": "e3e8b025440b82610c7cd28417de563f",
+    "semantic_hash": "e3e8b025440b82610c7cd28417de563f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-node-state.ts": {
+    "mtime": 1778854832.4233189,
+    "ast_hash": "6745878d8b120017554638720d025c8e",
+    "semantic_hash": "6745878d8b120017554638720d025c8e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-output-node-connection.ts": {
+    "mtime": 1778854832.4234,
+    "ast_hash": "9eb020c40be8a4a0ea04ed6d82cfe74c",
+    "semantic_hash": "9eb020c40be8a4a0ea04ed6d82cfe74c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-flow-history.ts": {
+    "mtime": 1778854832.4229054,
+    "ast_hash": "6de1f6b72d795053612bf4bdd0de85a8",
+    "semantic_hash": "6de1f6b72d795053612bf4bdd0de85a8"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/hooks/use-flow-connection.ts": {
+    "mtime": 1778854832.4227967,
+    "ast_hash": "23ab3a78254bc25c5e996893d63ab00e",
+    "semantic_hash": "23ab3a78254bc25c5e996893d63ab00e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/lib/utils.ts": {
+    "mtime": 1778854832.423745,
+    "ast_hash": "be430c8d63e93151a5e268b6b530c3fc",
+    "semantic_hash": "be430c8d63e93151a5e268b6b530c3fc"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/edges/index.ts": {
+    "mtime": 1778854832.4223437,
+    "ast_hash": "c9cac9dc75864199abf862b29fb7ffdb",
+    "semantic_hash": "c9cac9dc75864199abf862b29fb7ffdb"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/data/node-mappings.ts": {
+    "mtime": 1778854832.4221637,
+    "ast_hash": "d8d69067f6b6ff015c4584df6f252d46",
+    "semantic_hash": "d8d69067f6b6ff015c4584df6f252d46"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/data/agents.ts": {
+    "mtime": 1778854832.4218342,
+    "ast_hash": "3da5096dae2c74942d4d814be36d2a92",
+    "semantic_hash": "3da5096dae2c74942d4d814be36d2a92"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/data/sidebar-components.ts": {
+    "mtime": 1778854832.42223,
+    "ast_hash": "c5afe6f02f890d7b7065e5841b747388",
+    "semantic_hash": "c5afe6f02f890d7b7065e5841b747388"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/data/multi-node-mappings.ts": {
+    "mtime": 1778854832.421966,
+    "ast_hash": "07140cb0c6f241215c14cbff0d2324b5",
+    "semantic_hash": "07140cb0c6f241215c14cbff0d2324b5"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/data/models.ts": {
+    "mtime": 1778854832.4218986,
+    "ast_hash": "15ebd226f77f2aebba0ba42bf4bb4809",
+    "semantic_hash": "15ebd226f77f2aebba0ba42bf4bb4809"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/services/sidebar-storage.ts": {
+    "mtime": 1778854832.4280076,
+    "ast_hash": "66bda5aff72fd21841d9edb1eaa2c0a7",
+    "semantic_hash": "66bda5aff72fd21841d9edb1eaa2c0a7"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/services/api.ts": {
+    "mtime": 1778854832.4273736,
+    "ast_hash": "d5b4ece4c5804d9077db2b6fcfc4d44a",
+    "semantic_hash": "d5b4ece4c5804d9077db2b6fcfc4d44a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/services/api-keys-api.ts": {
+    "mtime": 1778854832.4272954,
+    "ast_hash": "bbc4eb2bd37cf2d04850467194506b8f",
+    "semantic_hash": "bbc4eb2bd37cf2d04850467194506b8f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/services/types.ts": {
+    "mtime": 1778854832.4281464,
+    "ast_hash": "dc44cdb477ec8fc0c394f7b4e40c4a62",
+    "semantic_hash": "dc44cdb477ec8fc0c394f7b4e40c4a62"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/services/tab-service.ts": {
+    "mtime": 1778854832.4280813,
+    "ast_hash": "cbdd3e359e17975a17ed4e227bd856d3",
+    "semantic_hash": "cbdd3e359e17975a17ed4e227bd856d3"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/services/backtest-api.ts": {
+    "mtime": 1778854832.4275506,
+    "ast_hash": "1f21aed0b08437708ebe3e843002704f",
+    "semantic_hash": "1f21aed0b08437708ebe3e843002704f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/src/services/flow-service.ts": {
+    "mtime": 1778854832.4276443,
+    "ast_hash": "71b9969a5921824ac7f00cd309f4ca4c",
+    "semantic_hash": "71b9969a5921824ac7f00cd309f4ca4c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/__init__.py": {
+    "mtime": 1778854832.4104092,
+    "ast_hash": "f7fe6dfc8522fc32bad8e10ef21ca170",
+    "semantic_hash": "f7fe6dfc8522fc32bad8e10ef21ca170"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/main.py": {
+    "mtime": 1778854832.4115062,
+    "ast_hash": "e3a9a21573804fbb9af1ba389b24af6f",
+    "semantic_hash": "e3a9a21573804fbb9af1ba389b24af6f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/database/models.py": {
+    "mtime": 1778854832.4114354,
+    "ast_hash": "66e146893402d654ba70d9ff47d482f8",
+    "semantic_hash": "66e146893402d654ba70d9ff47d482f8"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/database/__init__.py": {
+    "mtime": 1778854832.411263,
+    "ast_hash": "360b51b2a862691f8c6a035141a5b16e",
+    "semantic_hash": "360b51b2a862691f8c6a035141a5b16e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/database/connection.py": {
+    "mtime": 1778854832.411334,
+    "ast_hash": "801b7e68b16c110557d6a3465af0f09c",
+    "semantic_hash": "801b7e68b16c110557d6a3465af0f09c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/repositories/flow_repository.py": {
+    "mtime": 1778854832.4120743,
+    "ast_hash": "e8d27cd6fa3ce72497e8fbef8474d19e",
+    "semantic_hash": "e8d27cd6fa3ce72497e8fbef8474d19e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/repositories/__init__.py": {
+    "mtime": 1778854832.4118912,
+    "ast_hash": "9d2d2be8e1a5b88c4780c4b6725d1363",
+    "semantic_hash": "9d2d2be8e1a5b88c4780c4b6725d1363"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/repositories/api_key_repository.py": {
+    "mtime": 1778854832.411995,
+    "ast_hash": "0125f84c685268c07883b3221367f82b",
+    "semantic_hash": "0125f84c685268c07883b3221367f82b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/repositories/flow_run_repository.py": {
+    "mtime": 1778854832.4122403,
+    "ast_hash": "1912716b243cdf58ae97a66aa390bc95",
+    "semantic_hash": "1912716b243cdf58ae97a66aa390bc95"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/models/events.py": {
+    "mtime": 1778854832.4116828,
+    "ast_hash": "84cbe233f04ceaee94cfd54e2c2361a2",
+    "semantic_hash": "84cbe233f04ceaee94cfd54e2c2361a2"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/models/__init__.py": {
+    "mtime": 1778854832.4115863,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/models/schemas.py": {
+    "mtime": 1778854832.4117732,
+    "ast_hash": "71b641676e52fe425b4381d2b196cf62",
+    "semantic_hash": "71b641676e52fe425b4381d2b196cf62"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/alembic/env.py": {
+    "mtime": 1778854832.410649,
+    "ast_hash": "ce649431fdff97530ddcc3fde85858a6",
+    "semantic_hash": "ce649431fdff97530ddcc3fde85858a6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/alembic/versions/3f9a6b7c8d2e_add_hedgefundflowruncycle_table.py": {
+    "mtime": 1778854832.4110165,
+    "ast_hash": "b1e3d12384da00ebb3a9a92d28997955",
+    "semantic_hash": "b1e3d12384da00ebb3a9a92d28997955"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/alembic/versions/add_api_keys_table.py": {
+    "mtime": 1778854832.4111524,
+    "ast_hash": "0acb62dbb26baef528daa080d5d05a31",
+    "semantic_hash": "0acb62dbb26baef528daa080d5d05a31"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/alembic/versions/2f8c5d9e4b1a_add_hedgefundflowrun_table.py": {
+    "mtime": 1778854832.41091,
+    "ast_hash": "ec1f15b513cd5bdab545210c4be1da01",
+    "semantic_hash": "ec1f15b513cd5bdab545210c4be1da01"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/alembic/versions/5274886e5bee_add_hedgefundflow_table.py": {
+    "mtime": 1778854832.4110806,
+    "ast_hash": "644919342e0e04cef87d146ca733bd4e",
+    "semantic_hash": "644919342e0e04cef87d146ca733bd4e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/alembic/versions/1b1feba3d897_add_data_column_to_hedge_fund_flows.py": {
+    "mtime": 1778854832.4108377,
+    "ast_hash": "8fae6de48c199afde909218d6aef12da",
+    "semantic_hash": "8fae6de48c199afde909218d6aef12da"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/routes/language_models.py": {
+    "mtime": 1778854832.4130187,
+    "ast_hash": "cd1b4b621df62872eb9c205dc761a744",
+    "semantic_hash": "cd1b4b621df62872eb9c205dc761a744"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/routes/flow_runs.py": {
+    "mtime": 1778854832.4126465,
+    "ast_hash": "3dd85e312d85bc422ece8d236ec3e700",
+    "semantic_hash": "3dd85e312d85bc422ece8d236ec3e700"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/routes/health.py": {
+    "mtime": 1778854832.4128513,
+    "ast_hash": "a1883fe907d06851910e1df4489b9cc6",
+    "semantic_hash": "a1883fe907d06851910e1df4489b9cc6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/routes/__init__.py": {
+    "mtime": 1778854832.4124315,
+    "ast_hash": "5259c8ef009195c1f3a8c5b1e046b235",
+    "semantic_hash": "5259c8ef009195c1f3a8c5b1e046b235"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/routes/hedge_fund.py": {
+    "mtime": 1778854832.412948,
+    "ast_hash": "6c787f97bdadb820b5153f96b4404bdf",
+    "semantic_hash": "6c787f97bdadb820b5153f96b4404bdf"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/routes/storage.py": {
+    "mtime": 1778854832.4131777,
+    "ast_hash": "84552171681e371d0ef4e7ab1e7a57d9",
+    "semantic_hash": "84552171681e371d0ef4e7ab1e7a57d9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/routes/flows.py": {
+    "mtime": 1778854832.4127502,
+    "ast_hash": "988e5b30465faf388090db0d4bb4a228",
+    "semantic_hash": "988e5b30465faf388090db0d4bb4a228"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/routes/api_keys.py": {
+    "mtime": 1778854832.4125607,
+    "ast_hash": "30968d2ff5ea734495c888dddfa0746f",
+    "semantic_hash": "30968d2ff5ea734495c888dddfa0746f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/routes/ollama.py": {
+    "mtime": 1778854832.4130995,
+    "ast_hash": "4bdc876ffde7e74ec4f6f349783879b2",
+    "semantic_hash": "4bdc876ffde7e74ec4f6f349783879b2"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/services/agent_service.py": {
+    "mtime": 1778854832.413342,
+    "ast_hash": "b6ece6c96060a53283886f6186033826",
+    "semantic_hash": "b6ece6c96060a53283886f6186033826"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/services/graph.py": {
+    "mtime": 1778854832.4136534,
+    "ast_hash": "c521b9678b6e6f90e88d634fb07ed337",
+    "semantic_hash": "c521b9678b6e6f90e88d634fb07ed337"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/services/__init__.py": {
+    "mtime": 1778854832.4132519,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/services/ollama_service.py": {
+    "mtime": 1778854832.4137483,
+    "ast_hash": "ef87da7de42eca209b34357f430a90a3",
+    "semantic_hash": "ef87da7de42eca209b34357f430a90a3"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/services/api_key_service.py": {
+    "mtime": 1778854832.413413,
+    "ast_hash": "4cdea25ad7dd35cf8e5d5313c8f899a4",
+    "semantic_hash": "4cdea25ad7dd35cf8e5d5313c8f899a4"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/services/backtest_service.py": {
+    "mtime": 1778854832.4135156,
+    "ast_hash": "b360042eec16592eae01ca6c6d40dde9",
+    "semantic_hash": "b360042eec16592eae01ca6c6d40dde9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/services/portfolio.py": {
+    "mtime": 1778854832.4138408,
+    "ast_hash": "49bfc50059073e3fcefe92f0d3b74d7e",
+    "semantic_hash": "49bfc50059073e3fcefe92f0d3b74d7e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/test_api_rate_limiting.py": {
+    "mtime": 1778893266.455698,
+    "ast_hash": "3ead115459bf9754c0000416e73390f8",
+    "semantic_hash": "3ead115459bf9754c0000416e73390f8"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/test_providers.py": {
+    "mtime": 1778893266.455879,
+    "ast_hash": "15f7f84d7f14207d04c1258c7c5c56a6",
+    "semantic_hash": "15f7f84d7f14207d04c1258c7c5c56a6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/__init__.py": {
+    "mtime": 1778854832.4373431,
+    "ast_hash": "f5a222ea7cdc2d9c5e4ab0b11aa97b9a",
+    "semantic_hash": "f5a222ea7cdc2d9c5e4ab0b11aa97b9a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/test_cache.py": {
+    "mtime": 1778855772.3471456,
+    "ast_hash": "d7b1867e2a58c20df767c5ee1833a57b",
+    "semantic_hash": "d7b1867e2a58c20df767c5ee1833a57b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/compare_sources.py": {
+    "mtime": 1778893266.4554408,
+    "ast_hash": "e177c2687d0e3c73db47863940254510",
+    "semantic_hash": "e177c2687d0e3c73db47863940254510"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/conftest.py": {
+    "mtime": 1778854832.437441,
+    "ast_hash": "3eee607384299b077d2f980a73054eaa",
+    "semantic_hash": "3eee607384299b077d2f980a73054eaa"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/test_results.py": {
+    "mtime": 1778854832.4383385,
+    "ast_hash": "f48210f6dcd036b747bea18b89d02fd2",
+    "semantic_hash": "f48210f6dcd036b747bea18b89d02fd2"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/test_valuation.py": {
+    "mtime": 1778854832.4383988,
+    "ast_hash": "e63f2d1fbf5ca3d92c9e7c9e321ba39b",
+    "semantic_hash": "e63f2d1fbf5ca3d92c9e7c9e321ba39b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/test_metrics.py": {
+    "mtime": 1778854832.4381688,
+    "ast_hash": "433b12c3c8eb74fe22788846bd248084",
+    "semantic_hash": "433b12c3c8eb74fe22788846bd248084"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/test_portfolio.py": {
+    "mtime": 1778854832.4382727,
+    "ast_hash": "56859f80e6cdd497f2f0bbb3bba0cc86",
+    "semantic_hash": "56859f80e6cdd497f2f0bbb3bba0cc86"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/test_execution.py": {
+    "mtime": 1778854832.4381127,
+    "ast_hash": "36f808290a30fac5b63c932e3e9671fb",
+    "semantic_hash": "36f808290a30fac5b63c932e3e9671fb"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/test_controller.py": {
+    "mtime": 1778854832.438055,
+    "ast_hash": "5ba408037e3d9920b9832cc533d068f9",
+    "semantic_hash": "5ba408037e3d9920b9832cc533d068f9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/integration/conftest.py": {
+    "mtime": 1778854832.4376738,
+    "ast_hash": "3ec2e5d7490aea0dbe1077155576bd6e",
+    "semantic_hash": "3ec2e5d7490aea0dbe1077155576bd6e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/integration/test_integration_long_short.py": {
+    "mtime": 1778854832.437905,
+    "ast_hash": "efe1f6dde36b7428e524bb7e8a45a8e0",
+    "semantic_hash": "efe1f6dde36b7428e524bb7e8a45a8e0"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/integration/test_integration_short_only.py": {
+    "mtime": 1778854832.4379857,
+    "ast_hash": "9446b15e34fdea5b72653865e476b0f5",
+    "semantic_hash": "9446b15e34fdea5b72653865e476b0f5"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/integration/test_integration_long_only.py": {
+    "mtime": 1778854832.4378095,
+    "ast_hash": "c929482694ddaa596aac361f1b5e7187",
+    "semantic_hash": "c929482694ddaa596aac361f1b5e7187"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/backtesting/integration/mocks.py": {
+    "mtime": 1778854832.4377358,
+    "ast_hash": "2f366e64f47c6abfae4c2428ce9bdf3e",
+    "semantic_hash": "2f366e64f47c6abfae4c2428ce9bdf3e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/prices/TSLA_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.4402373,
+    "ast_hash": "fb42d8986a1a60ab7811b21d55f785ae",
+    "semantic_hash": "fb42d8986a1a60ab7811b21d55f785ae"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/prices/MSFT_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.440181,
+    "ast_hash": "47d1f3b7e8e0f69e0ce6056dd9fa0fcb",
+    "semantic_hash": "47d1f3b7e8e0f69e0ce6056dd9fa0fcb"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/prices/AAPL_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.440123,
+    "ast_hash": "4b91f74a8a62e1ccbe23f39a3df9864e",
+    "semantic_hash": "4b91f74a8a62e1ccbe23f39a3df9864e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/financial_metrics/TSLA_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.4388108,
+    "ast_hash": "536dbde87062210adf228d5bdbf5cb97",
+    "semantic_hash": "536dbde87062210adf228d5bdbf5cb97"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/financial_metrics/MSFT_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.438712,
+    "ast_hash": "432c77859755ad525fc71766292627cc",
+    "semantic_hash": "432c77859755ad525fc71766292627cc"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/financial_metrics/AAPL_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.4386384,
+    "ast_hash": "63f0bac8a22f7eb9272b770d3131cc86",
+    "semantic_hash": "63f0bac8a22f7eb9272b770d3131cc86"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/insider_trades/TSLA_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.4395707,
+    "ast_hash": "aae1aeac853a01e2bccf64b20b109f14",
+    "semantic_hash": "aae1aeac853a01e2bccf64b20b109f14"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/insider_trades/MSFT_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.43949,
+    "ast_hash": "9ca768f3088312c206b54afc430780e9",
+    "semantic_hash": "9ca768f3088312c206b54afc430780e9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/insider_trades/AAPL_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.4389586,
+    "ast_hash": "03fede22ddde0b85022f39ba1e25afe0",
+    "semantic_hash": "03fede22ddde0b85022f39ba1e25afe0"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/news/TSLA_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.4400077,
+    "ast_hash": "002cba5e43994eca034577cc56469d79",
+    "semantic_hash": "002cba5e43994eca034577cc56469d79"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/news/MSFT_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.4399283,
+    "ast_hash": "ffc782d69728f9326e1ea0070d638505",
+    "semantic_hash": "ffc782d69728f9326e1ea0070d638505"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/tests/fixtures/api/news/AAPL_2024-03-01_2024-03-08.json": {
+    "mtime": 1778854832.439841,
+    "ast_hash": "156a662978ff5bab1c1784dfcce5a77f",
+    "semantic_hash": "156a662978ff5bab1c1784dfcce5a77f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/.claude/settings.local.json": {
+    "mtime": 1778855534.585542,
+    "ast_hash": "134f3b99081fa43ee7981b3af14da06e",
+    "semantic_hash": "134f3b99081fa43ee7981b3af14da06e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/conftest.py": {
+    "mtime": 1778855963.6186264,
+    "ast_hash": "0dac8412db887920026d8272bd03d012",
+    "semantic_hash": "0dac8412db887920026d8272bd03d012"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/models.py": {
+    "mtime": 1778855772.3748655,
+    "ast_hash": "504d6a9cab08c6dd7a627aa7911a88c3",
+    "semantic_hash": "504d6a9cab08c6dd7a627aa7911a88c3"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/__init__.py": {
+    "mtime": 1778893374.492046,
+    "ast_hash": "12db97a2aaeba636be6fa15c835df70e",
+    "semantic_hash": "12db97a2aaeba636be6fa15c835df70e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/pipeline/execution.py": {
+    "mtime": 1778893374.7503014,
+    "ast_hash": "6011e6961cefd48a6a2e36f99a133dcb",
+    "semantic_hash": "6011e6961cefd48a6a2e36f99a133dcb"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/pipeline/__init__.py": {
+    "mtime": 1778893374.7131026,
+    "ast_hash": "95d10a9672208a2fc0f9e5b270699d08",
+    "semantic_hash": "95d10a9672208a2fc0f9e5b270699d08"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/event_study/plot.py": {
+    "mtime": 1778855963.627788,
+    "ast_hash": "0524fcdcfb9d789c283102cd0c89a6ed",
+    "semantic_hash": "0524fcdcfb9d789c283102cd0c89a6ed"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/event_study/models.py": {
+    "mtime": 1778855963.6276796,
+    "ast_hash": "2db32a0ddb7474515f2cc02738b55042",
+    "semantic_hash": "2db32a0ddb7474515f2cc02738b55042"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/event_study/test_event_study.py": {
+    "mtime": 1778855963.6279733,
+    "ast_hash": "ec87e9c8646a6dd81e602cc2fb848c2a",
+    "semantic_hash": "ec87e9c8646a6dd81e602cc2fb848c2a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/event_study/__init__.py": {
+    "mtime": 1778893374.6424775,
+    "ast_hash": "173c10b31f3b1ced4522747f18174a85",
+    "semantic_hash": "173c10b31f3b1ced4522747f18174a85"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/event_study/engine.py": {
+    "mtime": 1778855963.647859,
+    "ast_hash": "35519ce2f1cc3d459e5d950e0288d787",
+    "semantic_hash": "35519ce2f1cc3d459e5d950e0288d787"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/event_study/stats.py": {
+    "mtime": 1778855963.6278794,
+    "ast_hash": "4e8991ead80a527228e58d6562b5ef0c",
+    "semantic_hash": "4e8991ead80a527228e58d6562b5ef0c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/event_study/__main__.py": {
+    "mtime": 1778855963.6477363,
+    "ast_hash": "65f2563771818644996c8515cd64fdb9",
+    "semantic_hash": "65f2563771818644996c8515cd64fdb9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/backtesting/models.py": {
+    "mtime": 1778855963.6473582,
+    "ast_hash": "f5e1abfb6f69bfacb5906d96bd4c484a",
+    "semantic_hash": "f5e1abfb6f69bfacb5906d96bd4c484a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/backtesting/__init__.py": {
+    "mtime": 1778893374.536281,
+    "ast_hash": "db5ed2a3268badbd45a0555690e3ef1f",
+    "semantic_hash": "db5ed2a3268badbd45a0555690e3ef1f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/backtesting/strategy.py": {
+    "mtime": 1778855963.6474192,
+    "ast_hash": "0c5273871677457513f0f7df74e26be6",
+    "semantic_hash": "0c5273871677457513f0f7df74e26be6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/backtesting/engine.py": {
+    "mtime": 1778893374.571339,
+    "ast_hash": "35e8ff931239a71560dbf414e359afb0",
+    "semantic_hash": "35e8ff931239a71560dbf414e359afb0"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/backtesting/test_backtest.py": {
+    "mtime": 1778855963.647504,
+    "ast_hash": "aabfa743868881fe9a8b44c18838018f",
+    "semantic_hash": "aabfa743868881fe9a8b44c18838018f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/backtesting/__main__.py": {
+    "mtime": 1778855963.6471972,
+    "ast_hash": "887e318f1971bb35894d5c2afd07bb63",
+    "semantic_hash": "887e318f1971bb35894d5c2afd07bb63"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/signals/__init__.py": {
+    "mtime": 1778893374.9415367,
+    "ast_hash": "07bb8cbdb4265b2e8c436aafa7511e2a",
+    "semantic_hash": "07bb8cbdb4265b2e8c436aafa7511e2a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/signals/base.py": {
+    "mtime": 1778855772.375429,
+    "ast_hash": "5f932e032e8b8b3cacda65a935f569ff",
+    "semantic_hash": "5f932e032e8b8b3cacda65a935f569ff"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/features/__init__.py": {
+    "mtime": 1778893374.6779158,
+    "ast_hash": "ca1eb0e99c773033615a1a55a58413e4",
+    "semantic_hash": "ca1eb0e99c773033615a1a55a58413e4"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/portfolio/__init__.py": {
+    "mtime": 1778893374.7938428,
+    "ast_hash": "824f3d9f16c93a5aac18f54779a4a368",
+    "semantic_hash": "824f3d9f16c93a5aac18f54779a4a368"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/portfolio/optimizer.py": {
+    "mtime": 1778893374.8336256,
+    "ast_hash": "faaa783d880179bd7bb35f83c974c985",
+    "semantic_hash": "faaa783d880179bd7bb35f83c974c985"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/data/models.py": {
+    "mtime": 1778855963.6476178,
+    "ast_hash": "e8c2e561514a87d26556924abc792dd7",
+    "semantic_hash": "e8c2e561514a87d26556924abc792dd7"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/data/protocol.py": {
+    "mtime": 1778855838.1790385,
+    "ast_hash": "1f26ab99e12b9c268b509d159baf49b0",
+    "semantic_hash": "1f26ab99e12b9c268b509d159baf49b0"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/data/client.py": {
+    "mtime": 1778855963.6231196,
+    "ast_hash": "9845abbed18409091535e3a9bac3527e",
+    "semantic_hash": "9845abbed18409091535e3a9bac3527e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/data/__init__.py": {
+    "mtime": 1778893374.6074982,
+    "ast_hash": "2fff16fa96459192e3729a4c33979690",
+    "semantic_hash": "2fff16fa96459192e3729a4c33979690"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/data/test_client.py": {
+    "mtime": 1778855963.6234386,
+    "ast_hash": "c852c483e638178864c3ca84e338ecd9",
+    "semantic_hash": "c852c483e638178864c3ca84e338ecd9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/risk/__init__.py": {
+    "mtime": 1778893374.8698695,
+    "ast_hash": "3908e2b72ee1e094c0a4d56f75f43576",
+    "semantic_hash": "3908e2b72ee1e094c0a4d56f75f43576"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/risk/manager.py": {
+    "mtime": 1778893374.9053597,
+    "ast_hash": "d3df3f67862933f051b0c3d4efbf5af9",
+    "semantic_hash": "d3df3f67862933f051b0c3d4efbf5af9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/validation/__init__.py": {
+    "mtime": 1778893374.9778059,
+    "ast_hash": "5892e7b7a750d6cd2dec629d8bc76a14",
+    "semantic_hash": "5892e7b7a750d6cd2dec629d8bc76a14"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/scripts/release.sh": {
+    "mtime": 1778855963.6416426,
+    "ast_hash": "38c9ec14fa573c2117dac960cb195594",
+    "semantic_hash": "38c9ec14fa573c2117dac960cb195594"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/__init__.py": {
+    "mtime": 1778854832.430775,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtester.py": {
+    "mtime": 1778854832.4333448,
+    "ast_hash": "d11b2a1ee598b82c7f4b76de43d74eb5",
+    "semantic_hash": "d11b2a1ee598b82c7f4b76de43d74eb5"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/main.py": {
+    "mtime": 1778893266.454411,
+    "ast_hash": "182e1ea15243897a8c85bedf06c42f79",
+    "semantic_hash": "182e1ea15243897a8c85bedf06c42f79"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/tools/__init__.py": {
+    "mtime": 1778854832.4354491,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/tools/api.py": {
+    "mtime": 1778893266.4547358,
+    "ast_hash": "dd3a2965b799b9bc1bfd589f10ee5aeb",
+    "semantic_hash": "dd3a2965b799b9bc1bfd589f10ee5aeb"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/llm/models.py": {
+    "mtime": 1778855838.1502323,
+    "ast_hash": "b462551d4aac3a62cfc7c51d1f6298d3",
+    "semantic_hash": "b462551d4aac3a62cfc7c51d1f6298d3"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/llm/__init__.py": {
+    "mtime": 1778854832.4348612,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/llm/ollama_models.json": {
+    "mtime": 1778854832.435266,
+    "ast_hash": "b9fc1603b9a6b1312596e5db8369e0cf",
+    "semantic_hash": "b9fc1603b9a6b1312596e5db8369e0cf"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/llm/api_models.json": {
+    "mtime": 1778855963.6104972,
+    "ast_hash": "0abec0f562de3dea254616dcf32ac87b",
+    "semantic_hash": "0abec0f562de3dea254616dcf32ac87b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtesting/metrics.py": {
+    "mtime": 1778854832.4339352,
+    "ast_hash": "5f0a82efcead4c45a231d08517bc3984",
+    "semantic_hash": "5f0a82efcead4c45a231d08517bc3984"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtesting/controller.py": {
+    "mtime": 1778854832.433674,
+    "ast_hash": "f6a375849772370a4017e4334150d067",
+    "semantic_hash": "f6a375849772370a4017e4334150d067"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtesting/__init__.py": {
+    "mtime": 1778854832.433444,
+    "ast_hash": "cfdf1d0a790556959c880978472e2050",
+    "semantic_hash": "cfdf1d0a790556959c880978472e2050"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtesting/types.py": {
+    "mtime": 1778854832.4341936,
+    "ast_hash": "ddfb233d4f0ccc6cb79351472d812c8a",
+    "semantic_hash": "ddfb233d4f0ccc6cb79351472d812c8a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtesting/trader.py": {
+    "mtime": 1778854832.4341326,
+    "ast_hash": "0e1a0918cc5401e18dab707a80b08b1d",
+    "semantic_hash": "0e1a0918cc5401e18dab707a80b08b1d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtesting/engine.py": {
+    "mtime": 1778854832.4338636,
+    "ast_hash": "75a7c91d2a891330d41dd6ed432421dc",
+    "semantic_hash": "75a7c91d2a891330d41dd6ed432421dc"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtesting/cli.py": {
+    "mtime": 1778854832.4336133,
+    "ast_hash": "73e3c77100f817735f189906dc5fcc31",
+    "semantic_hash": "73e3c77100f817735f189906dc5fcc31"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtesting/valuation.py": {
+    "mtime": 1778854832.434253,
+    "ast_hash": "51097eaccda05a284e60d5c032d39250",
+    "semantic_hash": "51097eaccda05a284e60d5c032d39250"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtesting/portfolio.py": {
+    "mtime": 1778854832.4340796,
+    "ast_hash": "37a0d2cf3b15d15da11dd2f0ef38bcc9",
+    "semantic_hash": "37a0d2cf3b15d15da11dd2f0ef38bcc9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtesting/benchmarks.py": {
+    "mtime": 1778854832.4335039,
+    "ast_hash": "88c2ade87c39ceb18361784c860ee6bc",
+    "semantic_hash": "88c2ade87c39ceb18361784c860ee6bc"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/backtesting/output.py": {
+    "mtime": 1778854832.4340005,
+    "ast_hash": "abfd00b67bc56c94762171d8d876f4f7",
+    "semantic_hash": "abfd00b67bc56c94762171d8d876f4f7"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/graph/__init__.py": {
+    "mtime": 1778854832.4347148,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/graph/state.py": {
+    "mtime": 1778854832.4347985,
+    "ast_hash": "83274539958e10c4787b7ef128d39eae",
+    "semantic_hash": "83274539958e10c4787b7ef128d39eae"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/peter_lynch.py": {
+    "mtime": 1778854832.4322417,
+    "ast_hash": "3128313c063287649101b8c577278737",
+    "semantic_hash": "3128313c063287649101b8c577278737"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/rakesh_jhunjhunwala.py": {
+    "mtime": 1778854832.4325118,
+    "ast_hash": "0ed649771e67d98d03291c0feded8c49",
+    "semantic_hash": "0ed649771e67d98d03291c0feded8c49"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/warren_buffett.py": {
+    "mtime": 1778854832.433191,
+    "ast_hash": "63ddafed358a5ba296f64b1cbcb165e9",
+    "semantic_hash": "63ddafed358a5ba296f64b1cbcb165e9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/michael_burry.py": {
+    "mtime": 1778854832.4317575,
+    "ast_hash": "7691870b01f78f686b22dbc49675fea4",
+    "semantic_hash": "7691870b01f78f686b22dbc49675fea4"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/sentiment.py": {
+    "mtime": 1778854832.4327984,
+    "ast_hash": "70efa9e24fbe0e4f33f806da3824d8ab",
+    "semantic_hash": "70efa9e24fbe0e4f33f806da3824d8ab"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/fundamentals.py": {
+    "mtime": 1778893266.4521441,
+    "ast_hash": "c1585328165bfac5af72a6a1e925386f",
+    "semantic_hash": "c1585328165bfac5af72a6a1e925386f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/stanley_druckenmiller.py": {
+    "mtime": 1778854832.4329062,
+    "ast_hash": "68b85622fa981faca23a7549ac60d8d7",
+    "semantic_hash": "68b85622fa981faca23a7549ac60d8d7"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/technicals.py": {
+    "mtime": 1778893266.4525006,
+    "ast_hash": "c41964fa1a204a7f7d0f13abdadf7674",
+    "semantic_hash": "c41964fa1a204a7f7d0f13abdadf7674"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/cathie_wood.py": {
+    "mtime": 1778854832.4312668,
+    "ast_hash": "9c91309d189831a2930c82ee9284c083",
+    "semantic_hash": "9c91309d189831a2930c82ee9284c083"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/__init__.py": {
+    "mtime": 1778854832.4308693,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/phil_fisher.py": {
+    "mtime": 1778854832.4323342,
+    "ast_hash": "7016461f4297eec15cae7fa5be9dd900",
+    "semantic_hash": "7016461f4297eec15cae7fa5be9dd900"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/portfolio_manager.py": {
+    "mtime": 1778854832.4324236,
+    "ast_hash": "580aee71524e5c5689a0431a12fdcaa1",
+    "semantic_hash": "580aee71524e5c5689a0431a12fdcaa1"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/bill_ackman.py": {
+    "mtime": 1778854832.4311662,
+    "ast_hash": "388ab7c922603ea684c70ab2b407eab4",
+    "semantic_hash": "388ab7c922603ea684c70ab2b407eab4"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/news_sentiment.py": {
+    "mtime": 1778893266.4522667,
+    "ast_hash": "60a38dbbe8000da94fbf9eca32b68aef",
+    "semantic_hash": "60a38dbbe8000da94fbf9eca32b68aef"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/valuation.py": {
+    "mtime": 1778854832.4330735,
+    "ast_hash": "5e02f15599d66464d82abfc68c2b1bd3",
+    "semantic_hash": "5e02f15599d66464d82abfc68c2b1bd3"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/charlie_munger.py": {
+    "mtime": 1778854832.4313836,
+    "ast_hash": "03832587c2013b2ae35e52b33e1ee135",
+    "semantic_hash": "03832587c2013b2ae35e52b33e1ee135"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/ben_graham.py": {
+    "mtime": 1778893266.4437058,
+    "ast_hash": "bb37631310ca45e40752f8a9e5a12755",
+    "semantic_hash": "bb37631310ca45e40752f8a9e5a12755"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/nassim_taleb.py": {
+    "mtime": 1778854832.4320657,
+    "ast_hash": "a79d07db681b655630d77d00999943ce",
+    "semantic_hash": "a79d07db681b655630d77d00999943ce"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/mohnish_pabrai.py": {
+    "mtime": 1778854832.4319673,
+    "ast_hash": "ad7d8f434b1a2bbac5b1d301d36c1cd8",
+    "semantic_hash": "ad7d8f434b1a2bbac5b1d301d36c1cd8"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/risk_manager.py": {
+    "mtime": 1778854832.4326108,
+    "ast_hash": "5dc3bff6dcfa5ce6029d9b60dc0e2bf6",
+    "semantic_hash": "5dc3bff6dcfa5ce6029d9b60dc0e2bf6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/growth_agent.py": {
+    "mtime": 1778854832.4315698,
+    "ast_hash": "3ab91dc664dc4263bcb00cc22bca577e",
+    "semantic_hash": "3ab91dc664dc4263bcb00cc22bca577e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/agents/aswath_damodaran.py": {
+    "mtime": 1778854832.4309716,
+    "ast_hash": "39457ddf982c8f5659d1fbac72d85736",
+    "semantic_hash": "39457ddf982c8f5659d1fbac72d85736"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/utils/__init__.py": {
+    "mtime": 1778854832.4356804,
+    "ast_hash": "18676f9619a3450d915a20fb74cbe80d",
+    "semantic_hash": "18676f9619a3450d915a20fb74cbe80d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/utils/llm.py": {
+    "mtime": 1778893323.173614,
+    "ast_hash": "80dbe5f330fa6d0df7cc8b99129b730a",
+    "semantic_hash": "80dbe5f330fa6d0df7cc8b99129b730a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/utils/visualize.py": {
+    "mtime": 1778997296.1317742,
+    "ast_hash": "b23fad70fe4409d61a630b962205cb97",
+    "semantic_hash": "b23fad70fe4409d61a630b962205cb97"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/utils/docker.py": {
+    "mtime": 1778854832.4364839,
+    "ast_hash": "e0ddad7dd64aa0bd426cc5fbd5aca984",
+    "semantic_hash": "e0ddad7dd64aa0bd426cc5fbd5aca984"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/utils/display.py": {
+    "mtime": 1778893266.4549897,
+    "ast_hash": "cf5eb605569e41da4d54587123f4c488",
+    "semantic_hash": "cf5eb605569e41da4d54587123f4c488"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/utils/api_key.py": {
+    "mtime": 1778854832.4358618,
+    "ast_hash": "ae2152abb5e52fe41cee211c74dcb13d",
+    "semantic_hash": "ae2152abb5e52fe41cee211c74dcb13d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/utils/progress.py": {
+    "mtime": 1778854832.4371822,
+    "ast_hash": "9763091ee04570c36fef761226714143",
+    "semantic_hash": "9763091ee04570c36fef761226714143"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/utils/ollama.py": {
+    "mtime": 1778854832.4368443,
+    "ast_hash": "0e74f4524e0a0794d7f733a6f502f8d9",
+    "semantic_hash": "0e74f4524e0a0794d7f733a6f502f8d9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/utils/analysts.py": {
+    "mtime": 1778854832.435807,
+    "ast_hash": "9cb1f160dca248a9ae9c696b79e590b9",
+    "semantic_hash": "9cb1f160dca248a9ae9c696b79e590b9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/cli/__init__.py": {
+    "mtime": 1778854832.434316,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/cli/input.py": {
+    "mtime": 1778854832.4344018,
+    "ast_hash": "3eab5cc31e0d1cf43a1721ce77fbf5ff",
+    "semantic_hash": "3eab5cc31e0d1cf43a1721ce77fbf5ff"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/data/config.py": {
+    "mtime": 1778893266.4526873,
+    "ast_hash": "59d8fc28c3319e63bc14e82994dc09d9",
+    "semantic_hash": "59d8fc28c3319e63bc14e82994dc09d9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/data/models.py": {
+    "mtime": 1778893266.4528975,
+    "ast_hash": "1aabf2a790d80452f91418d7c9408ed0",
+    "semantic_hash": "1aabf2a790d80452f91418d7c9408ed0"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/data/cache.py": {
+    "mtime": 1778854832.4345453,
+    "ast_hash": "a0d080366418dac3eb32098639450258",
+    "semantic_hash": "a0d080366418dac3eb32098639450258"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/data/__init__.py": {
+    "mtime": 1778854832.4344645,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/data/providers/hybrid.py": {
+    "mtime": 1778893266.4540267,
+    "ast_hash": "52a10c3ff7dffd3d97e9db08412d00f3",
+    "semantic_hash": "52a10c3ff7dffd3d97e9db08412d00f3"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/data/providers/__init__.py": {
+    "mtime": 1778893266.45306,
+    "ast_hash": "2b68c857861dc01e43911243b364da9a",
+    "semantic_hash": "2b68c857861dc01e43911243b364da9a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/data/providers/financial_datasets.py": {
+    "mtime": 1778893266.453697,
+    "ast_hash": "66c7b2d1fd9f74eab89fd1bf4826363d",
+    "semantic_hash": "66c7b2d1fd9f74eab89fd1bf4826363d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/data/providers/yahoo_finance.py": {
+    "mtime": 1778893266.4541857,
+    "ast_hash": "42f604313167cc601f2301820ddf6c9c",
+    "semantic_hash": "42f604313167cc601f2301820ddf6c9c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/data/providers/base.py": {
+    "mtime": 1778893266.453437,
+    "ast_hash": "c17637fc7cf1b65a08915dd0b3765638",
+    "semantic_hash": "c17637fc7cf1b65a08915dd0b3765638"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/src/data/providers/alpha_vantage.py": {
+    "mtime": 1778893266.4532597,
+    "ast_hash": "e48393b74b4de068bddc0ccaf7fe28be",
+    "semantic_hash": "e48393b74b4de068bddc0ccaf7fe28be"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/trade.py": {
+    "mtime": 1778380015.188362,
+    "ast_hash": "1a240a873806ce77669db3538da61fdd",
+    "semantic_hash": "1a240a873806ce77669db3538da61fdd"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/test.py": {
+    "mtime": 1778380015.1866362,
+    "ast_hash": "0d6f696cb722d43b8e4358084f6d709d",
+    "semantic_hash": "0d6f696cb722d43b8e4358084f6d709d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/stock.py": {
+    "mtime": 1778380015.1865776,
+    "ast_hash": "d6d7d59a9a9d0cee8cae8cd3ea8c8a5a",
+    "semantic_hash": "d6d7d59a9a9d0cee8cae8cd3ea8c8a5a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/prompts.py": {
+    "mtime": 1778380015.1859598,
+    "ast_hash": "b2c17f986c1cd1f636fc7c0ae82b2a51",
+    "semantic_hash": "b2c17f986c1cd1f636fc7c0ae82b2a51"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/qw.py": {
+    "mtime": 1778380015.186164,
+    "ast_hash": "281d90fdf2b7291ac8dad2a1ab19a74a",
+    "semantic_hash": "281d90fdf2b7291ac8dad2a1ab19a74a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/main.py": {
+    "mtime": 1778380015.1858869,
+    "ast_hash": "2a04535884d2cef732a877bad0e73a3e",
+    "semantic_hash": "2a04535884d2cef732a877bad0e73a3e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/test_tools.py": {
+    "mtime": 1778380015.186788,
+    "ast_hash": "2b7aa2f9b73f5c5001a0f3419b459cce",
+    "semantic_hash": "2b7aa2f9b73f5c5001a0f3419b459cce"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/test_structured_agents.py": {
+    "mtime": 1778380015.1882393,
+    "ast_hash": "0f283139813755984bb1252a456d0317",
+    "semantic_hash": "0f283139813755984bb1252a456d0317"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/conftest.py": {
+    "mtime": 1778380015.1874368,
+    "ast_hash": "0fff30192f74514fdc1905d332c9f926",
+    "semantic_hash": "0fff30192f74514fdc1905d332c9f926"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/test_signal_processing.py": {
+    "mtime": 1778380015.1881185,
+    "ast_hash": "bab9965c1ac6b198dc072a87cb03c07c",
+    "semantic_hash": "bab9965c1ac6b198dc072a87cb03c07c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/__init__.py": {
+    "mtime": 1778380015.1868572,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/test_model_validation.py": {
+    "mtime": 1778380015.1879916,
+    "ast_hash": "2ca93f42f9ab69fb3403fbb63a703be7",
+    "semantic_hash": "2ca93f42f9ab69fb3403fbb63a703be7"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/test_safe_ticker_component.py": {
+    "mtime": 1778380015.188052,
+    "ast_hash": "539ffd0ede420d4410adc332e5dc7cb6",
+    "semantic_hash": "539ffd0ede420d4410adc332e5dc7cb6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/test_checkpoint_resume.py": {
+    "mtime": 1778380015.1875916,
+    "ast_hash": "cb3ffec4239bb5debabd1d1a884c525c",
+    "semantic_hash": "cb3ffec4239bb5debabd1d1a884c525c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/test_ticker_symbol_handling.py": {
+    "mtime": 1778380015.1883018,
+    "ast_hash": "f4ffaf707f5808767b6400b4b7f0fc3a",
+    "semantic_hash": "f4ffaf707f5808767b6400b4b7f0fc3a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/test_google_api_key.py": {
+    "mtime": 1778380015.187817,
+    "ast_hash": "4e3402e62a65f69ee55c5fcf81ab4e2e",
+    "semantic_hash": "4e3402e62a65f69ee55c5fcf81ab4e2e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/test_deepseek_reasoning.py": {
+    "mtime": 1778380015.1877532,
+    "ast_hash": "ee7d73bd219cb5c945fa05c430e6d5f2",
+    "semantic_hash": "ee7d73bd219cb5c945fa05c430e6d5f2"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/test_memory_log.py": {
+    "mtime": 1778380015.1879234,
+    "ast_hash": "17de2fb6577d6ee71ad32c0e82de89fc",
+    "semantic_hash": "17de2fb6577d6ee71ad32c0e82de89fc"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/agents/__init__.py": {
+    "mtime": 1778380015.1869483,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/agents/analysts/conftest.py": {
+    "mtime": 1778380015.1872144,
+    "ast_hash": "3ac55c6cba68f66350c70b64e18bb672",
+    "semantic_hash": "3ac55c6cba68f66350c70b64e18bb672"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/agents/analysts/__init__.py": {
+    "mtime": 1778380015.187039,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tests/agents/analysts/test_analyst_team.py": {
+    "mtime": 1778380015.187375,
+    "ast_hash": "a615aeb9ccfc8d6ff758d6d521ab0800",
+    "semantic_hash": "a615aeb9ccfc8d6ff758d6d521ab0800"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/cli/config.py": {
+    "mtime": 1778380015.184312,
+    "ast_hash": "274b370b2e21b67b0ff4c6f8e0f7cd8b",
+    "semantic_hash": "274b370b2e21b67b0ff4c6f8e0f7cd8b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/cli/models.py": {
+    "mtime": 1778380015.1845114,
+    "ast_hash": "a03bae01b4b6a1c2bfb6172f4a45a755",
+    "semantic_hash": "a03bae01b4b6a1c2bfb6172f4a45a755"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/cli/__init__.py": {
+    "mtime": 1778380015.1841733,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/cli/utils.py": {
+    "mtime": 1778380015.1847863,
+    "ast_hash": "dcfbd81f21cb788c014569ee5dad9612",
+    "semantic_hash": "dcfbd81f21cb788c014569ee5dad9612"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/cli/main.py": {
+    "mtime": 1778853859.4359665,
+    "ast_hash": "881f91d03cb807d47a7cae2b71a39372",
+    "semantic_hash": "881f91d03cb807d47a7cae2b71a39372"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/cli/announcements.py": {
+    "mtime": 1778380015.1842515,
+    "ast_hash": "c0dce97bf8815a2ea9273adde1d2122c",
+    "semantic_hash": "c0dce97bf8815a2ea9273adde1d2122c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/cli/stats_handler.py": {
+    "mtime": 1778380015.1846814,
+    "ast_hash": "fed5efefe48d04d81f02f1e5a524ecbb",
+    "semantic_hash": "fed5efefe48d04d81f02f1e5a524ecbb"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/__init__.py": {
+    "mtime": 1778380015.1884255,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/common.py": {
+    "mtime": 1778380015.1908014,
+    "ast_hash": "bfeb479247f7ecdc5a97e902c287508c",
+    "semantic_hash": "bfeb479247f7ecdc5a97e902c287508c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/default_config.py": {
+    "mtime": 1778380015.1925313,
+    "ast_hash": "93c1cfbeed7d75e9f948b3a9f5109f4d",
+    "semantic_hash": "93c1cfbeed7d75e9f948b3a9f5109f4d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/graph/reflection.py": {
+    "mtime": 1778380015.1928923,
+    "ast_hash": "adb9e8d3cb7189bd868a778f382612e8",
+    "semantic_hash": "adb9e8d3cb7189bd868a778f382612e8"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/graph/checkpointer.py": {
+    "mtime": 1778380015.1926954,
+    "ast_hash": "0ed1e3772a355fa1f9296be6477f4a03",
+    "semantic_hash": "0ed1e3772a355fa1f9296be6477f4a03"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/graph/__init__.py": {
+    "mtime": 1778380015.1926255,
+    "ast_hash": "8c67780df1e8db2667f19ddf3b1575c8",
+    "semantic_hash": "8c67780df1e8db2667f19ddf3b1575c8"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/graph/trading_graph.py": {
+    "mtime": 1779975652.1073544,
+    "ast_hash": "a5bab632458ca79acb186d8c29888f31",
+    "semantic_hash": "a5bab632458ca79acb186d8c29888f31"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/graph/conditional_logic.py": {
+    "mtime": 1778380015.192753,
+    "ast_hash": "3dc177f05795eb71da3a1ed532a0becb",
+    "semantic_hash": "3dc177f05795eb71da3a1ed532a0becb"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/graph/setup.py": {
+    "mtime": 1778380015.1930556,
+    "ast_hash": "7c8bd9e3d4337739584c649c0a2ec7f1",
+    "semantic_hash": "7c8bd9e3d4337739584c649c0a2ec7f1"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/graph/propagation.py": {
+    "mtime": 1778380015.192821,
+    "ast_hash": "f01ff53414f79f7e6fde39b150a946ff",
+    "semantic_hash": "f01ff53414f79f7e6fde39b150a946ff"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/graph/signal_processing.py": {
+    "mtime": 1778380015.1931236,
+    "ast_hash": "e5c1bfa9d65568fe7ba4de14394f3ab6",
+    "semantic_hash": "e5c1bfa9d65568fe7ba4de14394f3ab6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/__init__.py": {
+    "mtime": 1778380015.1885383,
+    "ast_hash": "7c519516d3ed869ee266c13e9cb85717",
+    "semantic_hash": "7c519516d3ed869ee266c13e9cb85717"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/schemas.py": {
+    "mtime": 1778380015.1897817,
+    "ast_hash": "b1376249a304b82369af19255a60ab28",
+    "semantic_hash": "b1376249a304b82369af19255a60ab28"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/researchers/bull_researcher.py": {
+    "mtime": 1778380015.1894047,
+    "ast_hash": "153864932e76461d8553d660dfc5c01b",
+    "semantic_hash": "153864932e76461d8553d660dfc5c01b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/researchers/bear_researcher.py": {
+    "mtime": 1778380015.1893363,
+    "ast_hash": "5aa89d9072d1e0a20dacceebc73b81bd",
+    "semantic_hash": "5aa89d9072d1e0a20dacceebc73b81bd"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/risk_mgmt/conservative_debator.py": {
+    "mtime": 1778380015.189603,
+    "ast_hash": "bb4e851801558c8b00f49d54ec433d05",
+    "semantic_hash": "bb4e851801558c8b00f49d54ec433d05"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/risk_mgmt/aggressive_debator.py": {
+    "mtime": 1778380015.18953,
+    "ast_hash": "0934f5f9fe2071734d195fc8ff08a2a5",
+    "semantic_hash": "0934f5f9fe2071734d195fc8ff08a2a5"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/risk_mgmt/neutral_debator.py": {
+    "mtime": 1778380015.1896603,
+    "ast_hash": "d3cd80f15893f1621e4e52334dbe9630",
+    "semantic_hash": "d3cd80f15893f1621e4e52334dbe9630"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/trader/trader.py": {
+    "mtime": 1778380015.1900609,
+    "ast_hash": "74d56a914d18b11670a4807f4079ab43",
+    "semantic_hash": "74d56a914d18b11670a4807f4079ab43"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/trader/alpaca_trader.py": {
+    "mtime": 1778380015.1899915,
+    "ast_hash": "96790dea06c66553cbd0e986a3019877",
+    "semantic_hash": "96790dea06c66553cbd0e986a3019877"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/managers/portfolio_manager.py": {
+    "mtime": 1778380015.1891632,
+    "ast_hash": "78a0faf408c815e74202974c14c4b996",
+    "semantic_hash": "78a0faf408c815e74202974c14c4b996"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/managers/research_manager.py": {
+    "mtime": 1778380015.1892288,
+    "ast_hash": "83f8471b38facec407536758fd83f216",
+    "semantic_hash": "83f8471b38facec407536758fd83f216"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/utils/fundamental_data_tools.py": {
+    "mtime": 1778380015.1903515,
+    "ast_hash": "b465c35448c2ddd57bcecf6a66d9cde6",
+    "semantic_hash": "b465c35448c2ddd57bcecf6a66d9cde6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/utils/memory.py": {
+    "mtime": 1778380015.1904693,
+    "ast_hash": "e9849ba47bbba3296f16268cd7c6552b",
+    "semantic_hash": "e9849ba47bbba3296f16268cd7c6552b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/utils/agent_utils.py": {
+    "mtime": 1779371562.335565,
+    "ast_hash": "8ea63a395fc2045ebf8e45bec9f627db",
+    "semantic_hash": "8ea63a395fc2045ebf8e45bec9f627db"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/utils/rating.py": {
+    "mtime": 1778380015.1906006,
+    "ast_hash": "1a5fea2ea2aa431e1d0c7521c6d80577",
+    "semantic_hash": "1a5fea2ea2aa431e1d0c7521c6d80577"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/utils/news_data_tools.py": {
+    "mtime": 1779371550.4601798,
+    "ast_hash": "99020066a9038be54e655f14faf788ef",
+    "semantic_hash": "99020066a9038be54e655f14faf788ef"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/utils/agent_states.py": {
+    "mtime": 1778380015.1901717,
+    "ast_hash": "712646dcc38b2799916466f21e7a4080",
+    "semantic_hash": "712646dcc38b2799916466f21e7a4080"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/utils/structured.py": {
+    "mtime": 1778380015.190673,
+    "ast_hash": "ffabcc89d7d79fc8c8921f07e44f56eb",
+    "semantic_hash": "ffabcc89d7d79fc8c8921f07e44f56eb"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/utils/core_stock_tools.py": {
+    "mtime": 1778380015.1902924,
+    "ast_hash": "f3e112f57f60813f50bc15126ca82b49",
+    "semantic_hash": "f3e112f57f60813f50bc15126ca82b49"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/utils/technical_indicators_tools.py": {
+    "mtime": 1778380015.1907415,
+    "ast_hash": "d1dee10b45efbd80c736499e2714dd31",
+    "semantic_hash": "d1dee10b45efbd80c736499e2714dd31"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/analysts/market_analyst.py": {
+    "mtime": 1778380015.1888921,
+    "ast_hash": "f1889c6321cb55fa2495a745daadd514",
+    "semantic_hash": "f1889c6321cb55fa2495a745daadd514"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/analysts/analyst_team.py": {
+    "mtime": 1779371688.9201255,
+    "ast_hash": "138d465d35ca9bdb8dbc1f6f24ce1e82",
+    "semantic_hash": "138d465d35ca9bdb8dbc1f6f24ce1e82"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/analysts/social_media_analyst.py": {
+    "mtime": 1778380015.1890485,
+    "ast_hash": "aa52e8c1712f11289de6902c5f1b00c9",
+    "semantic_hash": "aa52e8c1712f11289de6902c5f1b00c9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/analysts/news_analyst.py": {
+    "mtime": 1779371595.1151936,
+    "ast_hash": "e62831f43f8a7366214f6694a74753a9",
+    "semantic_hash": "e62831f43f8a7366214f6694a74753a9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/agents/analysts/fundamentals_analyst.py": {
+    "mtime": 1778380015.188739,
+    "ast_hash": "60d33d7f5ecb34b232749bee7c78fb8b",
+    "semantic_hash": "60d33d7f5ecb34b232749bee7c78fb8b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/config.py": {
+    "mtime": 1778380015.1915948,
+    "ast_hash": "71517d4495f8ea0b12a67a641f4ce2ca",
+    "semantic_hash": "71517d4495f8ea0b12a67a641f4ce2ca"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/interface.py": {
+    "mtime": 1778380015.192005,
+    "ast_hash": "85ac035388ced2ff1d96aec6048fcbc2",
+    "semantic_hash": "85ac035388ced2ff1d96aec6048fcbc2"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/__init__.py": {
+    "mtime": 1778380015.1908672,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/google.py": {
+    "mtime": 1778380015.1917543,
+    "ast_hash": "5ca4f2da7927f6e58a31a6821a19ffd9",
+    "semantic_hash": "5ca4f2da7927f6e58a31a6821a19ffd9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/stockstats_utils.py": {
+    "mtime": 1778380015.192167,
+    "ast_hash": "7d204c243f26595f7e8e00872e831d8c",
+    "semantic_hash": "7d204c243f26595f7e8e00872e831d8c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/alpha_vantage_indicator.py": {
+    "mtime": 1778380015.1914015,
+    "ast_hash": "3ce7f3de6fcf01a715941602acacde87",
+    "semantic_hash": "3ce7f3de6fcf01a715941602acacde87"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/y_finance.py": {
+    "mtime": 1778380015.192312,
+    "ast_hash": "2a927833c556b906c118c4e86b44d061",
+    "semantic_hash": "2a927833c556b906c118c4e86b44d061"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/googlenews_utils.py": {
+    "mtime": 1778380015.1918402,
+    "ast_hash": "dde3aaa3fda1add2a5c1817c0627673d",
+    "semantic_hash": "dde3aaa3fda1add2a5c1817c0627673d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/utils.py": {
+    "mtime": 1778380015.1922326,
+    "ast_hash": "7d92e5a7b1607665890afe03adfa16f3",
+    "semantic_hash": "7d92e5a7b1607665890afe03adfa16f3"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/alpha_vantage_common.py": {
+    "mtime": 1778380015.1912148,
+    "ast_hash": "a779bdd3a5417362619ece670771f155",
+    "semantic_hash": "a779bdd3a5417362619ece670771f155"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/alpha_vantage_news.py": {
+    "mtime": 1778380015.1914632,
+    "ast_hash": "510980d6df733117d420eabb8190112f",
+    "semantic_hash": "510980d6df733117d420eabb8190112f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/alpha_vantage_stock.py": {
+    "mtime": 1778380015.191535,
+    "ast_hash": "d2373a9c5e47741317a932396f809f33",
+    "semantic_hash": "d2373a9c5e47741317a932396f809f33"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/alpha_vantage_fundamentals.py": {
+    "mtime": 1778380015.1912808,
+    "ast_hash": "b147b6739a05a43936622b12171768bc",
+    "semantic_hash": "b147b6739a05a43936622b12171768bc"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/alpha_vantage.py": {
+    "mtime": 1778380015.1909406,
+    "ast_hash": "32d8d394d97ba768f5d770dca54bf989",
+    "semantic_hash": "32d8d394d97ba768f5d770dca54bf989"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/dataflows/yfinance_news.py": {
+    "mtime": 1778380015.1924696,
+    "ast_hash": "5b3817de7b540712e983df8567138762",
+    "semantic_hash": "5b3817de7b540712e983df8567138762"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/llm_clients/validators.py": {
+    "mtime": 1778380015.194117,
+    "ast_hash": "5638a6d39753b4d99d0125a1c927c50f",
+    "semantic_hash": "5638a6d39753b4d99d0125a1c927c50f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/llm_clients/base_client.py": {
+    "mtime": 1778380015.193589,
+    "ast_hash": "b5eb1177bcc5058eb5df51ecfa6f8b46",
+    "semantic_hash": "b5eb1177bcc5058eb5df51ecfa6f8b46"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/llm_clients/azure_client.py": {
+    "mtime": 1778380015.1935275,
+    "ast_hash": "e7dcddd69dff894fe1eb66add38797ea",
+    "semantic_hash": "e7dcddd69dff894fe1eb66add38797ea"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/llm_clients/__init__.py": {
+    "mtime": 1778380015.1933837,
+    "ast_hash": "6403ee6ff0028d88ec197ddc28462f09",
+    "semantic_hash": "6403ee6ff0028d88ec197ddc28462f09"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/llm_clients/factory.py": {
+    "mtime": 1778380015.193655,
+    "ast_hash": "56de9da9e155451cb5256f59c0d914b1",
+    "semantic_hash": "56de9da9e155451cb5256f59c0d914b1"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/llm_clients/google_client.py": {
+    "mtime": 1778380015.1937196,
+    "ast_hash": "d07145ceb403b0495b09b144f6225b0e",
+    "semantic_hash": "d07145ceb403b0495b09b144f6225b0e"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/llm_clients/model_catalog.py": {
+    "mtime": 1778380015.1938872,
+    "ast_hash": "39c2361ee0592c28af03f7816c42f225",
+    "semantic_hash": "39c2361ee0592c28af03f7816c42f225"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/llm_clients/openai_client.py": {
+    "mtime": 1778380015.1940439,
+    "ast_hash": "8ac1868b583ed8eced4738c3a1707bb9",
+    "semantic_hash": "8ac1868b583ed8eced4738c3a1707bb9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/llm_clients/anthropic_client.py": {
+    "mtime": 1778380015.1934698,
+    "ast_hash": "d51bfeb566b9c169613034bd29de15f4",
+    "semantic_hash": "d51bfeb566b9c169613034bd29de15f4"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/scripts/smoke_structured_output.py": {
+    "mtime": 1778380015.1864376,
+    "ast_hash": "dfa1e498123b60d4c91c113b80fa4c56",
+    "semantic_hash": "dfa1e498123b60d4c91c113b80fa4c56"
+  },
+  "/Users/yudongtan/projects/AIStock/src/news_cache.py": {
+    "mtime": 1778939093.4482687,
+    "ast_hash": "4c91c21f2f615bf904e1af41d912b885",
+    "semantic_hash": "4c91c21f2f615bf904e1af41d912b885"
+  },
+  "/Users/yudongtan/projects/AIStock/src/full_pipeline.py": {
+    "mtime": 1779372684.8704813,
+    "ast_hash": "3d5b3c7ff1537741962ece7df1a43bb9",
+    "semantic_hash": "3d5b3c7ff1537741962ece7df1a43bb9"
+  },
+  "/Users/yudongtan/projects/AIStock/src/config.py": {
+    "mtime": 1778375001.0823405,
+    "ast_hash": "f678c1208cd57a7969fdcfc9eea3c92c",
+    "semantic_hash": "f678c1208cd57a7969fdcfc9eea3c92c"
+  },
+  "/Users/yudongtan/projects/AIStock/src/models.py": {
+    "mtime": 1779372849.3847,
+    "ast_hash": "b4539d7d7695a9e825e07000221785ed",
+    "semantic_hash": "b4539d7d7695a9e825e07000221785ed"
+  },
+  "/Users/yudongtan/projects/AIStock/src/finrl_pipeline.py": {
+    "mtime": 1779372691.9850364,
+    "ast_hash": "4c934e5bab3b6d706c005166ceb7574c",
+    "semantic_hash": "4c934e5bab3b6d706c005166ceb7574c"
+  },
+  "/Users/yudongtan/projects/AIStock/src/database.py": {
+    "mtime": 1777731344.3625026,
+    "ast_hash": "810ac2ef46885d11d02d731a5dfa1a4a",
+    "semantic_hash": "810ac2ef46885d11d02d731a5dfa1a4a"
+  },
+  "/Users/yudongtan/projects/AIStock/src/display.py": {
+    "mtime": 1779372684.8701577,
+    "ast_hash": "734a974e6f4c2a2f97b07c4f8eb40139",
+    "semantic_hash": "734a974e6f4c2a2f97b07c4f8eb40139"
+  },
+  "/Users/yudongtan/projects/AIStock/src/ml_bucket_selector.py": {
+    "mtime": 1778419449.609154,
+    "ast_hash": "eced15d2bc4d5f879d4782351295ad52",
+    "semantic_hash": "eced15d2bc4d5f879d4782351295ad52"
+  },
+  "/Users/yudongtan/projects/AIStock/src/app.py": {
+    "mtime": 1779372849.3842876,
+    "ast_hash": "753b58a983b38ca1824754ac80b37fe8",
+    "semantic_hash": "753b58a983b38ca1824754ac80b37fe8"
+  },
+  "/Users/yudongtan/projects/AIStock/src/scheduler.py": {
+    "mtime": 1778424396.4985127,
+    "ast_hash": "c57078fa992e63cde8912945f6a03561",
+    "semantic_hash": "c57078fa992e63cde8912945f6a03561"
+  },
+  "/Users/yudongtan/projects/AIStock/src/main.py": {
+    "mtime": 1779372684.8708787,
+    "ast_hash": "fd4d8b1352733b0e5303ce489f5bda4f",
+    "semantic_hash": "fd4d8b1352733b0e5303ce489f5bda4f"
+  },
+  "/Users/yudongtan/projects/AIStock/src/repository.py": {
+    "mtime": 1779372691.9857004,
+    "ast_hash": "728e4f8a777f43974ada2e83e8d548d5",
+    "semantic_hash": "728e4f8a777f43974ada2e83e8d548d5"
+  },
+  "/Users/yudongtan/projects/AIStock/src/ta_run.py": {
+    "mtime": 1778939580.0605452,
+    "ast_hash": "7c0e786a3908700677a78889d38aecc6",
+    "semantic_hash": "7c0e786a3908700677a78889d38aecc6"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/config.py": {
+    "mtime": 1779372684.8741941,
+    "ast_hash": "6334a9a2c61b1eb8967a89d52ab630fe",
+    "semantic_hash": "6334a9a2c61b1eb8967a89d52ab630fe"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/deep_evaluation.py": {
+    "mtime": 1779372684.8746262,
+    "ast_hash": "6a7b55edfd0c7f9bb8d997f7da97a70b",
+    "semantic_hash": "6a7b55edfd0c7f9bb8d997f7da97a70b"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/__init__.py": {
+    "mtime": 1779372684.8729863,
+    "ast_hash": "de37f96bdff9ff03a41b7c62dabffeb0",
+    "semantic_hash": "de37f96bdff9ff03a41b7c62dabffeb0"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/orchestrator.py": {
+    "mtime": 1779461701.8610892,
+    "ast_hash": "4376bea6c68c29eee1e03a6c4d22b335",
+    "semantic_hash": "4376bea6c68c29eee1e03a6c4d22b335"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/fast_evaluation.py": {
+    "mtime": 1779497745.8775508,
+    "ast_hash": "7178c17e638e6f16f34d813ae86ac23e",
+    "semantic_hash": "7178c17e638e6f16f34d813ae86ac23e"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/stock_selection.py": {
+    "mtime": 1779372684.8752854,
+    "ast_hash": "f695b3becaa28478b85218313257398d",
+    "semantic_hash": "f695b3becaa28478b85218313257398d"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/base.py": {
+    "mtime": 1779372684.873973,
+    "ast_hash": "3d7ecb225d81fc54bdfac9b8baf65042",
+    "semantic_hash": "3d7ecb225d81fc54bdfac9b8baf65042"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/data_update.py": {
+    "mtime": 1779977266.8793151,
+    "ast_hash": "5cfdc95a31a3e0a8c6b06988a0c87749",
+    "semantic_hash": "5cfdc95a31a3e0a8c6b06988a0c87749"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/backends/fast_evaluators.py": {
+    "mtime": 1780058571.1016607,
+    "ast_hash": "4673c1b8ac9bd7165d5a724c98cc76f5",
+    "semantic_hash": "4673c1b8ac9bd7165d5a724c98cc76f5"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/backends/__init__.py": {
+    "mtime": 1779372684.873128,
+    "ast_hash": "c4c245e6edd30177b5785ba89db22132",
+    "semantic_hash": "c4c245e6edd30177b5785ba89db22132"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/backends/selectors.py": {
+    "mtime": 1779461408.0500045,
+    "ast_hash": "121127603f1b94ac58870e0f1e8da5eb",
+    "semantic_hash": "121127603f1b94ac58870e0f1e8da5eb"
+  },
+  "/Users/yudongtan/projects/AIStock/src/pipeline/backends/deep_evaluators.py": {
+    "mtime": 1780058577.8535967,
+    "ast_hash": "dd0b4ac2bec4980badce32aa20b80887",
+    "semantic_hash": "dd0b4ac2bec4980badce32aa20b80887"
+  },
+  "/Users/yudongtan/projects/AIStock/src/migrations/run.py": {
+    "mtime": 1779372684.8725157,
+    "ast_hash": "a0a3fd1599446a8d743a4e26219067ec",
+    "semantic_hash": "a0a3fd1599446a8d743a4e26219067ec"
+  },
+  "/Users/yudongtan/projects/AIStock/src/migrations/2026_05_17_pipeline_oop.sql": {
+    "mtime": 1779372684.8711169,
+    "ast_hash": "8e469b168cfc89412c575f324330740c",
+    "semantic_hash": "8e469b168cfc89412c575f324330740c"
+  },
+  "/Users/yudongtan/projects/AIStock/src/migrations/__init__.py": {
+    "mtime": 1779372684.871335,
+    "ast_hash": "0a8b918db6af7543e3d262dc11b329f6",
+    "semantic_hash": "0a8b918db6af7543e3d262dc11b329f6"
+  },
+  "/Users/yudongtan/projects/AIStock/src/ingestion/__init__.py": {
+    "mtime": 1777214832.0367885,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yudongtan/projects/AIStock/src/ingestion/indicators.py": {
+    "mtime": 1777903195.8319151,
+    "ast_hash": "947c960f5150574d682240d16d2c94cc",
+    "semantic_hash": "947c960f5150574d682240d16d2c94cc"
+  },
+  "/Users/yudongtan/projects/AIStock/src/ingestion/symbols.py": {
+    "mtime": 1777216619.648304,
+    "ast_hash": "1853d40219bac17a1262414dfa9d2763",
+    "semantic_hash": "1853d40219bac17a1262414dfa9d2763"
+  },
+  "/Users/yudongtan/projects/AIStock/src/ingestion/pipeline.py": {
+    "mtime": 1779977266.8787708,
+    "ast_hash": "44c191e2be418800623ffb0e221c00a5",
+    "semantic_hash": "44c191e2be418800623ffb0e221c00a5"
+  },
+  "/Users/yudongtan/projects/AIStock/src/fetcher/yahoo.py": {
+    "mtime": 1777214832.0367036,
+    "ast_hash": "78b21bc556dea224659e9f671cc7b786",
+    "semantic_hash": "78b21bc556dea224659e9f671cc7b786"
+  },
+  "/Users/yudongtan/projects/AIStock/src/fetcher/rate_limiter.py": {
+    "mtime": 1777216815.616196,
+    "ast_hash": "e12e7040a22ca8c832f05410ad1eb344",
+    "semantic_hash": "e12e7040a22ca8c832f05410ad1eb344"
+  },
+  "/Users/yudongtan/projects/AIStock/src/fetcher/__init__.py": {
+    "mtime": 1777691012.025894,
+    "ast_hash": "8dc5948f046f964c152c7c273ff0a94b",
+    "semantic_hash": "8dc5948f046f964c152c7c273ff0a94b"
+  },
+  "/Users/yudongtan/projects/AIStock/src/fetcher/base.py": {
+    "mtime": 1777214832.036349,
+    "ast_hash": "36ae8ec1ad5612b9187a1bf3eb32aef6",
+    "semantic_hash": "36ae8ec1ad5612b9187a1bf3eb32aef6"
+  },
+  "/Users/yudongtan/projects/AIStock/src/fetcher/alpha_vantage.py": {
+    "mtime": 1778165375.0427814,
+    "ast_hash": "cf74861a52238420af337b73b9a946f1",
+    "semantic_hash": "cf74861a52238420af337b73b9a946f1"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/feature_descriptions.md": {
+    "mtime": 1777811443.0627582,
+    "ast_hash": "619cfb18ef846a5fa2ee405200632007",
+    "semantic_hash": "619cfb18ef846a5fa2ee405200632007"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/finrl_manual.md": {
+    "mtime": 1778504856.9414523,
+    "ast_hash": "4da4911e297663184e406e138bc33fe6",
+    "semantic_hash": "4da4911e297663184e406e138bc33fe6"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/Design of full pipeline.txt": {
+    "mtime": 1778983916.223647,
+    "ast_hash": "b7d2d1defb2afcf6ba45de20f9999552",
+    "semantic_hash": "b7d2d1defb2afcf6ba45de20f9999552"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/tradingagents_manual.md": {
+    "mtime": 1778506288.5702152,
+    "ast_hash": "3f3ba5e363ac842a0c68ca23b4818859",
+    "semantic_hash": "3f3ba5e363ac842a0c68ca23b4818859"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/adr/0001-split-features-and-labels.md": {
+    "mtime": 1777777386.91847,
+    "ast_hash": "9d8ae690dbb2be5f7dc2bcadd37ed0f7",
+    "semantic_hash": "9d8ae690dbb2be5f7dc2bcadd37ed0f7"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/agents/domain.md": {
+    "mtime": 1777690586.3148267,
+    "ast_hash": "477d9959972912279da5677825ef61c3",
+    "semantic_hash": "477d9959972912279da5677825ef61c3"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/agents/triage-labels.md": {
+    "mtime": 1777690573.0150592,
+    "ast_hash": "22add54cb98451c55b20e6b7992d4a85",
+    "semantic_hash": "22add54cb98451c55b20e6b7992d4a85"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/agents/issue-tracker.md": {
+    "mtime": 1777690566.073886,
+    "ast_hash": "b3268117bb0bb6b731632d35d6a1369a",
+    "semantic_hash": "b3268117bb0bb6b731632d35d6a1369a"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/superpowers/plans/2026-05-16-full-pipeline.md": {
+    "mtime": 1778932076.6128063,
+    "ast_hash": "67694219b1156c36aab6a22819756421",
+    "semantic_hash": "67694219b1156c36aab6a22819756421"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/superpowers/plans/2026-05-17-full-pipeline-oop-redesign.md": {
+    "mtime": 1778986609.3861954,
+    "ast_hash": "c0f7aca6b3acdfe5abadfdbb714bc2f6",
+    "semantic_hash": "c0f7aca6b3acdfe5abadfdbb714bc2f6"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/superpowers/specs/2026-05-17-full-pipeline-oop-redesign.md": {
+    "mtime": 1778985800.94763,
+    "ast_hash": "2a591cbabe188bf95e0f0f0cc187f969",
+    "semantic_hash": "2a591cbabe188bf95e0f0f0cc187f969"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/superpowers/specs/2026-04-26-stock-system-design.md": {
+    "mtime": 1777213870.6720235,
+    "ast_hash": "59ec76ee6555b422a7299ee2110f4372",
+    "semantic_hash": "59ec76ee6555b422a7299ee2110f4372"
+  },
+  "/Users/yudongtan/projects/AIStock/docs/superpowers/specs/2026-05-16-full-pipeline-design.md": {
+    "mtime": 1778931670.7133086,
+    "ast_hash": "7ef1b6bcc7f5a1a29e2a60f2389f35b8",
+    "semantic_hash": "7ef1b6bcc7f5a1a29e2a60f2389f35b8"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/requirements.txt": {
+    "mtime": 1778375668.6154451,
+    "ast_hash": "a08c7abecd3fd378f7b569353d271fc9",
+    "semantic_hash": "a08c7abecd3fd378f7b569353d271fc9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/README.md": {
+    "mtime": 1778375668.5323102,
+    "ast_hash": "a2f2fd12df8ea61caa5266dbccf374ba",
+    "semantic_hash": "a2f2fd12df8ea61caa5266dbccf374ba"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/ML_STOCK_SELECTION.md": {
+    "mtime": 1778375668.532143,
+    "ast_hash": "4737acd58727c39140d639e52e314fbf",
+    "semantic_hash": "4737acd58727c39140d639e52e314fbf"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/docker-compose.yml": {
+    "mtime": 1778375668.6001446,
+    "ast_hash": "01fe88a9ed9ddb7892e18054c2213140",
+    "semantic_hash": "01fe88a9ed9ddb7892e18054c2213140"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/docs/trading_calendar_guide.md": {
+    "mtime": 1778375668.6003208,
+    "ast_hash": "c7938793c777208c5037940aed1ace65",
+    "semantic_hash": "c7938793c777208c5037940aed1ace65"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/examples/README.md": {
+    "mtime": 1778375668.6017807,
+    "ast_hash": "fc2987d13b566739d7eaeec79a8ffcce",
+    "semantic_hash": "fc2987d13b566739d7eaeec79a8ffcce"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/examples/weight_allocation_guide.md": {
+    "mtime": 1778375668.603026,
+    "ast_hash": "440a1ebf024c8110c45ca6c869c6ec5c",
+    "semantic_hash": "440a1ebf024c8110c45ca6c869c6ec5c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/AdaptiveRotationConf_v1.2.2.yaml": {
+    "mtime": 1778375668.617961,
+    "ast_hash": "503ca7f13d222dc69dd6b6a01c55349b",
+    "semantic_hash": "503ca7f13d222dc69dd6b6a01c55349b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/src/strategies/AdaptiveRotationConf_v1.2.1.yaml": {
+    "mtime": 1778375668.6178474,
+    "ast_hash": "82f83a375d6d279e55909200e8830ac6",
+    "semantic_hash": "82f83a375d6d279e55909200e8830ac6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/README.md": {
+    "mtime": 1778855772.3349235,
+    "ast_hash": "3044de123d9d6561b830c9bf74794d4a",
+    "semantic_hash": "3044de123d9d6561b830c9bf74794d4a"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/CLAUDE.md": {
+    "mtime": 1778893266.451493,
+    "ast_hash": "23eb5d9f9499e23f5ce7092e9a5d7c42",
+    "semantic_hash": "23eb5d9f9499e23f5ce7092e9a5d7c42"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/docker/README.md": {
+    "mtime": 1778854832.4292629,
+    "ast_hash": "1c354e4b1dacbc48cab547afbf7976e6",
+    "semantic_hash": "1c354e4b1dacbc48cab547afbf7976e6"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/docker/docker-compose.yml": {
+    "mtime": 1778854832.4293292,
+    "ast_hash": "d4de4e1ff78abf9dc7737a4c6ac8e8ca",
+    "semantic_hash": "d4de4e1ff78abf9dc7737a4c6ac8e8ca"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/README.md": {
+    "mtime": 1778854832.4102285,
+    "ast_hash": "9f07171f954abc4a47767de4de17489d",
+    "semantic_hash": "9f07171f954abc4a47767de4de17489d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/index.html": {
+    "mtime": 1778854832.4144502,
+    "ast_hash": "b9f114bc15f749c398532a714721b415",
+    "semantic_hash": "b9f114bc15f749c398532a714721b415"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/README.md": {
+    "mtime": 1778854832.4143112,
+    "ast_hash": "a5877c6b6e9c40a78d6110662f20232c",
+    "semantic_hash": "a5877c6b6e9c40a78d6110662f20232c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/frontend/.github/dependabot.yml": {
+    "mtime": 1778854832.4140868,
+    "ast_hash": "dbbeacc4697b6283cd8c338368b2d07c",
+    "semantic_hash": "dbbeacc4697b6283cd8c338368b2d07c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/app/backend/README.md": {
+    "mtime": 1778854832.4103436,
+    "ast_hash": "7fda7ad87e753ef4406f74a634b73d97",
+    "semantic_hash": "7fda7ad87e753ef4406f74a634b73d97"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/docs/MANUAL.md": {
+    "mtime": 1778893266.4517717,
+    "ast_hash": "7f46ee07d2c981062715986cf49deb15",
+    "semantic_hash": "7f46ee07d2c981062715986cf49deb15"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/v2/README.md": {
+    "mtime": 1778855838.1545699,
+    "ast_hash": "4b95cb00c1bee72d3b63dd41bdac4654",
+    "semantic_hash": "4b95cb00c1bee72d3b63dd41bdac4654"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/.github/ISSUE_TEMPLATE/feature_request.md": {
+    "mtime": 1778854832.4099057,
+    "ast_hash": "468713b5d94018560bc764e2c821ed05",
+    "semantic_hash": "468713b5d94018560bc764e2c821ed05"
+  },
+  "/Users/yudongtan/projects/AIStock/external/ai-hedge-fund/.github/ISSUE_TEMPLATE/bug_report.md": {
+    "mtime": 1778854832.4098358,
+    "ast_hash": "c8b0f61634f119284015abfc30d22d22",
+    "semantic_hash": "c8b0f61634f119284015abfc30d22d22"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/requirements.txt": {
+    "mtime": 1778380015.1862292,
+    "ast_hash": "8cf8463b34caa8ac871a52d5dd7ad1ef",
+    "semantic_hash": "8cf8463b34caa8ac871a52d5dd7ad1ef"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/CHANGELOG.md": {
+    "mtime": 1778380015.1732583,
+    "ast_hash": "efd6fa542e777b8bae20e36919855094",
+    "semantic_hash": "efd6fa542e777b8bae20e36919855094"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/README.md": {
+    "mtime": 1778380015.1737466,
+    "ast_hash": "d0db7975c777260f1c6f1024b1b73ad5",
+    "semantic_hash": "d0db7975c777260f1c6f1024b1b73ad5"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/docker-compose.yml": {
+    "mtime": 1778380015.1848593,
+    "ast_hash": "be4ca4ce21074a57dea6791e8e1403ce",
+    "semantic_hash": "be4ca4ce21074a57dea6791e8e1403ce"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/CLAUDE.md": {
+    "mtime": 1778380015.1734488,
+    "ast_hash": "48e9a28267805a6a3975836c8984c3fd",
+    "semantic_hash": "48e9a28267805a6a3975836c8984c3fd"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/docs/architecture.md": {
+    "mtime": 1778380015.1850104,
+    "ast_hash": "4b9f22bab32fd741cd871497dedadc90",
+    "semantic_hash": "4b9f22bab32fd741cd871497dedadc90"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/docs/quickstart.md": {
+    "mtime": 1778380015.1850967,
+    "ast_hash": "950456dca0a796c3750ffaa72e533f5b",
+    "semantic_hash": "950456dca0a796c3750ffaa72e533f5b"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/docs/superpowers/plans/2026-03-26-tradingagents-docs.md": {
+    "mtime": 1778380015.1852698,
+    "ast_hash": "9e64d07f2f86bb7862a1c86874e41fd8",
+    "semantic_hash": "9e64d07f2f86bb7862a1c86874e41fd8"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/docs/superpowers/specs/2026-03-28-analyst-parallelization-design.md": {
+    "mtime": 1778380015.1858194,
+    "ast_hash": "e0476f36ef172906e4eea7fd0ad22cf9",
+    "semantic_hash": "e0476f36ef172906e4eea7fd0ad22cf9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/docs/superpowers/specs/2026-03-26-tradingagents-docs-design.md": {
+    "mtime": 1778380015.1856604,
+    "ast_hash": "22a5e21488c871a05f8355420a7c797d",
+    "semantic_hash": "22a5e21488c871a05f8355420a7c797d"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/cli/static/welcome.txt": {
+    "mtime": 1778380015.1846168,
+    "ast_hash": "eece957f7b9d61b1d3e0ffaa13c9ee74",
+    "semantic_hash": "eece957f7b9d61b1d3e0ffaa13c9ee74"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/llm_clients/TODO.md": {
+    "mtime": 1778380015.1933203,
+    "ast_hash": "5408786d80246203279e2f957661e6f7",
+    "semantic_hash": "5408786d80246203279e2f957661e6f7"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/.github/copilot-instructions.md": {
+    "mtime": 1778380015.1727166,
+    "ast_hash": "804b969b5791a926b9c4f3e3943b6f6c",
+    "semantic_hash": "804b969b5791a926b9c4f3e3943b6f6c"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/figs/Sector_Rotation_Standalone.png": {
+    "mtime": 1778375668.6153846,
+    "ast_hash": "2954c71968826ce11673ada30165c2e0",
+    "semantic_hash": "2954c71968826ce11673ada30165c2e0"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/figs/DRL_Timing_Backtest.png": {
+    "mtime": 1778375668.6077316,
+    "ast_hash": "07a4bd82b58ce6312e2f2cd10e469338",
+    "semantic_hash": "07a4bd82b58ce6312e2f2cd10e469338"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/figs/Paper_Trading.png": {
+    "mtime": 1778375668.6137261,
+    "ast_hash": "515cd516decef0073e95d639017b99b9",
+    "semantic_hash": "515cd516decef0073e95d639017b99b9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/figs/All_Backtests_v2.png": {
+    "mtime": 1778375668.604399,
+    "ast_hash": "b3cc78accd0ce136c766672b6db2c218",
+    "semantic_hash": "b3cc78accd0ce136c766672b6db2c218"
+  },
+  "/Users/yudongtan/projects/AIStock/external/FinRL-Trading/figs/FinRL_X_Framework.png": {
+    "mtime": 1778375668.611793,
+    "ast_hash": "be3c9ead906050cf9cbad546b008c72f",
+    "semantic_hash": "be3c9ead906050cf9cbad546b008c72f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/assets/TauricResearch.png": {
+    "mtime": 1778380015.174039,
+    "ast_hash": "fc1788d11571f9cf491388742860f019",
+    "semantic_hash": "fc1788d11571f9cf491388742860f019"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/assets/researcher.png": {
+    "mtime": 1778380015.1817355,
+    "ast_hash": "40cf4d70ed8f8c828a5a54469d7f03ad",
+    "semantic_hash": "40cf4d70ed8f8c828a5a54469d7f03ad"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/assets/trader.png": {
+    "mtime": 1778380015.183451,
+    "ast_hash": "f07a05b4be1cbdad01a24caf37e030b1",
+    "semantic_hash": "f07a05b4be1cbdad01a24caf37e030b1"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/assets/analyst.png": {
+    "mtime": 1778380015.1747212,
+    "ast_hash": "93096fff6ed78bfb3aeeacadf7169546",
+    "semantic_hash": "93096fff6ed78bfb3aeeacadf7169546"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/assets/schema.png": {
+    "mtime": 1778380015.182958,
+    "ast_hash": "b1d6a9e2d0d3987ba2cc4b9e859afc30",
+    "semantic_hash": "b1d6a9e2d0d3987ba2cc4b9e859afc30"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/assets/wechat.png": {
+    "mtime": 1778380015.1840792,
+    "ast_hash": "3a42783c8efb5eabe98f1116634e70f1",
+    "semantic_hash": "3a42783c8efb5eabe98f1116634e70f1"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/assets/risk.png": {
+    "mtime": 1778380015.1822257,
+    "ast_hash": "749e3f0a9c0f9928e93786e860592594",
+    "semantic_hash": "749e3f0a9c0f9928e93786e860592594"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/assets/cli/cli_transaction.png": {
+    "mtime": 1778380015.1812775,
+    "ast_hash": "4ab6758ca0d5201f881fb010c063238f",
+    "semantic_hash": "4ab6758ca0d5201f881fb010c063238f"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/assets/cli/cli_technical.png": {
+    "mtime": 1778380015.1793258,
+    "ast_hash": "439f6740a4b455bf4d05756f9eb537be",
+    "semantic_hash": "439f6740a4b455bf4d05756f9eb537be"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/assets/cli/cli_news.png": {
+    "mtime": 1778380015.1773436,
+    "ast_hash": "396432d87fe7e404843c56a1b93fddf9",
+    "semantic_hash": "396432d87fe7e404843c56a1b93fddf9"
+  },
+  "/Users/yudongtan/projects/AIStock/external/TradingAgents/assets/cli/cli_init.png": {
+    "mtime": 1778380015.175207,
+    "ast_hash": "28b84708d06f7d4328b0d15219df731c",
+    "semantic_hash": "28b84708d06f7d4328b0d15219df731c"
+  }
+}

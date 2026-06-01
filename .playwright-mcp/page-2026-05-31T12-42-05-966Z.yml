@@ -1,0 +1,84 @@
+- generic [active]:
+  - generic [ref=e2]:
+    - generic [ref=e8]:
+      - heading "📈 AIStock" [level=2] [ref=e59]
+      - paragraph [ref=e60]: Trading Platform
+      - separator [ref=e23]
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - generic [ref=e65]: Full Pipeline
+          - combobox "Selected Full Pipeline. Navigation" [ref=e67]
+        - img "open" [ref=e69]
+      - separator [ref=e30]
+      - heading "Quick Stats" [level=3] [ref=e34]
+      - generic [ref=e72]:
+        - generic [ref=e77]:
+          - paragraph [ref=e80]: Total
+          - paragraph [ref=e83]: "8991"
+        - generic [ref=e88]:
+          - paragraph [ref=e91]: Active
+          - paragraph [ref=e94]: "3062"
+    - generic [ref=e37]:
+      - banner [ref=e38]:
+        - generic [ref=e41]:
+          - button "Deploy" [ref=e237] [cursor=pointer]:
+            - generic [ref=e239]: Deploy
+          - button "Main menu" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+      - generic [ref=e96]:
+        - heading "Full Pipeline" [level=2] [ref=e101]:
+          - text: Full Pipeline
+          - generic [ref=e102]:
+            - link "Link to heading":
+              - /url: "#full-pipeline"
+              - img
+        - generic [ref=e104]:
+          - generic [ref=e109] [cursor=pointer]:
+            - checkbox "1. Data Update" [checked]
+            - paragraph [ref=e114]: 1. Data Update
+          - generic [ref=e119] [cursor=pointer]:
+            - checkbox "2. Stock Selection" [checked]
+            - paragraph [ref=e124]: 2. Stock Selection
+          - generic [ref=e129] [cursor=pointer]:
+            - checkbox "3. Fast Evaluation" [checked]
+            - paragraph [ref=e134]: 3. Fast Evaluation
+          - generic [ref=e139] [cursor=pointer]:
+            - checkbox "4. Deep Evaluation" [checked]
+            - paragraph [ref=e144]: 4. Deep Evaluation
+        - separator [ref=e149]
+        - group [ref=e152]:
+          - generic "keyboard_arrow_right 1. Data Update" [ref=e153] [cursor=pointer]:
+            - generic [ref=e154]:
+              - generic [ref=e156]: keyboard_arrow_right
+              - paragraph [ref=e159]: 1. Data Update
+        - group [ref=e162]:
+          - generic "keyboard_arrow_right 2. Stock Selection" [ref=e163] [cursor=pointer]:
+            - generic [ref=e164]:
+              - generic [ref=e166]: keyboard_arrow_right
+              - paragraph [ref=e169]: 2. Stock Selection
+        - group [ref=e172]:
+          - generic "keyboard_arrow_right 3. Fast Evaluation" [ref=e173] [cursor=pointer]:
+            - generic [ref=e174]:
+              - generic [ref=e176]: keyboard_arrow_right
+              - paragraph [ref=e179]: 3. Fast Evaluation
+        - group [ref=e182]:
+          - generic "keyboard_arrow_right 4. Deep Evaluation" [ref=e183] [cursor=pointer]:
+            - generic [ref=e184]:
+              - generic [ref=e186]: keyboard_arrow_right
+              - paragraph [ref=e189]: 4. Deep Evaluation
+        - separator [ref=e194]
+        - generic [ref=e196]:
+          - button "Run Pipeline" [disabled] [ref=e201]:
+            - paragraph [ref=e205]: Run Pipeline
+          - alert [ref=e210]:
+            - paragraph [ref=e215]: "Running... Elapsed: 0s"
+        - generic [ref=e217]:
+          - heading "Log Output" [level=3] [ref=e222]:
+            - text: Log Output
+            - generic [ref=e223]:
+              - link "Link to heading":
+                - /url: "#log-output"
+                - img
+          - code [ref=e235]: "project_root: /Users/yudongtan/projects/AIStock/external/FinRL-Trading ============================================================ Bucket: DEFENSIVE Train: 252 | Val: 1308 (20Q: 2021-03-01 ~ 2025-12-01) | Infer: 68 Infer dates: ['2026-03-01'] (1Q) ============================================================ RF : MSE = 0.017635 XGB : MSE = 0.019968 LGBM : MSE = 0.019711 HistGBM : MSE = 0.019707 ExtraTrees : MSE = 0.018255 Ridge : MSE = 0.367775 Stacking : MSE = 0.015654 (base: ['RF', 'ExtraTrees', 'HistGBM']) >> Best: Stacking (MSE=0.015654) Retrained on train+val: 1560 samples Ranking (2026-03-01, 68 stocks): 1. COR pred= +4.1% *** 2. CAH pred= +3.9% *** 3. MCK pred= +3.9% *** 4. ABEV pred= +3.7% 5. ADM pred= +3.5% 6. EXC pred= +3.3% 7. MO pred= +3.3% 8. HCA pred= +3.2% 9. FMX pred= +3.1% 10. EIX pred= +3.1% Top 5 Features (Stacking): ocf_ratio 0.098 debt_ratio 0.084 pe 0.077 operating_margin 0.066 ev_multiple 0.060 Model saved → /Users/yudongtan/projects/AIStock/data/models/defensive_Stacking_202605312039.pkl ============================================================ Bucket: GROWTH_TECH Train: 204 | Val: 1088 (20Q: 2021-03-01 ~ 2025-12-01) | Infer: 56 Infer dates: ['2026-03-01'] (1Q) ============================================================ RF : MSE = 0.039920 XGB : MSE = 0.044054 LGBM : MSE = 0.040920 HistGBM : MSE = 0.041703 ExtraTrees : MSE = 0.039475 Ridge : MSE = 0.051992 Stacking : MSE = 0.039275 (base: ['ExtraTrees', 'RF', 'LGBM']) >> Best: Stacking (MSE=0.039275) Retrained on train+val: 1292 samples Ranking (2026-03-01, 56 stocks): 1. COHR pred= +8.2% *** 2. CRDO pred= +7.7% *** 3. NVDA pred= +7.5% *** 4. FLEX pred= +7.2% 5. ARM pred= +7.1% 6. JBL pred= +7.1% 7. META pred= +7.0% 8. CIEN pred= +6.1% 9. KLAC pred= +6.1% 10. ANET pred= +6.0% Top 5 Features (Stacking): cur_ratio 0.140 pe 0.067 operating_margin 0.062 ps 0.060 asset_turnover 0.057 Model saved → /Users/yudongtan/projects/AIStock/data/models/growth_tech_Stacking_202605312039.pkl ============================================================ Bucket: CYCLICAL Train: 429 | Val: 2266 (20Q: 2021-03-01 ~ 2025-12-01) | Infer: 115 Infer dates: ['2026-03-01'] (1Q) ============================================================ RF : MSE = 0.029609 XGB : MSE = 0.034610 LGBM : MSE = 0.034358 HistGBM : MSE = 0.034685 ExtraTrees : MSE = 0.026071 Ridge : MSE = 415802.140995 Stacking : MSE = 0.026011 (base: ['ExtraTrees', 'RF', 'LGBM']) >> Best: Stacking (MSE=0.026011) Retrained on train+val: 2695 samples Ranking (2026-03-01, 115 stocks): 1. HOOD pred= +4.9% *** 2. F pred= +4.7% *** 3. BRK-A pred= +4.6% *** 4. BX pred= +4.5% 5. GM pred= +4.5% 6. CNI pred= +4.5% 7. HDB pred= +4.5% 8. HD pred= +4.4% 9. APO pred= +4.4% 10. MELI pred= +4.3% Top 5 Features (Stacking): pe 0.137 ev_multiple 0.104 pb 0.102 operating_margin 0.093 ps 0.065 Model saved → /Users/yudongtan/projects/AIStock/data/models/cyclical_Stacking_202605312039.pkl ============================================================ Bucket: REAL_ASSETS Train: 180 | Val: 902 (20Q: 2021-03-01 ~ 2025-12-01) | Infer: 46 Infer dates: ['2026-03-01'] (1Q) ============================================================ RF : MSE = 0.026049 XGB : MSE = 0.029995 LGBM : MSE = 0.031256 HistGBM : MSE = 0.032726 ExtraTrees : MSE = 0.025035 Ridge : MSE = 30.909281 Stacking : MSE = 0.022682 (base: ['ExtraTrees', 'RF', 'XGB']) >> Best: Stacking (MSE=0.022682) Retrained on train+val: 1082 samples Ranking (2026-03-01, 46 stocks): 1. AEM pred= +7.6% *** 2. FTI pred= +7.5% *** 3. KGC pred= +7.3% *** 4. GFI pred= +6.8% 5. CCJ pred= +6.6% 6. DOW pred= +5.9% 7. B pred= +5.4% 8. FNV pred= +5.1% 9. E pred= +5.0% 10. EC pred= +4.9% Top 5 Features (Stacking): operating_margin 0.115 acc_rec_turnover 0.093 ps 0.088 solvency_ratio 0.072 EPS 0.069 Model saved → /Users/yudongtan/projects/AIStock/data/models/real_assets_Stacking_202605312039.pkl"
+  - generic:
+    - document

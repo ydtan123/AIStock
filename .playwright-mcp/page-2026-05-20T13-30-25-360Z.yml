@@ -1,0 +1,150 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e24]:
+      - heading "📈 AIStock" [level=2] [ref=e29]
+      - paragraph [ref=e34]: Trading Platform
+      - separator [ref=e39]
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e356]: Stock Data
+          - combobox "Selected Stock Data. Navigation" [ref=e357]
+        - img "open" [ref=e49]
+      - separator [ref=e55]
+      - heading "Quick Stats" [level=3] [ref=e59]
+      - generic [ref=e61]:
+        - generic [ref=e66]:
+          - paragraph [ref=e69]: Total
+          - paragraph [ref=e72]: "8991"
+        - generic [ref=e77]:
+          - paragraph [ref=e80]: Active
+          - paragraph [ref=e83]: "3062"
+      - generic [ref=e86]:
+        - paragraph [ref=e89]: Bullish
+        - paragraph [ref=e92]: "344"
+    - generic [ref=e3]:
+      - banner [ref=e4]:
+        - generic [ref=e7]:
+          - button "Deploy" [ref=e9] [cursor=pointer]:
+            - generic [ref=e11]: Deploy
+          - button "Main menu" [ref=e13] [cursor=pointer]:
+            - img [ref=e14]
+      - generic [ref=e95]:
+        - heading "Stock Data" [level=2] [ref=e358]:
+          - text: Stock Data
+          - generic [ref=e101]:
+            - link "Link to heading":
+              - /url: "#platform-overview"
+              - img
+        - generic [ref=e360]:
+          - tablist [ref=e362]:
+            - tab "Lookup" [ref=e363] [cursor=pointer]:
+              - paragraph [ref=e365]: Lookup
+            - tab "Technical Analysis" [ref=e366] [cursor=pointer]:
+              - paragraph [ref=e368]: Technical Analysis
+            - tab "Screener" [active] [selected] [ref=e369] [cursor=pointer]:
+              - paragraph [ref=e371]: Screener
+            - tab "Manager" [ref=e372] [cursor=pointer]:
+              - paragraph [ref=e374]: Manager
+            - tab "Predictions" [ref=e375] [cursor=pointer]:
+              - paragraph [ref=e377]: Predictions
+          - tabpanel "Screener" [ref=e841]:
+            - generic [ref=e842]:
+              - generic [ref=e847]: SCREENER
+              - generic [ref=e850]:
+                - generic [ref=e852]:
+                  - generic [ref=e854]:
+                    - generic [ref=e856]:
+                      - paragraph [ref=e860]: Min Market Cap ($B)
+                      - generic [ref=e861]:
+                        - spinbutton "Min Market Cap ($B)" [ref=e864]: "1.00"
+                        - generic [ref=e865]:
+                          - button [ref=e866] [cursor=pointer]:
+                            - img [ref=e867]
+                          - button [ref=e869] [cursor=pointer]:
+                            - img [ref=e870]
+                    - generic [ref=e873]:
+                      - paragraph [ref=e877]: Min ROE (%)
+                      - generic [ref=e878]:
+                        - spinbutton "Min ROE (%)" [ref=e881]: "0.00"
+                        - generic [ref=e882]:
+                          - button [ref=e883] [cursor=pointer]:
+                            - img [ref=e884]
+                          - button [ref=e886] [cursor=pointer]:
+                            - img [ref=e887]
+                  - generic [ref=e890]:
+                    - generic [ref=e892]:
+                      - paragraph [ref=e896]: Min PE
+                      - generic [ref=e897]:
+                        - spinbutton "Min PE" [ref=e900]: "0.00"
+                        - generic [ref=e901]:
+                          - button [disabled] [ref=e902]:
+                            - img [ref=e903]
+                          - button [ref=e905] [cursor=pointer]:
+                            - img [ref=e906]
+                    - generic [ref=e909]:
+                      - paragraph [ref=e913]: Max PE
+                      - generic [ref=e914]:
+                        - spinbutton "Max PE" [ref=e917]: "100.00"
+                        - generic [ref=e918]:
+                          - button [ref=e919] [cursor=pointer]:
+                            - img [ref=e920]
+                          - button [ref=e922] [cursor=pointer]:
+                            - img [ref=e923]
+                  - generic [ref=e926]:
+                    - generic [ref=e928]:
+                      - paragraph [ref=e932]: Min RSI
+                      - generic [ref=e933]:
+                        - spinbutton "Min RSI" [ref=e936]: "0.00"
+                        - generic [ref=e937]:
+                          - button [disabled] [ref=e938]:
+                            - img [ref=e939]
+                          - button [ref=e941] [cursor=pointer]:
+                            - img [ref=e942]
+                    - generic [ref=e945]:
+                      - paragraph [ref=e949]: Max RSI
+                      - generic [ref=e950]:
+                        - spinbutton "Max RSI" [ref=e953]: "100.00"
+                        - generic [ref=e954]:
+                          - button [ref=e955] [cursor=pointer]:
+                            - img [ref=e956]
+                          - button [ref=e958] [cursor=pointer]:
+                            - img [ref=e959]
+                  - generic [ref=e962]:
+                    - generic [ref=e964]:
+                      - paragraph [ref=e968]: Max Beta
+                      - generic [ref=e969]:
+                        - spinbutton "Max Beta" [ref=e972]: "3.00"
+                        - generic [ref=e973]:
+                          - button [ref=e974] [cursor=pointer]:
+                            - img [ref=e975]
+                          - button [ref=e977] [cursor=pointer]:
+                            - img [ref=e978]
+                    - generic [ref=e981]:
+                      - paragraph [ref=e985]: Min Div Yield (%)
+                      - generic [ref=e986]:
+                        - spinbutton "Min Div Yield (%)" [ref=e989]: "0.00"
+                        - generic [ref=e990]:
+                          - button [disabled] [ref=e991]:
+                            - img [ref=e992]
+                          - button [ref=e994] [cursor=pointer]:
+                            - img [ref=e995]
+                - generic [ref=e998]:
+                  - generic [ref=e1002]:
+                    - paragraph [ref=e1006]: Sector
+                    - generic [ref=e1008]:
+                      - generic [ref=e1009]:
+                        - generic [ref=e1010]: All
+                        - combobox "Selected All. Sector" [ref=e1012]
+                      - img "open" [ref=e1014]
+                  - generic [ref=e1019]:
+                    - paragraph [ref=e1023]: Exchange
+                    - generic [ref=e1025]:
+                      - generic [ref=e1026]:
+                        - generic [ref=e1027]: Both
+                        - combobox "Selected Both. Exchange" [ref=e1029]
+                      - img "open" [ref=e1031]
+                - button "Run Screen" [ref=e1036] [cursor=pointer]:
+                  - paragraph [ref=e1040]: Run Screen
+  - generic:
+    - document
+  - img [ref=e294]

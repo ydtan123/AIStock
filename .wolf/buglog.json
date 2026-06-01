@@ -1,0 +1,1109 @@
+{
+  "version": 1,
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-05-20T13:44:41.339Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/app.py",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 40→24 lines (4 removed) | Also: # Check if this is predict-only or full pipeline; if st.session_state.get(\"ml_predict_only_df\"): | Also: df = repo.get_all_predictions(); primary_col = \"P(5% high)\" if not df.empty and \"P( | Also: df = repo.get_all_predictions(); if not df.empty and \"P(5% high)\" in df.columns:",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 4,
+      "last_seen": "2026-05-20T13:46:56.936Z"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-05-20T13:55:40.928Z",
+      "error_message": "Wrong reference: StockPrediction should be StockSnapshot",
+      "file": "src/ingestion/pipeline.py",
+      "root_cause": "Used \"StockPrediction\" instead of \"StockSnapshot\"",
+      "fix": "Changed StockPrediction → StockSnapshot",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-20T13:55:40.928Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-05-20T13:56:35.207Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ingestion/pipeline.py",
+      "root_cause": "20 lines replaced/restructured",
+      "fix": "Rewrote 44→26 lines (20 removed) | Also: # Load all available models; workers share read-on; from model.train import load_model, load_feature_c",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-20T13:56:59.865Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-05-20T13:57:41.249Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/main.py",
+      "root_cause": "41 lines replaced/restructured",
+      "fix": "Rewrote 67→16 lines (41 removed) | Also: elif args.command == \"train\":; cmd_train(args)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-20T13:58:09.612Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-05-21T13:53:15.318Z",
+      "error_message": "Significant refactor of ",
+      "file": "external/TradingAgents/tradingagents/agents/analysts/news_analyst.py",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 27→41 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-21T13:53:15.318Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-05-21T13:54:49.170Z",
+      "error_message": "Significant refactor of ",
+      "file": "external/TradingAgents/tradingagents/agents/analysts/analyst_team.py",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 17→43 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-21T13:54:49.170Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-05-30T06:18:47.430Z",
+      "error_message": "Incorrect value in code",
+      "file": ".understand-anything/meta.json",
+      "root_cause": "Had \"2026-05-30T03:51:34.138Z\"",
+      "fix": "Changed to \"2026-05-30T06:20:00.000Z\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "json"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T06:18:47.430Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-05-30T07:27:24.595Z",
+      "error_message": "Missing error handling in test_get_cached_db_error_returns_none",
+      "file": "docs/coverage-gap-analysis.md",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:27:24.596Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-05-30T07:40:17.962Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/pipeline/stock_selection.py",
+      "root_cause": "14 lines replaced/restructured",
+      "fix": "Rewrote 24→9 lines (14 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:40:17.962Z"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-05-30T07:40:25.759Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/pipeline/fast_evaluation.py",
+      "root_cause": "13 lines replaced/restructured",
+      "fix": "Rewrote 29→15 lines (13 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:40:25.759Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-05-30T07:40:28.869Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/pipeline/deep_evaluation.py",
+      "root_cause": "13 lines replaced/restructured",
+      "fix": "Rewrote 25→11 lines (13 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:40:28.869Z"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-05-30T07:40:34.963Z",
+      "error_message": "Wrong reference: _open_session should be open_session",
+      "file": "src/pipeline/stock_selection.py",
+      "root_cause": "Used \"_open_session\" instead of \"open_session\"",
+      "fix": "Changed _open_session → open_session",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:40:34.963Z"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-05-30T07:40:36.125Z",
+      "error_message": "Wrong reference: _open_session should be open_session",
+      "file": "src/pipeline/fast_evaluation.py",
+      "root_cause": "Used \"_open_session\" instead of \"open_session\"",
+      "fix": "Changed _open_session → open_session",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:40:36.125Z"
+    },
+    {
+      "id": "bug-014",
+      "timestamp": "2026-05-30T07:40:37.069Z",
+      "error_message": "Wrong reference: _open_session should be open_session",
+      "file": "src/pipeline/deep_evaluation.py",
+      "root_cause": "Used \"_open_session\" instead of \"open_session\"",
+      "fix": "Changed _open_session → open_session",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:40:37.069Z"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-05-30T07:41:54.485Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/fetcher/alpha_vantage.py",
+      "root_cause": "18 lines replaced/restructured",
+      "fix": "Rewrote 39→17 lines (18 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:41:54.485Z"
+    },
+    {
+      "id": "bug-016",
+      "timestamp": "2026-05-30T07:42:01.095Z",
+      "error_message": "Wrong reference: _safe_float should be safe_float",
+      "file": "src/fetcher/alpha_vantage.py",
+      "root_cause": "Used \"_safe_float\" instead of \"safe_float\"",
+      "fix": "Changed _safe_float → safe_float",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-05-30T07:42:04.239Z"
+    },
+    {
+      "id": "bug-017",
+      "timestamp": "2026-05-30T07:45:55.995Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/pipeline/backends/fast_evaluators.py",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 11→5 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:45:55.995Z"
+    },
+    {
+      "id": "bug-018",
+      "timestamp": "2026-05-30T07:46:00.126Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/pipeline/backends/deep_evaluators.py",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 11→5 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:46:00.126Z"
+    },
+    {
+      "id": "bug-019",
+      "timestamp": "2026-05-30T07:46:11.303Z",
+      "error_message": "Wrong reference: StepContext should be RegisteredBackend",
+      "file": "src/pipeline/backends/fast_evaluators.py",
+      "root_cause": "Used \"StepContext\" instead of \"RegisteredBackend\"",
+      "fix": "Changed StepContext → RegisteredBackend",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:46:11.303Z"
+    },
+    {
+      "id": "bug-020",
+      "timestamp": "2026-05-30T07:46:15.341Z",
+      "error_message": "Wrong reference: StepContext should be RegisteredBackend",
+      "file": "src/pipeline/backends/deep_evaluators.py",
+      "root_cause": "Used \"StepContext\" instead of \"RegisteredBackend\"",
+      "fix": "Changed StepContext → RegisteredBackend",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:46:15.341Z"
+    },
+    {
+      "id": "bug-021",
+      "timestamp": "2026-05-30T07:50:16.009Z",
+      "error_message": "Wrong reference: finrl_pipeline should be finrl_runner",
+      "file": "src/pipeline/backends/selectors.py",
+      "root_cause": "Used \"finrl_pipeline\" instead of \"finrl_runner\"",
+      "fix": "Changed finrl_pipeline → finrl_runner",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:50:16.009Z"
+    },
+    {
+      "id": "bug-022",
+      "timestamp": "2026-05-30T07:50:35.563Z",
+      "error_message": "Wrong reference: finrl_pipeline should be finrl_runner",
+      "file": "src/app.py",
+      "root_cause": "Used \"finrl_pipeline\" instead of \"finrl_runner\"",
+      "fix": "Changed finrl_pipeline → finrl_runner",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T07:50:35.563Z"
+    },
+    {
+      "id": "bug-023",
+      "timestamp": "2026-05-30T08:30:58.578Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/app.py",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 11→15 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T08:30:58.578Z"
+    },
+    {
+      "id": "bug-024",
+      "timestamp": "2026-05-30T08:49:55.604Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/finrl_runner.py",
+      "root_cause": "16 lines replaced/restructured",
+      "fix": "Rewrote 16→3 lines (16 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T08:49:55.604Z"
+    },
+    {
+      "id": "bug-025",
+      "timestamp": "2026-05-30T09:28:01.857Z",
+      "error_message": "Significant refactor of ",
+      "file": "docs/security-audit.json",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 15→21 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "json"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T09:28:01.857Z"
+    },
+    {
+      "id": "bug-026",
+      "timestamp": "2026-05-30T10:03:06.918Z",
+      "error_message": "Missing error handling in test_single_data_point_handled",
+      "file": "docs/coverage-gap-analysis.md",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T10:03:06.918Z"
+    },
+    {
+      "id": "bug-027",
+      "timestamp": "2026-05-30T11:13:14.068Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ui/pages/stock_technical.py",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 37→60 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T11:13:14.068Z"
+    },
+    {
+      "id": "bug-028",
+      "timestamp": "2026-05-30T11:13:39.463Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ui/pages/stock_screener.py",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 47→75 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T11:13:39.463Z"
+    },
+    {
+      "id": "bug-029",
+      "timestamp": "2026-05-30T11:13:50.875Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ui/pages/stock_manager.py",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 14→44 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T11:13:50.875Z"
+    },
+    {
+      "id": "bug-030",
+      "timestamp": "2026-05-30T11:15:43.614Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ui/pages/ml_pipeline.py",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 17→10 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T11:15:43.614Z"
+    },
+    {
+      "id": "bug-031",
+      "timestamp": "2026-05-30T11:19:08.342Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/config.py",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 26→30 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T11:19:08.342Z"
+    },
+    {
+      "id": "bug-032",
+      "timestamp": "2026-05-30T11:19:25.848Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/app.py",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 10→15 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T11:19:25.848Z"
+    },
+    {
+      "id": "bug-033",
+      "timestamp": "2026-05-30T11:19:57.936Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ingestion/pipeline.py",
+      "root_cause": "13 lines replaced/restructured",
+      "fix": "Rewrote 14→4 lines (13 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T11:19:57.936Z"
+    },
+    {
+      "id": "bug-034",
+      "timestamp": "2026-05-30T11:21:56.098Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/pipeline/backends/deep_evaluators.py",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 36→45 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T11:21:56.098Z"
+    },
+    {
+      "id": "bug-035",
+      "timestamp": "2026-05-30T13:01:37.835Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ingestion/pipeline.py",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 17→60 lines (2 removed) | Also: def _needs_full_backfill(stock_id: int, first_indi; When pre-fetched dates are provided, the check is ",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-30T13:01:59.766Z"
+    },
+    {
+      "id": "bug-036",
+      "timestamp": "2026-05-30T13:25:13.391Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/full_pipeline.py",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 6→28 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T13:25:13.391Z"
+    },
+    {
+      "id": "bug-037",
+      "timestamp": "2026-05-30T13:39:35.009Z",
+      "error_message": "Wrong reference: date should be _last_trading_date",
+      "file": "src/ingestion/pipeline.py",
+      "root_cause": "Used \"date\" instead of \"_last_trading_date\"",
+      "fix": "Changed date → _last_trading_date",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T13:39:35.009Z"
+    },
+    {
+      "id": "bug-038",
+      "timestamp": "2026-05-30T13:46:29.363Z",
+      "error_message": "Wrong operator: == should be >=",
+      "file": "src/ingestion/pipeline.py",
+      "root_cause": "Used \"==\" instead of \">=\"",
+      "fix": "Changed operator == → >=",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T13:46:29.363Z"
+    },
+    {
+      "id": "bug-039",
+      "timestamp": "2026-05-30T14:02:36.497Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ingestion/pipeline.py",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 20→27 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T14:02:36.497Z"
+    },
+    {
+      "id": "bug-040",
+      "timestamp": "2026-05-30T14:10:47.154Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ingestion/pipeline.py",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 13→23 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T14:10:47.154Z"
+    },
+    {
+      "id": "bug-041",
+      "timestamp": "2026-05-30T14:56:53.094Z",
+      "error_message": "Wrong reference: dict should be refresh_days",
+      "file": "src/ingestion/pipeline.py",
+      "root_cause": "Used \"dict\" instead of \"refresh_days\"",
+      "fix": "Changed dict → refresh_days",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T14:56:53.094Z"
+    },
+    {
+      "id": "bug-042",
+      "timestamp": "2026-05-30T14:57:19.912Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/repository.py",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 6→8 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T14:57:19.912Z"
+    },
+    {
+      "id": "bug-043",
+      "timestamp": "2026-05-30T14:58:02.428Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/app.py",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 22→29 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T14:58:02.428Z"
+    },
+    {
+      "id": "bug-044",
+      "timestamp": "2026-05-30T14:58:24.124Z",
+      "error_message": "Wrong reference: root should be pl",
+      "file": "src/app.py",
+      "root_cause": "Used \"root\" instead of \"pl\"",
+      "fix": "Changed root → pl",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T14:58:24.125Z"
+    },
+    {
+      "id": "bug-045",
+      "timestamp": "2026-05-30T14:59:35.221Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ui/pages/stock_lookup.py",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 36→20 lines (9 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T14:59:35.221Z"
+    },
+    {
+      "id": "bug-046",
+      "timestamp": "2026-05-30T14:59:41.879Z",
+      "error_message": "Wrong reference: _cached_find_stock should be cached_find_stock",
+      "file": "src/ui/pages/stock_lookup.py",
+      "root_cause": "Used \"_cached_find_stock\" instead of \"cached_find_stock\"",
+      "fix": "Changed _cached_find_stock → cached_find_stock",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-30T14:59:47.494Z"
+    },
+    {
+      "id": "bug-047",
+      "timestamp": "2026-05-30T14:59:56.052Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ui/pages/stock_technical.py",
+      "root_cause": "8 lines replaced/restructured",
+      "fix": "Rewrote 29→16 lines (8 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-30T14:59:56.052Z"
+    },
+    {
+      "id": "bug-048",
+      "timestamp": "2026-05-30T15:00:01.815Z",
+      "error_message": "Wrong reference: _cached_find_stock_ta should be cached_find_stock",
+      "file": "src/ui/pages/stock_technical.py",
+      "root_cause": "Used \"_cached_find_stock_ta\" instead of \"cached_find_stock\"",
+      "fix": "Changed _cached_find_stock_ta → cached_find_stock",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-30T15:00:07.042Z"
+    },
+    {
+      "id": "bug-049",
+      "timestamp": "2026-05-31T06:14:41.503Z",
+      "error_message": "Significant refactor of ",
+      "file": "external/TradingAgents/tradingagents/llm_clients/openai_client.py",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 8→13 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T06:14:41.503Z"
+    },
+    {
+      "id": "bug-050",
+      "timestamp": "2026-05-31T06:55:44.878Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/pipeline/deep_evaluation.py",
+      "root_cause": "36 lines replaced/restructured",
+      "fix": "Rewrote 120→255 lines (36 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T06:55:44.878Z"
+    },
+    {
+      "id": "bug-051",
+      "timestamp": "2026-05-31T11:53:42.120Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/app.py",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 18→10 lines (7 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T11:53:42.120Z"
+    },
+    {
+      "id": "bug-052",
+      "timestamp": "2026-05-31T12:00:33.213Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/repository.py",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 8→12 lines (2 removed) | Also: # Expand the JSON indicators column into separate ; # Pop first, then use the popped Series — df.pop()",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-31T12:00:55.054Z"
+    },
+    {
+      "id": "bug-053",
+      "timestamp": "2026-05-31T12:19:50.973Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/app.py",
+      "root_cause": "Had \"Overview\"",
+      "fix": "Changed to \"Full Pipeline\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-31T12:19:57.775Z"
+    },
+    {
+      "id": "bug-054",
+      "timestamp": "2026-05-31T12:20:18.326Z",
+      "error_message": "Wrong reference: render_overview should be render_full_pipeline",
+      "file": "src/app.py",
+      "root_cause": "Used \"render_overview\" instead of \"render_full_pipeline\"",
+      "fix": "Changed render_overview → render_full_pipeline",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T12:20:18.326Z"
+    },
+    {
+      "id": "bug-055",
+      "timestamp": "2026-05-31T12:20:31.391Z",
+      "error_message": "Wrong reference: render_overview should be render_full_pipeline",
+      "file": "src/ui/pages/__init__.py",
+      "root_cause": "Used \"render_overview\" instead of \"render_full_pipeline\"",
+      "fix": "Changed render_overview → render_full_pipeline",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T12:20:31.391Z"
+    },
+    {
+      "id": "bug-056",
+      "timestamp": "2026-05-31T12:20:37.287Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/ui/pages/__init__.py",
+      "root_cause": "Had \"render_overview\"",
+      "fix": "Changed to \"render_full_pipeline\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T12:20:37.287Z"
+    },
+    {
+      "id": "bug-057",
+      "timestamp": "2026-05-31T12:23:46.306Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ui/pages/overview.py",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 10→16 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T12:23:46.306Z"
+    },
+    {
+      "id": "bug-058",
+      "timestamp": "2026-05-31T12:41:22.870Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ui/pages/overview.py",
+      "root_cause": "8 lines replaced/restructured",
+      "fix": "Rewrote 14→6 lines (8 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T12:41:22.870Z"
+    },
+    {
+      "id": "bug-059",
+      "timestamp": "2026-05-31T12:56:12.191Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/ui/pages/overview.py",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 26→37 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T12:56:12.191Z"
+    },
+    {
+      "id": "bug-060",
+      "timestamp": "2026-05-31T12:56:25.911Z",
+      "error_message": "Wrong reference: None should be stop_event",
+      "file": "src/app.py",
+      "root_cause": "Used \"None\" instead of \"stop_event\"",
+      "fix": "Changed None → stop_event",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T12:56:25.911Z"
+    },
+    {
+      "id": "bug-061",
+      "timestamp": "2026-05-31T13:07:13.855Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/app.py",
+      "root_cause": "80 lines replaced/restructured",
+      "fix": "Rewrote 222→144 lines (80 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T13:07:13.855Z"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-05-31T13:46:14.489Z",
+      "error_message": "Incorrect value in code",
+      "file": "config.yaml",
+      "root_cause": "Had \"deepseek-v4-flash\"",
+      "fix": "Changed to \"deepseek-chat\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "yaml"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-31T13:46:14.489Z"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-05-31T13:54:08.200Z",
+      "error_message": "Incorrect value in code",
+      "file": "config.yaml",
+      "root_cause": "Had \"deepseek-v4-pro\"",
+      "fix": "Changed to \"gemini-3-flash-preview\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "yaml"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-05-31T13:56:03.639Z"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-05-31T14:09:57.017Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/app.py",
+      "root_cause": "Had \"Stock Data\"",
+      "fix": "Changed to \"Fast Evaluation\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-31T14:13:09.123Z"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-06-01T02:47:35.186Z",
+      "error_message": "Significant refactor of ",
+      "file": "CLAUDE.md",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5→5 lines (2 removed) | Also: ### Dashboard Pages (`src/app.py`); | Overview | `show_overview()` | Quick stats |",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-01T02:47:46.593Z"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-06-01T02:56:27.437Z",
+      "error_message": "Wrong return value",
+      "file": "src/finrl_runner.py",
+      "root_cause": "Was returning: str(report_path)",
+      "fix": "Now returns: str(report_path), selected_stocks_info",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-01T02:56:27.437Z"
+    },
+    {
+      "id": "bug-067",
+      "timestamp": "2026-06-01T04:03:58.141Z",
+      "error_message": "Missing guard clause",
+      "file": "tests/e2e/conftest.py",
+      "root_cause": "No early return/throw for edge case: !scroller",
+      "fix": "Added guard clause: if (!scroller)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-01T04:03:58.141Z"
+    },
+    {
+      "id": "bug-068",
+      "timestamp": "2026-06-01T04:11:13.489Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/app.py",
+      "root_cause": "86 lines replaced/restructured",
+      "fix": "Rewrote 107→11 lines (86 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-01T04:11:13.489Z"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-06-01T04:11:44.329Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/app.py",
+      "root_cause": "Had \"ML Pipeline\"",
+      "fix": "Changed to \"Strategy Backtesting\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-01T04:11:44.329Z"
+    }
+  ]
+}

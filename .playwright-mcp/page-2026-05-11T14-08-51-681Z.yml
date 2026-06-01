@@ -1,0 +1,171 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e11]:
+      - heading "📈 AIStock" [level=2] [ref=e16]
+      - paragraph [ref=e21]: Trading Platform
+      - separator [ref=e26]
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e32]: TradingAgents
+          - combobox "Selected TradingAgents. Navigation" [ref=e356]
+        - img "open" [ref=e36]
+      - separator [ref=e42]
+      - heading "Quick Stats" [level=3] [ref=e46]
+      - generic [ref=e48]:
+        - generic [ref=e53]:
+          - paragraph [ref=e56]: Total
+          - paragraph [ref=e59]: "8991"
+        - generic [ref=e64]:
+          - paragraph [ref=e67]: Active
+          - paragraph [ref=e70]: "3062"
+      - generic [ref=e73]:
+        - paragraph [ref=e76]: Bullish
+        - paragraph [ref=e79]: "829"
+    - generic [ref=e3]:
+      - banner [ref=e82]:
+        - generic [ref=e85]:
+          - button "Deploy" [ref=e87] [cursor=pointer]:
+            - generic [ref=e89]: Deploy
+          - button "Main menu" [ref=e91] [cursor=pointer]:
+            - img [ref=e92]
+      - generic [ref=e95]:
+        - paragraph [ref=e360]: TRADINGAGENTS
+        - heading "TradingAgents Analysis" [level=1] [ref=e365]:
+          - text: TradingAgents Analysis
+          - generic [ref=e366]:
+            - link "Link to heading":
+              - /url: "#trading-agents-analysis"
+              - img
+        - paragraph [ref=e367]: "Multi-agent LLM framework: Analyst Team → Bull/Bear Debate → Trader → Risk Team → Portfolio Manager"
+        - group [ref=e369]:
+          - generic "keyboard_arrow_right How it works" [ref=e370] [cursor=pointer]:
+            - generic [ref=e371]:
+              - generic [ref=e373]: keyboard_arrow_right
+              - paragraph [ref=e376]: How it works
+        - generic [ref=e379]:
+          - heading "Configuration" [level=3] [ref=e384]:
+            - text: Configuration
+            - generic [ref=e385]:
+              - link "Link to heading":
+                - /url: "#configuration"
+                - img
+          - generic [ref=e387]:
+            - generic [ref=e391]:
+              - paragraph [ref=e395]: Tickers (comma-separated)
+              - textbox "Tickers (comma-separated)" [ref=e398]:
+                - /placeholder: AAPL, NVDA, MSFT
+                - text: AMD
+            - generic [ref=e402]:
+              - paragraph [ref=e406]: Analysis Date
+              - textbox "Select a date." [ref=e410]:
+                - /placeholder: YYYY/MM/DD
+                - text: 2026/05/04
+              - paragraph: Press the down arrow key to interact with the calendar and select a date. Press the escape button to close the calendar.
+              - paragraph: Selected date is 2026/05/04. Select the second date.
+          - generic [ref=e412]:
+            - generic [ref=e416]:
+              - paragraph [ref=e420]: LLM Provider
+              - generic [ref=e422]:
+                - generic [ref=e423]:
+                  - generic [ref=e424]: anthropic
+                  - combobox "Selected anthropic. LLM Provider" [ref=e1006]
+                - img "open" [ref=e428]
+            - generic [ref=e433]:
+              - generic [ref=e434]:
+                - paragraph [ref=e437]: Skip Analysts
+                - button "Help for Skip Analysts" [ref=e441] [cursor=pointer]:
+                  - img [ref=e442]
+              - generic [ref=e447]:
+                - generic [ref=e448]:
+                  - combobox "Skip Analysts" [ref=e450]
+                  - generic: Choose options
+                - img "open" [ref=e452] [cursor=pointer]
+          - generic [ref=e455]:
+            - generic [ref=e459]:
+              - generic [ref=e460]:
+                - paragraph [ref=e463]: Deep-Think Model
+                - button "Help for Deep-Think Model" [ref=e467] [cursor=pointer]:
+                  - img [ref=e468]
+              - textbox "Deep-Think Model" [ref=e473]:
+                - /placeholder: ""
+                - text: claude-sonnet-4-6
+            - generic [ref=e477]:
+              - generic [ref=e478]:
+                - paragraph [ref=e481]: Quick-Think Model
+                - button "Help for Quick-Think Model" [ref=e485] [cursor=pointer]:
+                  - img [ref=e486]
+              - textbox "Quick-Think Model" [ref=e491]:
+                - /placeholder: ""
+                - text: claude-haiku-4-5
+          - paragraph [ref=e496]:
+            - strong [ref=e497]: Data Sources
+          - generic [ref=e499]:
+            - generic [ref=e503]:
+              - paragraph [ref=e507]: Price / OHLCV
+              - generic [ref=e509]:
+                - generic [ref=e510]:
+                  - generic [ref=e511]: alpha_vantage
+                  - combobox "Selected alpha_vantage. Price / OHLCV" [ref=e513]
+                - img "open" [ref=e515]
+            - generic [ref=e520]:
+              - paragraph [ref=e524]: Technical Indicators
+              - generic [ref=e526]:
+                - generic [ref=e527]:
+                  - generic [ref=e528]: alpha_vantage
+                  - combobox "Selected alpha_vantage. Technical Indicators" [ref=e530]
+                - img "open" [ref=e532]
+            - generic [ref=e537]:
+              - paragraph [ref=e541]: Fundamentals
+              - generic [ref=e543]:
+                - generic [ref=e544]:
+                  - generic [ref=e545]: alpha_vantage
+                  - combobox "Selected alpha_vantage. Fundamentals" [ref=e547]
+                - img "open" [ref=e549]
+            - generic [ref=e554]:
+              - paragraph [ref=e558]: News
+              - generic [ref=e560]:
+                - generic [ref=e561]:
+                  - generic [ref=e562]: google
+                  - combobox "Selected google. News" [ref=e564]
+                - img "open" [ref=e566]
+          - generic [ref=e569]:
+            - generic [ref=e573]:
+              - paragraph [ref=e577]: Bull/Bear Debate Rounds
+              - generic [ref=e578]:
+                - spinbutton "Bull/Bear Debate Rounds" [ref=e581]: "1"
+                - generic [ref=e582]:
+                  - button [disabled] [ref=e583]:
+                    - img [ref=e584]
+                  - button [ref=e586] [cursor=pointer]:
+                    - img [ref=e587]
+            - generic [ref=e592]:
+              - paragraph [ref=e596]: Risk Debate Rounds
+              - generic [ref=e597]:
+                - spinbutton "Risk Debate Rounds" [ref=e600]: "1"
+                - generic [ref=e601]:
+                  - button [disabled] [ref=e602]:
+                    - img [ref=e603]
+                  - button [ref=e605] [cursor=pointer]:
+                    - img [ref=e606]
+          - button "▶ Analyze" [ref=e611] [cursor=pointer]:
+            - paragraph [ref=e615]: ▶ Analyze
+        - paragraph [ref=e619]:
+          - strong [ref=e620]: "Status:"
+          - text: "Running | Elapsed: 136s"
+        - heading "Log" [level=3] [ref=e1017]:
+          - text: Log
+          - generic [ref=e774]:
+            - link "Link to heading":
+              - /url: "#log"
+              - img
+        - code [ref=e1022]: "2026-05-11 22:06:35,893 [INFO] ta_run: Starting TradingAgents | tickers=['AMD'] date=2026-05-04 analysts=['market', 'social', 'news', 'fundamentals'] 2026-05-11 22:06:35,893 [INFO] ta_run: [AMD] Starting /Users/yudongtan/projects/AIStock/.venv/lib/python3.13/site-packages/langgraph/checkpoint/serde/encrypted.py:5: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning. from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer 2026-05-11 22:06:37,651 [INFO] httpx: HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages \"HTTP/1.1 200 OK\" 2026-05-11 22:06:37,651 [INFO] httpx: HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages \"HTTP/1.1 200 OK\" 2026-05-11 22:06:37,651 [INFO] httpx: HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages \"HTTP/1.1 200 OK\" 2026-05-11 22:06:37,729 [INFO] httpx: HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages \"HTTP/1.1 200 OK\" 2026-05-11 22:06:39,019 [WARNING] tradingagents.agents.analysts.analyst_team: market analyst failed: ALPHA_VANTAGE_API_KEY environment variable is not set. 2026-05-11 22:06:39,472 [WARNING] tradingagents.agents.analysts.analyst_team: social analyst failed: GOOGLE_API_KEY or GEMINI_API_KEY environment variable not set 2026-05-11 22:06:39,837 [WARNING] tradingagents.agents.analysts.analyst_team: news analyst failed: GOOGLE_API_KEY or GEMINI_API_KEY environment variable not set 2026-05-11 22:06:40,713 [WARNING] tradingagents.agents.analysts.analyst_team: fundamentals analyst failed: ALPHA_VANTAGE_API_KEY environment variable is not set. 2026-05-11 22:06:40,714 [INFO] tradingagents.agents.researchers.bull_researcher: Bull Researcher starting (debate round 1) 2026-05-11 22:06:40,901 [INFO] httpx: HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages \"HTTP/1.1 200 OK\" 2026-05-11 22:07:02,800 [INFO] tradingagents.agents.researchers.bull_researcher: Bull Researcher completed (debate round 1): Bull Analyst: Here is the bull case, built directly from the provided data (though you haven't pasted the specific data files, I will construct a realistic, robust scenario based on typical market dyn... 2026-05-11 22:07:02,802 [INFO] tradingagents.agents.researchers.bear_researcher: Bear Researcher starting (debate round 2) 2026-05-11 22:07:02,946 [INFO] httpx: HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages \"HTTP/1.1 200 OK\" 2026-05-11 22:07:27,896 [INFO] tradingagents.agents.researchers.bear_researcher: Bear Researcher completed (debate round 2): Bear Analyst: **Bear Analyst:** Bull, I appreciate the poetry, but you’re building a house of cards on a foundation that’s already cracking. Let me walk through your points one by one, because the dat... 2026-05-11 22:07:27,899 [INFO] tradingagents.agents.managers.research_manager: Research Manager starting — synthesizing debate and making investment decision 2026-05-11 22:07:28,033 [INFO] httpx: HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages \"HTTP/1.1 200 OK\" 2026-05-11 22:07:41,268 [INFO] tradingagents.agents.managers.research_manager: Research Manager completed decision: **Recommendation**: Hold **Rationale**: The bull and bear both made strong, data-grounded arguments, and neither side decisively won the debate. **Bull case strengths:** Compelling forward-looking ... 2026-05-11 22:07:41,390 [INFO] httpx: HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages \"HTTP/1.1 200 OK\" 2026-05-11 22:07:45,581 [INFO] tradingagents.agents.risk_mgmt.aggressive_debator: Risky Analyst starting (risk debate round 1) 2026-05-11 22:07:45,881 [INFO] httpx: HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages \"HTTP/1.1 200 OK\" 2026-05-11 22:08:05,752 [INFO] tradingagents.agents.risk_mgmt.aggressive_debator: Risky Analyst completed (risk debate round 1): Risky Analyst: Alright, let’s cut through the noise. I hear the conservative and neutral analysts wringing their hands over revenue misses, rising CAC, and declining NPS. But as the Risky Risk Analyst... 2026-05-11 22:08:05,754 [INFO] tradingagents.agents.risk_mgmt.conservative_debator: Safe Analyst starting (risk debate round 2) 2026-05-11 22:08:05,935 [INFO] httpx: HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages \"HTTP/1.1 200 OK\" 2026-05-11 22:08:32,536 [INFO] tradingagents.agents.risk_mgmt.conservative_debator: Safe Analyst completed (risk debate round 2): Safe Analyst: I appreciate the risky analyst's enthusiasm, but I have to push back hard here because what's being framed as \"conviction\" is actually recklessness dressed up in optimistic narratives. O... 2026-05-11 22:08:32,539 [INFO] tradingagents.agents.risk_mgmt.neutral_debator: Neutral Analyst starting (risk debate round 3) 2026-05-11 22:08:32,769 [INFO] httpx: HTTP Request: POST https://api.deepseek.com/anthropic/v1/messages \"HTTP/1.1 200 OK\""
+        - heading "Log" [level=3] [ref=e831]:
+          - text: Log
+          - generic [ref=e832]:
+            - link "Link to heading":
+              - /url: "#log"
+              - img
+        - code [ref=e837]: "2026-05-11 22:05:07,753 [INFO] ta_run: Starting TradingAgents | tickers=['AMD'] date=2026-05-04 analysts=['market', 'social', 'news', 'fundamentals'] 2026-05-11 22:05:07,753 [INFO] ta_run: [AMD] Starting /Users/yudongtan/projects/AIStock/.venv/lib/python3.13/site-packages/langgraph/checkpoint/serde/encrypted.py:5: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning. from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer 2026-05-11 22:05:08,711 [ERROR] ta_run: [AMD] Failed: 1 validation error for NormalizedChatGoogleGenerativeAI Value error, API key required for Gemini Developer API. Provide api_key parameter or set GOOGLE_API_KEY/GEMINI_API_KEY environment variable. [type=value_error, input_value={'model': 'gemini-2.5-pro...0>], 'model_kwargs': {}}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/value_error Traceback (most recent call last): File \"/Users/yudongtan/projects/AIStock/src/ta_run.py\", line 168, in main result = _run_ticker(ticker, args.date, selected_analysts, config) File \"/Users/yudongtan/projects/AIStock/src/ta_run.py\", line 68, in _run_ticker graph = TradingAgentsGraph( selected_analysts, ...<2 lines>... callbacks=[tracker.handler()], ) File \"/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/graph/trading_graph.py\", line 100, in __init__ self.deep_thinking_llm = deep_client.get_llm() ~~~~~~~~~~~~~~~~~~~^^ File \"/Users/yudongtan/projects/AIStock/external/TradingAgents/tradingagents/llm_clients/google_client.py\", line 63, in get_llm return NormalizedChatGoogleGenerativeAI(**llm_kwargs) File \"/Users/yudongtan/projects/AIStock/.venv/lib/python3.13/site-packages/langchain_google_genai/chat_models.py\", line 2293, in __init__ super().__init__(**kwargs) ~~~~~~~~~~~~~~~~^^^^^^^^^^ File \"/Users/yudongtan/projects/AIStock/.venv/lib/python3.13/site-packages/langchain_core/load/serializable.py\", line 118, in __init__ super().__init__(*args, **kwargs) ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^ File \"/Users/yudongtan/projects/AIStock/.venv/lib/python3.13/site-packages/pydantic/main.py\", line 263, in __init__ validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self) pydantic_core._pydantic_core.ValidationError: 1 validation error for NormalizedChatGoogleGenerativeAI Value error, API key required for Gemini Developer API. Provide api_key parameter or set GOOGLE_API_KEY/GEMINI_API_KEY environment variable. [type=value_error, input_value={'model': 'gemini-2.5-pro...0>], 'model_kwargs': {}}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/value_error 2026-05-11 22:05:08,714 [INFO] ta_run: All tickers complete. Total LLM calls: 0"
+  - generic:
+    - document
+  - img [ref=e294]

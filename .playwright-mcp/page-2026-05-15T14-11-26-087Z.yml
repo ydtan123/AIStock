@@ -1,0 +1,59 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e7]:
+      - button "keyboard_double_arrow_left" [ref=e297] [cursor=pointer]:
+        - generic [ref=e299]: keyboard_double_arrow_left
+      - generic [ref=e11]:
+        - heading "📈 AIStock" [level=2] [ref=e16]
+        - paragraph [ref=e21]: Trading Platform
+        - separator [ref=e26]
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e32]: Analysis Reports
+            - combobox "Selected Analysis Reports. Navigation" [active] [ref=e356]
+          - img "open" [ref=e36]
+        - separator [ref=e42]
+        - heading "Quick Stats" [level=3] [ref=e46]
+        - generic [ref=e48]:
+          - generic [ref=e53]:
+            - paragraph [ref=e56]: Total
+            - paragraph [ref=e59]: "8991"
+          - generic [ref=e64]:
+            - paragraph [ref=e67]: Active
+            - paragraph [ref=e70]: "3062"
+        - generic [ref=e73]:
+          - paragraph [ref=e76]: Bullish
+          - paragraph [ref=e79]: "829"
+    - generic [ref=e3]:
+      - banner [ref=e82]:
+        - generic [ref=e85]:
+          - button "Deploy" [ref=e87] [cursor=pointer]:
+            - generic [ref=e89]: Deploy
+          - button "Main menu" [ref=e91] [cursor=pointer]:
+            - img [ref=e92]
+      - generic [ref=e95]:
+        - heading "Analysis Reports" [level=1] [ref=e357]:
+          - text: Analysis Reports
+          - generic [ref=e358]:
+            - link "Link to heading":
+              - /url: "#analysis-reports"
+              - img
+        - heading "All Analyses" [level=4] [ref=e364]:
+          - text: All Analyses
+          - generic [ref=e365]:
+            - link "Link to heading":
+              - /url: "#all-analyses"
+              - img
+        - generic [ref=e370]:
+          - button "Show/hide columns" [ref=e374] [cursor=pointer]:
+            - img [ref=e375]
+          - button "Download as CSV" [ref=e380] [cursor=pointer]:
+            - img [ref=e381]
+          - button "Search" [ref=e386] [cursor=pointer]:
+            - img [ref=e387]
+          - button "Fullscreen" [ref=e392] [cursor=pointer]:
+            - img [ref=e393]
+        - paragraph [ref=e408]: Click a row to view full reports.
+  - generic:
+    - document
+  - img [ref=e294]

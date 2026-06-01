@@ -1,0 +1,1 @@
+{"nodes": [{"id": "tradingagents_docker_compose", "label": "TradingAgents Docker Compose", "file_type": "document", "source_file": "external/TradingAgents/docker-compose.yml", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Containerized deployment config for TradingAgents"}], "edges": [], "hyperedges": []}

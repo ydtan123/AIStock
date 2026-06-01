@@ -1,0 +1,129 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - button "keyboard_double_arrow_left" [ref=e307] [cursor=pointer]:
+        - generic [ref=e309]: keyboard_double_arrow_left
+      - generic [ref=e8]:
+        - heading "📈 AIStock" [level=2] [ref=e13]
+        - paragraph [ref=e18]: Trading Platform
+        - separator [ref=e23]
+        - generic [ref=e156]:
+          - generic [ref=e157]:
+            - generic [ref=e158]: Strategy Backtesting
+            - combobox "Selected Strategy Backtesting. Navigation" [active] [ref=e1744]
+          - img "open" [ref=e162]
+        - separator [ref=e30]
+        - heading "Quick Stats" [level=3] [ref=e34]
+        - generic [ref=e36]:
+          - generic [ref=e165]:
+            - paragraph [ref=e168]: Total
+            - paragraph [ref=e171]: "8991"
+          - generic [ref=e173]:
+            - paragraph [ref=e176]: Active
+            - paragraph [ref=e179]: "3062"
+        - generic [ref=e181]:
+          - paragraph [ref=e184]: Bullish
+          - paragraph [ref=e187]: "829"
+    - generic [ref=e49]:
+      - banner [ref=e50]:
+        - generic [ref=e53]:
+          - button "Deploy" [ref=e55] [cursor=pointer]:
+            - generic [ref=e57]: Deploy
+          - button "Main menu" [ref=e59] [cursor=pointer]:
+            - img [ref=e60]
+      - generic [ref=e65]:
+        - heading "Strategy Backtesting" [level=2] [ref=e1745]:
+          - text: Strategy Backtesting
+          - generic [ref=e71]:
+            - link "Link to heading":
+              - /url: "#platform-overview"
+              - img
+        - generic [ref=e1747]:
+          - paragraph [ref=e1751]: Select Backtest Result
+          - generic [ref=e1753]:
+            - generic [ref=e1754]:
+              - generic [ref=e1755]: backtest_result_20260510.json
+              - combobox "Selected backtest_result_20260510.json. Select Backtest Result" [ref=e1757]
+            - img "open" [ref=e1759]
+        - heading "Performance Metrics" [level=3] [ref=e1765]:
+          - text: Performance Metrics
+          - generic [ref=e1766]:
+            - link "Link to heading":
+              - /url: "#performance-metrics"
+              - img
+        - generic [ref=e1770]:
+          - button "Show/hide columns" [ref=e1774] [cursor=pointer]:
+            - img [ref=e1775]
+          - button "Download as CSV" [ref=e1780] [cursor=pointer]:
+            - img [ref=e1781]
+          - button "Search" [ref=e1786] [cursor=pointer]:
+            - img [ref=e1787]
+          - button "Fullscreen" [ref=e1792] [cursor=pointer]:
+            - img [ref=e1793]
+        - heading "Cumulative Return" [level=3] [ref=e1804]:
+          - text: Cumulative Return
+          - generic [ref=e1688]:
+            - link "Link to heading":
+              - /url: "#log-output"
+              - img
+        - generic [ref=e1810]:
+          - img:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: "2021"
+                  - generic:
+                    - generic: "2022"
+                  - generic:
+                    - generic: "2023"
+                  - generic:
+                    - generic: "2024"
+                  - generic:
+                    - generic: "2025"
+                - generic:
+                  - generic:
+                    - generic: 50.0%
+                  - generic:
+                    - generic: 100.0%
+                  - generic:
+                    - generic: 150.0%
+                  - generic:
+                    - generic: 200.0%
+                  - generic:
+                    - generic: 250.0%
+                  - generic:
+                    - generic: 300.0%
+                  - generic:
+                    - generic: 350.0%
+                  - generic:
+                    - generic: 400.0%
+          - img:
+            - generic:
+              - generic:
+                - generic: Date
+              - generic:
+                - generic: Cumulative Return
+          - toolbar [ref=e1824]:
+            - button "Download plot as a PNG" [ref=e1826] [cursor=pointer]:
+              - img [ref=e1827]
+            - generic [ref=e1829]:
+              - button "Zoom" [ref=e1830] [cursor=pointer]:
+                - img [ref=e1831]
+              - button "Pan" [ref=e1833] [cursor=pointer]:
+                - img [ref=e1834]
+            - generic [ref=e1836]:
+              - button "Zoom in" [ref=e1837] [cursor=pointer]:
+                - img [ref=e1838]
+              - button "Zoom out" [ref=e1840] [cursor=pointer]:
+                - img [ref=e1841]
+              - button "Autoscale" [ref=e1843] [cursor=pointer]:
+                - img [ref=e1844]
+              - button "Reset axes" [ref=e1846] [cursor=pointer]:
+                - img [ref=e1847]
+            - button "Fullscreen" [ref=e1850] [cursor=pointer]:
+              - img [ref=e1851]
+          - img
+  - img [ref=e304]
+  - generic:
+    - document

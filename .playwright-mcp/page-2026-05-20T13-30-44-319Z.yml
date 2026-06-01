@@ -1,0 +1,147 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e24]:
+      - heading "📈 AIStock" [level=2] [ref=e29]
+      - paragraph [ref=e34]: Trading Platform
+      - separator [ref=e39]
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e356]: Stock Data
+          - combobox "Selected Stock Data. Navigation" [ref=e357]
+        - img "open" [ref=e49]
+      - separator [ref=e55]
+      - heading "Quick Stats" [level=3] [ref=e59]
+      - generic [ref=e61]:
+        - generic [ref=e66]:
+          - paragraph [ref=e69]: Total
+          - paragraph [ref=e72]: "8991"
+        - generic [ref=e77]:
+          - paragraph [ref=e80]: Active
+          - paragraph [ref=e83]: "3062"
+      - generic [ref=e86]:
+        - paragraph [ref=e89]: Bullish
+        - paragraph [ref=e92]: "344"
+    - generic [ref=e3]:
+      - banner [ref=e4]:
+        - generic [ref=e7]:
+          - button "Deploy" [ref=e9] [cursor=pointer]:
+            - generic [ref=e11]: Deploy
+          - button "Main menu" [ref=e13] [cursor=pointer]:
+            - img [ref=e14]
+      - generic [ref=e95]:
+        - heading "Stock Data" [level=2] [ref=e358]:
+          - text: Stock Data
+          - generic [ref=e101]:
+            - link "Link to heading":
+              - /url: "#platform-overview"
+              - img
+        - generic [ref=e360]:
+          - tablist [ref=e362]:
+            - tab "Lookup" [ref=e363] [cursor=pointer]:
+              - paragraph [ref=e365]: Lookup
+            - tab "Technical Analysis" [ref=e366] [cursor=pointer]:
+              - paragraph [ref=e368]: Technical Analysis
+            - tab "Screener" [ref=e369] [cursor=pointer]:
+              - paragraph [ref=e371]: Screener
+            - tab "Manager" [active] [selected] [ref=e372] [cursor=pointer]:
+              - paragraph [ref=e374]: Manager
+            - tab "Predictions" [ref=e375] [cursor=pointer]:
+              - paragraph [ref=e377]: Predictions
+          - tabpanel "Manager" [ref=e1097]:
+            - generic [ref=e1098]:
+              - generic [ref=e1103]: STOCK MANAGER
+              - generic [ref=e1105]:
+                - generic [ref=e1110]:
+                  - paragraph [ref=e1113]: Total Listed
+                  - paragraph [ref=e1116]: "8991"
+                - generic [ref=e1121]:
+                  - paragraph [ref=e1124]: Active
+                  - paragraph [ref=e1127]: "3062"
+                - generic [ref=e1132]:
+                  - paragraph [ref=e1135]: Inactive
+                  - paragraph [ref=e1138]: "5929"
+              - separator [ref=e1143]
+              - paragraph [ref=e1148]:
+                - strong [ref=e1149]: Filter & Bulk Actions
+              - generic [ref=e1152]:
+                - generic [ref=e1154]:
+                  - generic [ref=e1156]:
+                    - generic [ref=e1158]:
+                      - paragraph [ref=e1162]: Exchange
+                      - generic [ref=e1164]:
+                        - generic [ref=e1165]:
+                          - generic [ref=e1166]: Both
+                          - combobox "Selected Both. Exchange" [ref=e1168]
+                        - img "open" [ref=e1170]
+                    - generic [ref=e1173]:
+                      - paragraph [ref=e1177]: Sector
+                      - generic [ref=e1179]:
+                        - generic [ref=e1180]:
+                          - generic [ref=e1181]: All
+                          - combobox "Selected All. Sector" [ref=e1183]
+                        - img "open" [ref=e1185]
+                  - generic [ref=e1188]:
+                    - generic [ref=e1190]:
+                      - paragraph [ref=e1194]: Min Mkt Cap ($B)
+                      - generic [ref=e1195]:
+                        - spinbutton "Min Mkt Cap ($B)" [ref=e1198]: "0.00"
+                        - generic [ref=e1199]:
+                          - button [disabled] [ref=e1200]:
+                            - img [ref=e1201]
+                          - button [ref=e1203] [cursor=pointer]:
+                            - img [ref=e1204]
+                    - generic [ref=e1207]:
+                      - paragraph [ref=e1211]: Max PE
+                      - generic [ref=e1212]:
+                        - spinbutton "Max PE" [ref=e1215]: "999.00"
+                        - generic [ref=e1216]:
+                          - button [ref=e1217] [cursor=pointer]:
+                            - img [ref=e1218]
+                          - button [ref=e1220] [cursor=pointer]:
+                            - img [ref=e1221]
+                  - generic [ref=e1224]:
+                    - generic [ref=e1226]:
+                      - paragraph [ref=e1230]: Min ROE (%)
+                      - generic [ref=e1231]:
+                        - spinbutton "Min ROE (%)" [ref=e1234]: "-200.00"
+                        - generic [ref=e1235]:
+                          - button [disabled] [ref=e1236]:
+                            - img [ref=e1237]
+                          - button [ref=e1239] [cursor=pointer]:
+                            - img [ref=e1240]
+                    - generic [ref=e1243]:
+                      - paragraph [ref=e1247]: Max Beta
+                      - generic [ref=e1248]:
+                        - spinbutton "Max Beta" [ref=e1251]: "10.00"
+                        - generic [ref=e1252]:
+                          - button [ref=e1253] [cursor=pointer]:
+                            - img [ref=e1254]
+                          - button [ref=e1256] [cursor=pointer]:
+                            - img [ref=e1257]
+                  - generic [ref=e1262]:
+                    - paragraph [ref=e1266]: Status
+                    - generic [ref=e1268]:
+                      - generic [ref=e1269]:
+                        - generic [ref=e1270]: All
+                        - combobox "Selected All. Status" [ref=e1272]
+                      - img "open" [ref=e1274]
+                - button "Apply Filters" [ref=e1279] [cursor=pointer]:
+                  - paragraph [ref=e1283]: Apply Filters
+              - paragraph [ref=e1288]: 500 stocks match filters
+              - generic [ref=e1290]:
+                - button "✅ Activate All Filtered" [ref=e1295] [cursor=pointer]:
+                  - paragraph [ref=e1299]: ✅ Activate All Filtered
+                - button "❌ Deactivate All Filtered" [ref=e1304] [cursor=pointer]:
+                  - paragraph [ref=e1308]: ❌ Deactivate All Filtered
+              - generic [ref=e1315]:
+                - button "Show/hide columns" [ref=e1319] [cursor=pointer]:
+                  - img [ref=e1320]
+                - button "Download as CSV" [ref=e1325] [cursor=pointer]:
+                  - img [ref=e1326]
+                - button "Search" [ref=e1331] [cursor=pointer]:
+                  - img [ref=e1332]
+                - button "Fullscreen" [ref=e1337] [cursor=pointer]:
+                  - img [ref=e1338]
+  - generic:
+    - document
+  - img [ref=e294]

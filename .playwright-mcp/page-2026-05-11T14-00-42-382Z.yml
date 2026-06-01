@@ -1,0 +1,181 @@
+- generic:
+  - generic:
+    - generic [ref=e2]:
+      - generic [ref=e7]:
+        - button "keyboard_double_arrow_left" [ref=e297] [cursor=pointer]:
+          - generic [ref=e299]: keyboard_double_arrow_left
+        - generic [ref=e11]:
+          - heading "📈 AIStock" [level=2] [ref=e16]
+          - paragraph [ref=e21]: Trading Platform
+          - separator [ref=e26]
+          - generic [ref=e30]:
+            - generic [ref=e31]:
+              - generic [ref=e32]: Overview
+              - combobox "Selected Overview. Navigation" [expanded] [active] [ref=e34]
+            - img "open" [ref=e36]
+          - separator [ref=e42]
+          - heading "Quick Stats" [level=3] [ref=e46]
+          - generic [ref=e48]:
+            - generic [ref=e53]:
+              - paragraph [ref=e56]: Total
+              - paragraph [ref=e59]: "8991"
+            - generic [ref=e64]:
+              - paragraph [ref=e67]: Active
+              - paragraph [ref=e70]: "3062"
+          - generic [ref=e73]:
+            - paragraph [ref=e76]: Bullish
+            - paragraph [ref=e79]: "829"
+      - generic [ref=e3]:
+        - banner [ref=e82]:
+          - generic [ref=e85]:
+            - button "Deploy" [ref=e87] [cursor=pointer]:
+              - generic [ref=e89]: Deploy
+            - button "Main menu" [ref=e91] [cursor=pointer]:
+              - img [ref=e92]
+        - generic [ref=e95]:
+          - heading "Platform Overview" [level=2] [ref=e100]:
+            - text: Platform Overview
+            - generic [ref=e101]:
+              - link "Link to heading":
+                - /url: "#platform-overview"
+                - img
+          - generic [ref=e103]:
+            - generic [ref=e108]:
+              - paragraph [ref=e111]: Total Stocks
+              - paragraph [ref=e114]: "8991"
+            - generic [ref=e119]:
+              - paragraph [ref=e122]: Active Stocks
+              - paragraph [ref=e125]: "3062"
+            - generic [ref=e130]:
+              - paragraph [ref=e133]: Bullish Signals
+              - paragraph [ref=e136]: "829"
+            - generic [ref=e141]:
+              - paragraph [ref=e144]: Bearish Signals
+              - paragraph [ref=e147]: "1133"
+          - separator [ref=e152]
+          - generic [ref=e154]:
+            - generic [ref=e156]:
+              - heading "Prediction Distribution" [level=3] [ref=e161]:
+                - text: Prediction Distribution
+                - generic [ref=e162]:
+                  - link "Link to heading":
+                    - /url: "#prediction-distribution"
+                    - img
+              - generic [ref=e168]:
+                - img:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: "0"
+                        - generic:
+                          - generic: "0.2"
+                        - generic:
+                          - generic: "0.4"
+                        - generic:
+                          - generic: "0.6"
+                        - generic:
+                          - generic: "0.8"
+                      - generic:
+                        - generic:
+                          - generic: "0"
+                        - generic:
+                          - generic: "50"
+                        - generic:
+                          - generic: "100"
+                        - generic:
+                          - generic: "150"
+                        - generic:
+                          - generic: "200"
+                - img:
+                  - generic:
+                    - generic:
+                      - generic: P(5% high)
+                    - generic:
+                      - generic: count
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: Bullish threshold
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: Bearish threshold
+                - toolbar [ref=e182]:
+                  - button "Download plot as a PNG" [ref=e184] [cursor=pointer]:
+                    - img [ref=e185]
+                  - generic [ref=e187]:
+                    - button "Zoom" [ref=e188] [cursor=pointer]:
+                      - img [ref=e189]
+                    - button "Pan" [ref=e191] [cursor=pointer]:
+                      - img [ref=e192]
+                  - generic [ref=e194]:
+                    - button "Zoom in" [ref=e195] [cursor=pointer]:
+                      - img [ref=e196]
+                    - button "Zoom out" [ref=e198] [cursor=pointer]:
+                      - img [ref=e199]
+                    - button "Autoscale" [ref=e201] [cursor=pointer]:
+                      - img [ref=e202]
+                    - button "Reset axes" [ref=e204] [cursor=pointer]:
+                      - img [ref=e205]
+                  - button "Fullscreen" [ref=e208] [cursor=pointer]:
+                    - img [ref=e209]
+                - img
+            - generic [ref=e212]:
+              - heading "Signal Breakdown" [level=3] [ref=e217]:
+                - text: Signal Breakdown
+                - generic [ref=e218]:
+                  - link "Link to heading":
+                    - /url: "#signal-breakdown"
+                    - img
+              - generic [ref=e223]:
+                - generic [ref=e224]: Bullish
+                - generic [ref=e225]: 829 (27.1%)
+              - generic [ref=e230]:
+                - generic [ref=e231]: Neutral
+                - generic [ref=e232]: 1099 (35.9%)
+              - generic [ref=e237]:
+                - generic [ref=e238]: Bearish
+                - generic [ref=e239]: 1133 (37.0%)
+          - separator [ref=e244]
+          - heading "Recent Predictions" [level=3] [ref=e249]:
+            - text: Recent Predictions
+            - generic [ref=e250]:
+              - link "Link to heading":
+                - /url: "#recent-predictions"
+                - img
+          - paragraph [ref=e255]: "Last updated: 2026-05-07 13:35"
+          - generic [ref=e260]:
+            - button "Show/hide columns" [ref=e264] [cursor=pointer]:
+              - img [ref=e265]
+            - button "Download as CSV" [ref=e270] [cursor=pointer]:
+              - img [ref=e271]
+            - button "Search" [ref=e276] [cursor=pointer]:
+              - img [ref=e277]
+            - button "Fullscreen" [ref=e282] [cursor=pointer]:
+              - img [ref=e283]
+    - list [ref=e303]:
+      - generic [ref=e305]:
+        - option "Overview" [selected] [ref=e306] [cursor=pointer]:
+          - generic [ref=e310]: Overview
+        - option "Stock Data" [ref=e311] [cursor=pointer]:
+          - generic [ref=e315]: Stock Data
+        - option "ML Pipeline" [ref=e316] [cursor=pointer]:
+          - generic [ref=e320]: ML Pipeline
+        - option "TradingAgents" [ref=e321] [cursor=pointer]:
+          - generic [ref=e325]: TradingAgents
+        - option "Strategy Backtesting" [ref=e326] [cursor=pointer]:
+          - generic [ref=e330]: Strategy Backtesting
+        - option "Live Trading" [ref=e331] [cursor=pointer]:
+          - generic [ref=e335]: Live Trading
+        - option "Paper Trading" [ref=e336] [cursor=pointer]:
+          - generic [ref=e340]: Paper Trading
+        - option "Portfolio Analysis" [ref=e341] [cursor=pointer]:
+          - generic [ref=e345]: Portfolio Analysis
+        - option "Settings" [ref=e346] [cursor=pointer]:
+          - generic [ref=e350]: Settings
+        - option "Job History" [ref=e351] [cursor=pointer]:
+          - generic [ref=e355]: Job History
+  - generic:
+    - document
+  - img [ref=e294]

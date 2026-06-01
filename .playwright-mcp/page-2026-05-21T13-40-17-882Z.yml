@@ -1,0 +1,1017 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e11]:
+      - heading "📈 AIStock" [level=2] [ref=e16]
+      - paragraph [ref=e21]: Trading Platform
+      - separator [ref=e26]
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e177]: Stock Data
+          - combobox "Selected Stock Data. Navigation" [ref=e178]
+        - img "open" [ref=e36]
+      - separator [ref=e42]
+      - heading "Quick Stats" [level=3] [ref=e46]
+      - generic [ref=e48]:
+        - generic [ref=e53]:
+          - paragraph [ref=e56]: Total
+          - paragraph [ref=e59]: "8991"
+        - generic [ref=e64]:
+          - paragraph [ref=e67]: Active
+          - paragraph [ref=e70]: "3062"
+    - generic [ref=e3]:
+      - banner [ref=e73]:
+        - generic [ref=e76]:
+          - button "Deploy" [ref=e78] [cursor=pointer]:
+            - generic [ref=e80]: Deploy
+          - button "Main menu" [ref=e82] [cursor=pointer]:
+            - img [ref=e83]
+      - generic [ref=e86]:
+        - heading "Stock Data" [level=2] [ref=e179]:
+          - text: Stock Data
+          - generic [ref=e92]:
+            - link "Link to heading":
+              - /url: "#platform-overview"
+              - img
+        - generic [ref=e181]:
+          - tablist [ref=e183]:
+            - tab "Lookup" [selected] [ref=e184] [cursor=pointer]:
+              - paragraph [ref=e186]: Lookup
+            - tab "Technical Analysis" [ref=e187] [cursor=pointer]:
+              - paragraph [ref=e189]: Technical Analysis
+            - tab "Screener" [ref=e190] [cursor=pointer]:
+              - paragraph [ref=e192]: Screener
+            - tab "Manager" [ref=e193] [cursor=pointer]:
+              - paragraph [ref=e195]: Manager
+          - tabpanel "Lookup" [ref=e198]:
+            - generic [ref=e199]:
+              - generic [ref=e204]: LOOKUP
+              - generic [ref=e206]:
+                - generic [ref=e208]:
+                  - generic [ref=e210]:
+                    - paragraph [ref=e214]: Symbol
+                    - textbox "Symbol" [active] [ref=e217]:
+                      - /placeholder: ""
+                      - text: COHR
+                    - generic [ref=e443]: 4/10
+                  - generic [ref=e219]:
+                    - paragraph [ref=e223]: Start date
+                    - textbox "Select a date." [ref=e227]:
+                      - /placeholder: YYYY/MM/DD
+                      - text: 2025/05/21
+                    - paragraph: Press the down arrow key to interact with the calendar and select a date. Press the escape button to close the calendar.
+                    - paragraph: Selected date is 2025/05/21. Select the second date.
+                  - generic [ref=e229]:
+                    - paragraph [ref=e233]: End date
+                    - textbox "Select a date." [ref=e237]:
+                      - /placeholder: YYYY/MM/DD
+                      - text: 2026/05/21
+                    - paragraph: Press the down arrow key to interact with the calendar and select a date. Press the escape button to close the calendar.
+                    - paragraph: Selected date is 2026/05/21. Select the second date.
+                  - generic [ref=e242]:
+                    - generic [ref=e243]: Coherent Inc
+                    - generic [ref=e244]: NYSE · TECHNOLOGY
+                    - generic [ref=e245]: SCIENTIFIC & TECHNICAL INSTRUMENTS
+                    - generic [ref=e246]: ● Active
+                - generic [ref=e248]:
+                  - generic [ref=e250]:
+                    - generic [ref=e257]:
+                      - generic [ref=e258]: CLOSE
+                      - generic [ref=e259]: $353.63
+                      - generic [ref=e260]: ▼ -2.54%
+                    - generic [ref=e267]:
+                      - generic [ref=e268]: PE RATIO
+                      - generic [ref=e269]: "323.0"
+                      - generic [ref=e270]: trailing
+                    - generic [ref=e277]:
+                      - generic [ref=e278]: MKT CAP
+                      - generic [ref=e279]: $61.78B
+                      - generic [ref=e280]: USD
+                    - generic [ref=e287]:
+                      - generic [ref=e288]: VOLUME
+                      - generic [ref=e289]: 5.8M
+                      - generic [ref=e290]: daily
+                  - generic [ref=e449]:
+                    - img:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic: "100"
+                            - generic:
+                              - generic: "150"
+                            - generic:
+                              - generic: "200"
+                            - generic:
+                              - generic: "250"
+                            - generic:
+                              - generic: "300"
+                            - generic:
+                              - generic: "350"
+                            - generic:
+                              - generic: "400"
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic: Jul 2025
+                            - generic:
+                              - generic: Sep 2025
+                            - generic:
+                              - generic: Nov 2025
+                            - generic:
+                              - generic: Jan 2026
+                            - generic:
+                              - generic: Mar 2026
+                            - generic:
+                              - generic: May 2026
+                          - generic:
+                            - generic:
+                              - generic: "0"
+                            - generic:
+                              - generic: 20M
+                            - generic:
+                              - generic: 40M
+                    - img:
+                      - generic [ref=e478]:
+                        - generic [ref=e480]: OHLC
+                        - generic [ref=e488]: Adj Close
+                        - generic [ref=e491]: Volume
+                    - toolbar [ref=e497]:
+                      - button "Download plot as a PNG" [ref=e499] [cursor=pointer]:
+                        - img [ref=e500]
+                      - generic [ref=e502]:
+                        - button "Zoom" [ref=e503] [cursor=pointer]:
+                          - img [ref=e504]
+                        - button "Pan" [ref=e506] [cursor=pointer]:
+                          - img [ref=e507]
+                      - generic [ref=e509]:
+                        - button "Zoom in" [ref=e510] [cursor=pointer]:
+                          - img [ref=e511]
+                        - button "Zoom out" [ref=e513] [cursor=pointer]:
+                          - img [ref=e514]
+                        - button "Autoscale" [ref=e516] [cursor=pointer]:
+                          - img [ref=e517]
+                        - button "Reset axes" [ref=e519] [cursor=pointer]:
+                          - img [ref=e520]
+                      - button "Fullscreen" [ref=e523] [cursor=pointer]:
+                        - img [ref=e524]
+                    - img
+                  - paragraph [ref=e381]:
+                    - strong [ref=e382]: Recent Prices
+                  - generic [ref=e387]:
+                    - button "Show/hide columns" [ref=e391] [cursor=pointer]:
+                      - img [ref=e392]
+                    - button "Download as CSV" [ref=e397] [cursor=pointer]:
+                      - img [ref=e398]
+                    - button "Search" [ref=e403] [cursor=pointer]:
+                      - img [ref=e404]
+                    - button "Fullscreen" [ref=e409] [cursor=pointer]:
+                      - img [ref=e410]
+                  - group [ref=e423]:
+                    - generic "keyboard_arrow_down News (4 articles)" [ref=e526] [cursor=pointer]:
+                      - generic [ref=e425]:
+                        - generic [ref=e528]: keyboard_arrow_down
+                        - paragraph [ref=e430]: News (4 articles)
+                    - generic [ref=e530]:
+                      - paragraph [ref=e535]: "Fetched: 2026-05-16 22:15"
+                      - generic [ref=e539]:
+                        - paragraph [ref=e540]: "During the period of May 13, 2025, to May 15, 2025, Coherent Corp. (NYSE: COHR) saw significant analyst activity and insider transactions following its fiscal third-quarter 2025 earnings report released on May 7."
+                        - 'heading "1. Financial Context: Post-Earnings Momentum" [level=3] [ref=e542]':
+                          - strong [ref=e544]: "1. Financial Context: Post-Earnings Momentum"
+                          - generic [ref=e545]:
+                            - link "Link to heading":
+                              - /url: "#1-financial-context-post-earnings-momentum"
+                              - img
+                        - paragraph [ref=e546]:
+                          - text: The market sentiment during this window was dominated by the digest of Coherent’s
+                          - strong [ref=e547]: Q3 FY2025 results
+                          - text: . The company had reported a record quarterly revenue of
+                          - strong [ref=e548]: $1.50 billion
+                          - text: (up 24% Y/Y), exceeding consensus estimates.
+                        - list [ref=e549]:
+                          - listitem [ref=e550]:
+                            - strong [ref=e551]: "Networking Segment:"
+                            - text: This was the primary growth engine, up 45% Y/Y due to surging demand for AI-related datacenter infrastructure (specifically 800G and 400G transceivers).
+                          - listitem [ref=e552]:
+                            - strong [ref=e553]: "Profitability:"
+                            - text: Non-GAAP EPS came in at **
+                            - generic [ref=e554]:
+                              - math [ref=e556]:
+                                - generic [ref=e558]:
+                                  - generic [ref=e559]: "0.91"
+                                  - generic [ref=e560]: ∗
+                                  - generic [ref=e561]: ∗
+                                  - generic [ref=e562]: ","
+                                  - generic [ref=e563]: s
+                                  - generic [ref=e564]: i
+                                  - generic [ref=e565]: g
+                                  - generic [ref=e566]: "n"
+                                  - generic [ref=e567]: i
+                                  - generic [ref=e568]: f
+                                  - generic [ref=e569]: i
+                                  - generic [ref=e570]: c
+                                  - generic [ref=e571]: a
+                                  - generic [ref=e572]: "n"
+                                  - generic [ref=e573]: t
+                                  - generic [ref=e574]: l
+                                  - generic [ref=e575]: "y"
+                                  - generic [ref=e576]: b
+                                  - generic [ref=e577]: e
+                                  - generic [ref=e578]: a
+                                  - generic [ref=e579]: t
+                                  - generic [ref=e580]: i
+                                  - generic [ref=e581]: "n"
+                                  - generic [ref=e582]: g
+                                  - generic [ref=e583]: t
+                                  - generic [ref=e584]: h
+                                  - generic [ref=e585]: e
+                                  - generic [ref=e586]: a
+                                  - generic [ref=e587]: "n"
+                                  - generic [ref=e588]: a
+                                  - generic [ref=e589]: l
+                                  - generic [ref=e590]: "y"
+                                  - generic [ref=e591]: s
+                                  - generic [ref=e592]: t
+                                  - generic [ref=e593]: f
+                                  - generic [ref=e594]: o
+                                  - generic [ref=e595]: r
+                                  - generic [ref=e596]: e
+                                  - generic [ref=e597]: c
+                                  - generic [ref=e598]: a
+                                  - generic [ref=e599]: s
+                                  - generic [ref=e600]: t
+                                  - generic [ref=e601]: o
+                                  - generic [ref=e602]: f
+                              - generic [ref=e603]:
+                                - generic [ref=e604]: 0.91 ∗
+                                - generic [ref=e605]: ∗, significantlybeatingtheanalystforecastof
+                            - text: 0.855.
+                          - listitem [ref=e606]:
+                            - strong [ref=e607]: "Strategic Realignment:"
+                            - text: Management confirmed they were moving toward an optimized portfolio, including the discontinuation of some unprofitable silicon carbide (SiC) product lines and booking $74 million in restructuring charges.
+                        - heading "2. Analyst Revisions (May 13–14, 2025)" [level=3] [ref=e609]:
+                          - strong [ref=e611]: 2. Analyst Revisions (May 13–14, 2025)
+                          - generic [ref=e612]:
+                            - link "Link to heading":
+                              - /url: "#2-analyst-revisions-may-13-14-2025"
+                              - img
+                        - paragraph [ref=e613]: "Wall Street firms issued several updates during this period, generally maintaining a bullish outlook on the \"AI optics\" trade:"
+                        - list [ref=e614]:
+                          - listitem [ref=e615]:
+                            - strong [ref=e616]: "Stifel (May 14):"
+                            - text: Maintained a
+                            - strong [ref=e617]: Buy
+                            - text: rating with a price target of
+                            - strong [ref=e618]: $100.00
+                            - text: . Analysts highlighted Coherent’s leadership in the upcoming 1.6T transceiver ramp and effective execution on its growth strategy.
+                          - listitem [ref=e619]:
+                            - strong [ref=e620]: "Citigroup (May 14):"
+                            - text: Reiterated a
+                            - strong [ref=e621]: Buy
+                            - text: rating with a price target of
+                            - strong [ref=e622]: $110.00
+                            - text: ", noting the company's resilience against macro headwinds in the industrial sector and its strong positioning for AI-driven bandwidth requirements."
+                          - listitem [ref=e623]:
+                            - strong [ref=e624]: "Futurum Group (May 13):"
+                            - text: Published a detailed analysis praising the company's margin expansion (non-GAAP gross margin improved to 38.5%) and its roadmap for 3.2T optical platforms.
+                        - heading "3. Insider Activity" [level=3] [ref=e626]:
+                          - strong [ref=e628]: 3. Insider Activity
+                          - generic [ref=e629]:
+                            - link "Link to heading":
+                              - /url: "#3-insider-activity"
+                              - img
+                        - paragraph [ref=e630]: "Significant insider filings were recorded with the SEC during this window:"
+                        - list [ref=e631]:
+                          - listitem [ref=e632]:
+                            - strong [ref=e633]: "Christopher Koeppen (EVP, Aerospace & Defense):"
+                            - text: On May 13, 2025, Koeppen sold
+                            - strong [ref=e634]: 11,280 shares
+                            - text: at an average price of
+                            - strong [ref=e635]:
+                              - generic [ref=e636]:
+                                - math [ref=e638]:
+                                  - generic [ref=e640]:
+                                    - generic [ref=e641]: "80.00"
+                                    - generic [ref=e642]: ∗
+                                    - generic [ref=e643]: ∗
+                                    - generic [ref=e644]: ","
+                                    - generic [ref=e645]: t
+                                    - generic [ref=e646]: o
+                                    - generic [ref=e647]: t
+                                    - generic [ref=e648]: a
+                                    - generic [ref=e649]: l
+                                    - generic [ref=e650]: i
+                                    - generic [ref=e651]: "n"
+                                    - generic [ref=e652]: g
+                                    - generic [ref=e653]: a
+                                    - generic [ref=e654]: p
+                                    - generic [ref=e655]: p
+                                    - generic [ref=e656]: r
+                                    - generic [ref=e657]: o
+                                    - generic [ref=e658]: x
+                                    - generic [ref=e659]: i
+                                    - generic [ref=e660]: m
+                                    - generic [ref=e661]: a
+                                    - generic [ref=e662]: t
+                                    - generic [ref=e663]: e
+                                    - generic [ref=e664]: l
+                                    - generic [ref=e665]: "y"
+                                    - generic [ref=e666]: ∗
+                                    - generic [ref=e667]: ∗
+                                - generic [ref=e668]:
+                                  - generic [ref=e669]: 80.00 ∗
+                                  - generic [ref=e670]: ∗, totalingapproximately ∗
+                                  - generic [ref=e671]: ∗
+                              - text: 902,400
+                            - text: . This transaction was part of a pre-arranged Rule 10b5-1 trading plan.
+                          - listitem [ref=e672]:
+                            - strong [ref=e673]: "Julie Eng (CTO):"
+                            - text: On May 13, Eng terminated an existing 10b5-1 plan and on May 15, 2025, adopted a new 10b5-1 plan to govern future stock sales through early 2026.
+                        - heading "4. Stock Performance and Market Position" [level=3] [ref=e675]:
+                          - strong [ref=e677]: 4. Stock Performance and Market Position
+                          - generic [ref=e678]:
+                            - link "Link to heading":
+                              - /url: "#4-stock-performance-and-market-position"
+                              - img
+                        - list [ref=e679]:
+                          - listitem [ref=e680]:
+                            - strong [ref=e681]: "Pricing:"
+                            - text: On May 13, 2025, COHR shares were trading at approximately
+                            - strong [ref=e682]:
+                              - generic [ref=e683]:
+                                - math [ref=e685]:
+                                  - generic [ref=e687]:
+                                    - generic [ref=e688]: "78.90"
+                                    - generic [ref=e689]: t
+                                    - generic [ref=e690]: o
+                                - generic [ref=e692]: 78.90to
+                              - text: "80.00"
+                            - text: ", representing a consolidation phase after the sharp post-earnings rally."
+                          - listitem [ref=e693]:
+                            - strong [ref=e694]: "Outlook:"
+                            - text: Management’s guidance for the June quarter (Q4 FY2025) remained cautious due to "flat" expectations in the industrial segment, but investor interest remained high due to the
+                            - strong [ref=e695]: Analyst and Investor Day
+                            - text: scheduled for late May (May 28, 2025).
+                        - heading "Summary Table" [level=3] [ref=e697]:
+                          - strong [ref=e699]: Summary Table
+                          - generic [ref=e700]:
+                            - link "Link to heading":
+                              - /url: "#summary-table"
+                              - img
+                        - table [ref=e701]:
+                          - rowgroup [ref=e702]:
+                            - row "Date Event Type Key Detail" [ref=e703]:
+                              - columnheader "Date" [ref=e704]
+                              - columnheader "Event Type" [ref=e705]
+                              - columnheader "Key Detail" [ref=e706]
+                          - rowgroup [ref=e707]:
+                            - row "May 13 Analyst Analysis Futurum Group highlights 24% Y/Y revenue growth led by AI." [ref=e708]:
+                              - cell "May 13" [ref=e709]:
+                                - strong [ref=e710]: May 13
+                              - cell "Analyst Analysis" [ref=e711]
+                              - cell "Futurum Group highlights 24% Y/Y revenue growth led by AI." [ref=e712]
+                            - row "May 13 Insider Trade EVP Christopher Koeppen sells 11,280 shares at $80.00." [ref=e713]:
+                              - cell "May 13" [ref=e714]:
+                                - strong [ref=e715]: May 13
+                              - cell "Insider Trade" [ref=e716]
+                              - cell "EVP Christopher Koeppen sells 11,280 shares at $80.00." [ref=e717]
+                            - row "May 14 Analyst Rating Stifel maintains Buy; $100.00 Price Target." [ref=e718]:
+                              - cell "May 14" [ref=e719]:
+                                - strong [ref=e720]: May 14
+                              - cell "Analyst Rating" [ref=e721]
+                              - cell "Stifel maintains Buy; $100.00 Price Target." [ref=e722]
+                            - row "May 14 Analyst Rating Citi maintains Buy; $110.00 Price Target." [ref=e723]:
+                              - cell "May 14" [ref=e724]:
+                                - strong [ref=e725]: May 14
+                              - cell "Analyst Rating" [ref=e726]
+                              - cell "Citi maintains Buy; $110.00 Price Target." [ref=e727]
+                            - row "May 15 Regulatory CTO Julie Eng updates 10b5-1 trading plan for future divestment." [ref=e728]:
+                              - cell "May 15" [ref=e729]:
+                                - strong [ref=e730]: May 15
+                              - cell "Regulatory" [ref=e731]
+                              - cell "CTO Julie Eng updates 10b5-1 trading plan for future divestment." [ref=e732]
+                      - separator [ref=e737]
+                      - paragraph [ref=e742]: "Fetched: 2026-05-16 22:15"
+                      - generic [ref=e746]:
+                        - paragraph [ref=e747]:
+                          - text: As a Senior Equity Research Analyst, I have compiled the following high-fidelity news summary and data analysis for
+                          - strong [ref=e748]: Coherent Corp. (COHR)
+                          - text: for the period spanning
+                          - strong [ref=e749]: May 10, 2025, to May 12, 2025
+                          - text: .
+                        - heading "Market Context & Catalyst" [level=3] [ref=e751]:
+                          - strong [ref=e753]: Market Context & Catalyst
+                          - generic [ref=e754]:
+                            - link "Link to heading":
+                              - /url: "#market-context-and-catalyst"
+                              - img
+                        - paragraph [ref=e755]:
+                          - text: The reporting period was primarily defined by the market’s digestion of Coherent’s
+                          - strong [ref=e756]: Q3 Fiscal Year 2025 results
+                          - text: ", which were released on"
+                          - strong [ref=e757]: May 7, 2025
+                          - text: . By the weekend of May 10–11 and the market open on May 12, sentiment was focused on the company's significant exposure to AI-driven data center infrastructure.
+                        - heading "Financial Highlights (Q3 FY25)" [level=3] [ref=e759]:
+                          - strong [ref=e761]: Financial Highlights (Q3 FY25)
+                          - generic [ref=e762]:
+                            - link "Link to heading":
+                              - /url: "#financial-highlights-q3-fy-25"
+                              - img
+                        - list [ref=e763]:
+                          - listitem [ref=e764]:
+                            - strong [ref=e765]: "Revenue:"
+                            - text: $1.50 billion, representing a
+                            - strong [ref=e766]: 24% year-over-year (YoY) increase
+                            - text: ", exceeding consensus estimates."
+                          - listitem [ref=e767]:
+                            - strong [ref=e768]: "Earnings (Non-GAAP):"
+                            - text: $0.91 per diluted share, beating consensus expectations.
+                          - listitem [ref=e769]:
+                            - strong [ref=e770]: "Segment Performance:"
+                            - text: The
+                            - strong [ref=e771]: Networking segment
+                            - text: was the primary growth driver, with revenue up
+                            - strong [ref=e772]: 45% YoY
+                            - text: ", fueled by aggressive demand for optical transceivers (800G and 400G) within AI data centers."
+                          - listitem [ref=e773]:
+                            - strong [ref=e774]: "Guidance (Q4 FY25):"
+                            - text: Management projected revenue between
+                            - strong [ref=e775]:
+                              - generic [ref=e776]:
+                                - math [ref=e778]:
+                                  - generic [ref=e780]:
+                                    - generic [ref=e781]: "1.425"
+                                    - generic [ref=e782]: B
+                                    - generic [ref=e783]: a
+                                    - generic [ref=e784]: "n"
+                                    - generic [ref=e785]: d
+                                - generic [ref=e787]: 1.425Band
+                              - text: 1.575B
+                            - text: and non-GAAP EPS in the range of
+                            - strong [ref=e788]:
+                              - generic [ref=e789]:
+                                - math [ref=e791]:
+                                  - generic [ref=e793]:
+                                    - generic [ref=e794]: "0.81"
+                                    - generic [ref=e795]: t
+                                    - generic [ref=e796]: o
+                                - generic [ref=e798]: 0.81to
+                              - text: "1.01"
+                            - text: .
+                        - heading "Daily Activity Summary (May 10–12, 2025)" [level=3] [ref=e800]:
+                          - strong [ref=e802]: Daily Activity Summary (May 10–12, 2025)
+                          - generic [ref=e803]:
+                            - link "Link to heading":
+                              - /url: "#daily-activity-summary-may-10-12-2025"
+                              - img
+                        - table [ref=e804]:
+                          - rowgroup [ref=e805]:
+                            - row "Date Event Type Details & Impact" [ref=e806]:
+                              - columnheader "Date" [ref=e807]
+                              - columnheader "Event Type" [ref=e808]
+                              - columnheader "Details & Impact" [ref=e809]
+                          - rowgroup [ref=e810]:
+                            - row "May 10–11 (Sat/Sun) Research Circulation Weekend research notes from tier-1 firms focused on Coherent's transition to a \"pure-play\" AI infrastructure beneficiary. Analysts highlighted the 1.6T and 3.2T optical platforms and increased Indium Phosphide (InP) capacity as key long-term moats." [ref=e811]:
+                              - cell "May 10–11 (Sat/Sun)" [ref=e812]:
+                                - strong [ref=e813]: May 10–11 (Sat/Sun)
+                              - cell "Research Circulation" [ref=e814]:
+                                - strong [ref=e815]: Research Circulation
+                              - cell "Weekend research notes from tier-1 firms focused on Coherent's transition to a \"pure-play\" AI infrastructure beneficiary. Analysts highlighted the 1.6T and 3.2T optical platforms and increased Indium Phosphide (InP) capacity as key long-term moats." [ref=e816]:
+                                - text: Weekend research notes from tier-1 firms focused on Coherent's transition to a "pure-play" AI infrastructure beneficiary. Analysts highlighted the
+                                - strong [ref=e817]: 1.6T and 3.2T optical platforms
+                                - text: and increased
+                                - strong [ref=e818]: Indium Phosphide (InP)
+                                - text: capacity as key long-term moats.
+                            - row "May 12 (Mon) Price Action The stock traded in a range of approximately 78.00. Shares saw continued support as investors repositioned following the post-earnings \"beat and raise\" narrative." [ref=e819]:
+                              - cell "May 12 (Mon)" [ref=e820]:
+                                - strong [ref=e821]: May 12 (Mon)
+                              - cell "Price Action" [ref=e822]:
+                                - strong [ref=e823]: Price Action
+                              - cell "The stock traded in a range of approximately 78.00. Shares saw continued support as investors repositioned following the post-earnings \"beat and raise\" narrative." [ref=e824]:
+                                - text: The stock traded in a range of approximately
+                                - strong [ref=e825]:
+                                  - generic [ref=e826]:
+                                    - math [ref=e828]:
+                                      - generic [ref=e830]:
+                                        - generic [ref=e831]: "72.68"
+                                        - generic [ref=e832]: t
+                                        - generic [ref=e833]: o
+                                    - generic [ref=e835]: 72.68to
+                                  - text: "78.00"
+                                - text: . Shares saw continued support as investors repositioned following the post-earnings "beat and raise" narrative.
+                            - row "May 12 (Mon) Insider Trading Director Howard H. Xia executed a sale of 3,000 shares total (occurring May 9 and May 12) at prices ranging from 78.00. This was reported via Form 4 filings on May 12, 2025." [ref=e836]:
+                              - cell "May 12 (Mon)" [ref=e837]:
+                                - strong [ref=e838]: May 12 (Mon)
+                              - cell "Insider Trading" [ref=e839]:
+                                - strong [ref=e840]: Insider Trading
+                              - cell "Director Howard H. Xia executed a sale of 3,000 shares total (occurring May 9 and May 12) at prices ranging from 78.00. This was reported via Form 4 filings on May 12, 2025." [ref=e841]:
+                                - strong [ref=e842]: Director Howard H. Xia
+                                - text: executed a sale of 3,000 shares total (occurring May 9 and May 12) at prices ranging from
+                                - strong [ref=e843]:
+                                  - generic [ref=e844]:
+                                    - math [ref=e846]:
+                                      - generic [ref=e848]:
+                                        - generic [ref=e849]: "72.69"
+                                        - generic [ref=e850]: t
+                                        - generic [ref=e851]: o
+                                    - generic [ref=e853]: 72.69to
+                                  - text: "78.00"
+                                - text: . This was reported via Form 4 filings on May 12, 2025.
+                            - row "May 12 (Mon) Analyst Sentiment Michael Genovese (Rosenblatt) maintained a Buy rating (reaffirmed post-earnings May 8), setting the stage for bullish momentum leading into the company's scheduled Analyst and Investor Day later in the month." [ref=e854]:
+                              - cell "May 12 (Mon)" [ref=e855]:
+                                - strong [ref=e856]: May 12 (Mon)
+                              - cell "Analyst Sentiment" [ref=e857]:
+                                - strong [ref=e858]: Analyst Sentiment
+                              - cell "Michael Genovese (Rosenblatt) maintained a Buy rating (reaffirmed post-earnings May 8), setting the stage for bullish momentum leading into the company's scheduled Analyst and Investor Day later in the month." [ref=e859]:
+                                - strong [ref=e860]: Michael Genovese (Rosenblatt)
+                                - text: maintained a
+                                - strong [ref=e861]: Buy
+                                - text: rating (reaffirmed post-earnings May 8), setting the stage for bullish momentum leading into the company's scheduled Analyst and Investor Day later in the month.
+                        - heading "Equity Research Analyst Perspective" [level=3] [ref=e863]:
+                          - strong [ref=e865]: Equity Research Analyst Perspective
+                          - generic [ref=e866]:
+                            - link "Link to heading":
+                              - /url: "#equity-research-analyst-perspective"
+                              - img
+                        - paragraph [ref=e867]:
+                          - text: The data from this window confirms that COHR was successfully pivoting its narrative from a general industrial photonics supplier to a critical bottleneck provider for hyperscale AI. While
+                          - strong [ref=e868]: industrial and consumer materials
+                          - text: segments showed relative softness (Materials revenue declined 1% YoY), the massive acceleration in
+                          - strong [ref=e869]: Networking
+                          - text: (now ~75% of the story) provided a valuation floor.
+                        - paragraph [ref=e870]:
+                          - text: The
+                          - strong [ref=e871]: insider sales
+                          - text: by Director Xia during this window were relatively small (~$227k) and likely viewed as routine liquidity actions, failing to dampen the overall bullish sentiment driven by the
+                          - strong [ref=e872]: 54% YoY growth
+                          - text: in the data center end-market. Investors exiting the May 12 session were clearly focused on the upcoming
+                          - strong [ref=e873]: May 28 Analyst Day
+                          - text: as the next major catalyst for upward revisions to long-term financial models.
+                      - separator [ref=e878]
+                      - paragraph [ref=e883]: "Fetched: 2026-05-16 22:15"
+                      - generic [ref=e887]:
+                        - paragraph [ref=e888]:
+                          - text: For the period of
+                          - strong [ref=e889]: May 8, 2025, to May 9, 2025
+                          - text: ", the financial news for"
+                          - strong [ref=e890]: Coherent Corp. (COHR)
+                          - text: was dominated by the market's reaction to the company’s
+                          - strong [ref=e891]: Fiscal Third Quarter 2025 results
+                          - text: ", which were released after the market close on May 7, 2025."
+                        - paragraph [ref=e892]: The report exceeded analyst expectations, particularly in revenue and profitability, fueled by unprecedented demand for AI-related datacenter infrastructure.
+                        - heading "Key Financial Results (Released May 7, 2025)" [level=3] [ref=e894]:
+                          - strong [ref=e896]: Key Financial Results (Released May 7, 2025)
+                          - generic [ref=e897]:
+                            - link "Link to heading":
+                              - /url: "#key-financial-results-released-may-7-2025"
+                              - img
+                        - list [ref=e898]:
+                          - listitem [ref=e899]:
+                            - strong [ref=e900]: "Revenue:"
+                            - text: $1.50 billion (a record for the company), representing a
+                            - strong [ref=e901]: 24% year-over-year increase
+                            - text: .
+                          - listitem [ref=e902]:
+                            - strong [ref=e903]: "Non-GAAP EPS:"
+                            - generic [ref=e904]:
+                              - math [ref=e906]:
+                                - generic [ref=e908]:
+                                  - generic [ref=e909]: "0.91"
+                                  - generic [ref=e910]: ","
+                                  - generic [ref=e911]: s
+                                  - generic [ref=e912]: u
+                                  - generic [ref=e913]: r
+                                  - generic [ref=e914]: p
+                                  - generic [ref=e915]: a
+                                  - generic [ref=e916]: s
+                                  - generic [ref=e917]: s
+                                  - generic [ref=e918]: i
+                                  - generic [ref=e919]: "n"
+                                  - generic [ref=e920]: g
+                                  - generic [ref=e921]: t
+                                  - generic [ref=e922]: h
+                                  - generic [ref=e923]: e
+                                  - generic [ref=e924]: c
+                                  - generic [ref=e925]: o
+                                  - generic [ref=e926]: "n"
+                                  - generic [ref=e927]: s
+                                  - generic [ref=e928]: e
+                                  - generic [ref=e929]: "n"
+                                  - generic [ref=e930]: s
+                                  - generic [ref=e931]: u
+                                  - generic [ref=e932]: s
+                                  - generic [ref=e933]: e
+                                  - generic [ref=e934]: s
+                                  - generic [ref=e935]: t
+                                  - generic [ref=e936]: i
+                                  - generic [ref=e937]: m
+                                  - generic [ref=e938]: a
+                                  - generic [ref=e939]: t
+                                  - generic [ref=e940]: e
+                                  - generic [ref=e941]: o
+                                  - generic [ref=e942]: f
+                                  - generic [ref=e943]: a
+                                  - generic [ref=e944]: p
+                                  - generic [ref=e945]: p
+                                  - generic [ref=e946]: r
+                                  - generic [ref=e947]: o
+                                  - generic [ref=e948]: x
+                                  - generic [ref=e949]: i
+                                  - generic [ref=e950]: m
+                                  - generic [ref=e951]: a
+                                  - generic [ref=e952]: t
+                                  - generic [ref=e953]: e
+                                  - generic [ref=e954]: l
+                                  - generic [ref=e955]: "y"
+                              - generic [ref=e957]: 0.91, surpassingtheconsensusestimateofapproximately
+                            - text: 0.85–$0.86.
+                          - listitem [ref=e958]:
+                            - strong [ref=e959]: "GAAP Gross Margin:"
+                            - text: 35.2%;
+                            - strong [ref=e960]: "Non-GAAP Gross Margin:"
+                            - text: 38.5% (up 490 bps Y/Y).
+                          - listitem [ref=e961]:
+                            - strong [ref=e962]: "Debt Reduction:"
+                            - text: The company paid down
+                            - strong [ref=e963]: $136 million
+                            - text: in debt during the quarter.
+                          - listitem [ref=e964]:
+                            - strong [ref=e965]: "Segment Highlights:"
+                            - text: The
+                            - strong [ref=e966]: Networking segment
+                            - text: saw a 45% Y/Y increase, primarily driven by the demand for optical transceivers in AI datacenters.
+                        - heading "Market & Analyst Reaction (May 8–9, 2025)" [level=3] [ref=e968]:
+                          - strong [ref=e970]: Market & Analyst Reaction (May 8–9, 2025)
+                          - generic [ref=e971]:
+                            - link "Link to heading":
+                              - /url: "#market-and-analyst-reaction-may-8-9-2025"
+                              - img
+                        - paragraph [ref=e972]: "Following the earnings call, several Tier-1 and boutique research firms issued updates on May 8 and 9:"
+                        - list [ref=e973]:
+                          - listitem [ref=e974]:
+                            - strong [ref=e975]: "Rosenblatt Securities:"
+                            - text: Analyst Mike Genovese raised the price target to **
+                            - generic [ref=e976]:
+                              - math [ref=e978]:
+                                - generic [ref=e980]:
+                                  - generic [ref=e981]: "95.00"
+                                  - generic [ref=e982]: ∗
+                                  - generic [ref=e983]: ∗
+                                  - generic [ref=e984]: (
+                                  - generic [ref=e985]: f
+                                  - generic [ref=e986]: r
+                                  - generic [ref=e987]: o
+                                  - generic [ref=e988]: m
+                              - generic [ref=e989]:
+                                - generic [ref=e990]: 95.00 ∗
+                                - generic [ref=e991]: ∗(from
+                            - text: 80.00) and maintained a
+                            - strong [ref=e992]: Buy
+                            - text: rating, citing the "strong AI-related datacenter demand" and the successful ramp of 800G and 1.6T transceivers.
+                          - listitem [ref=e993]:
+                            - strong [ref=e994]: "Wolfe Research:"
+                            - text: Initiated coverage on Coherent with an
+                            - strong [ref=e995]: Outperform
+                            - text: rating on May 8, 2025, identifying the company as a key beneficiary of the "optical supercycle" in AI infrastructure.
+                          - listitem [ref=e996]:
+                            - strong [ref=e997]: "Benchmark:"
+                            - text: Analyst Mark Miller maintained a
+                            - strong [ref=e998]: Buy
+                            - text: rating but adjusted the price target to **
+                            - generic [ref=e999]:
+                              - math [ref=e1001]:
+                                - generic [ref=e1003]:
+                                  - generic [ref=e1004]: "95.00"
+                                  - generic [ref=e1005]: ∗
+                                  - generic [ref=e1006]: ∗
+                                  - generic [ref=e1007]: (
+                                  - generic [ref=e1008]: p
+                                  - generic [ref=e1009]: r
+                                  - generic [ref=e1010]: e
+                                  - generic [ref=e1011]: v
+                                  - generic [ref=e1012]: i
+                                  - generic [ref=e1013]: o
+                                  - generic [ref=e1014]: u
+                                  - generic [ref=e1015]: s
+                                  - generic [ref=e1016]: l
+                                  - generic [ref=e1017]: "y"
+                              - generic [ref=e1018]:
+                                - generic [ref=e1019]: 95.00 ∗
+                                - generic [ref=e1020]: ∗(previously
+                            - text: 105.00) to align with broader sector multiples, while still noting the company’s improving operational leverage.
+                          - listitem [ref=e1021]:
+                            - strong [ref=e1022]: "Needham & Company:"
+                            - text: Reiterated a
+                            - strong [ref=e1023]: Buy
+                            - text: rating, highlighting management’s commentary on doubling
+                            - strong [ref=e1024]: Indium Phosphide (InP)
+                            - text: production capacity ahead of schedule to meet supply-constrained demand.
+                        - heading "Management Outlook & Strategy" [level=3] [ref=e1026]:
+                          - strong [ref=e1028]: Management Outlook & Strategy
+                          - generic [ref=e1029]:
+                            - link "Link to heading":
+                              - /url: "#management-outlook-and-strategy"
+                              - img
+                        - paragraph [ref=e1030]:
+                          - text: On May 8, news outlets focused on CEO
+                          - strong [ref=e1031]: Jim Anderson’s
+                          - text: "first full quarter results since taking the helm. Key takeaways from management's commentary included:"
+                        - list [ref=e1032]:
+                          - listitem [ref=e1033]:
+                            - strong [ref=e1034]: "Q4 Fiscal 2025 Guidance:"
+                            - text: Revenue projected between
+                            - strong [ref=e1035]:
+                              - generic [ref=e1036]:
+                                - math [ref=e1038]:
+                                  - generic [ref=e1040]:
+                                    - generic [ref=e1041]: "1.425"
+                                    - generic [ref=e1042]: b
+                                    - generic [ref=e1043]: i
+                                    - generic [ref=e1044]: l
+                                    - generic [ref=e1045]: l
+                                    - generic [ref=e1046]: i
+                                    - generic [ref=e1047]: o
+                                    - generic [ref=e1048]: "n"
+                                    - generic [ref=e1049]: a
+                                    - generic [ref=e1050]: "n"
+                                    - generic [ref=e1051]: d
+                                - generic [ref=e1053]: 1.425billionand
+                              - text: 1.575 billion
+                            - text: ", with Non-GAAP EPS of"
+                            - strong [ref=e1054]:
+                              - generic [ref=e1055]:
+                                - math [ref=e1057]:
+                                  - generic [ref=e1059]:
+                                    - generic [ref=e1060]: "0.81"
+                                    - generic [ref=e1061]: t
+                                    - generic [ref=e1062]: o
+                                - generic [ref=e1064]: 0.81to
+                              - text: "1.01"
+                            - text: .
+                          - listitem [ref=e1065]:
+                            - strong [ref=e1066]: "AI Exposure:"
+                            - text: Management emphasized that AI-related revenue is becoming a larger portion of the overall mix, which is expected to drive further gross margin expansion toward the company's 40% long-term target.
+                          - listitem [ref=e1067]:
+                            - strong [ref=e1068]: "Operational Efficiency:"
+                            - text: CFO Sherri Luther noted that the company is on track for significant year-over-year EPS improvement due to the "gross margin expansion strategy" involving pricing optimization and cost reductions.
+                        - heading "Stock Performance" [level=3] [ref=e1070]:
+                          - strong [ref=e1072]: Stock Performance
+                          - generic [ref=e1073]:
+                            - link "Link to heading":
+                              - /url: "#stock-performance"
+                              - img
+                        - paragraph [ref=e1074]:
+                          - text: The stock experienced a significant surge on
+                          - strong [ref=e1075]: May 8, 2025
+                          - text: ", as investors processed the earnings beat and the bullish guidance. The momentum continued into May 9, as the broader technology sector rallied on the back of strong AI infrastructure capex signals from Coherent and its peers."
+                      - separator [ref=e1080]
+                      - paragraph [ref=e1085]: "Fetched: 2026-05-16 22:14"
+                      - generic [ref=e1089]:
+                        - paragraph [ref=e1090]:
+                          - text: "As a Senior Equity Research Analyst, I have compiled the following report on Coherent Corp. (NYSE: COHR) financial news and market activity for the period of"
+                          - strong [ref=e1091]: May 8, 2025, to May 15, 2025
+                          - text: .
+                        - 'heading "Overview: Post-Earnings Momentum and AI Tailwinds" [level=3] [ref=e1093]':
+                          - strong [ref=e1095]: "Overview: Post-Earnings Momentum and AI Tailwinds"
+                          - generic [ref=e1096]:
+                            - link "Link to heading":
+                              - /url: "#overview-post-earnings-momentum-and-ai-tailwinds"
+                              - img
+                        - paragraph [ref=e1097]:
+                          - text: The trading week of May 8, 2025, was dominated by the market's digestion of Coherent's
+                          - strong [ref=e1098]: Q3 Fiscal 2025 earnings report
+                          - text: ", which was released after the market closed on May 7, 2025. The period was characterized by a \"beat and raise\" narrative, primarily driven by accelerating demand for 800G optical transceivers within AI-scale datacenters."
+                        - separator [ref=e1099]
+                        - 'heading "1. Q3 Fiscal 2025 Earnings Recap (Event Date: May 7, 2025)" [level=3] [ref=e1101]':
+                          - strong [ref=e1103]: "1. Q3 Fiscal 2025 Earnings Recap (Event Date: May 7, 2025)"
+                          - generic [ref=e1104]:
+                            - link "Link to heading":
+                              - /url: "#1-q3-fiscal-2025-earnings-recap-event-date-may-7-2025"
+                              - img
+                        - paragraph [ref=e1105]: "The news cycle from May 8-15 centered on these key financial results:"
+                        - list [ref=e1106]:
+                          - listitem [ref=e1107]:
+                            - strong [ref=e1108]: "Revenue:"
+                            - text: Reported at
+                            - strong [ref=e1109]: $1.50 billion
+                            - text: ", a 24% year-over-year increase, exceeding consensus estimates."
+                          - listitem [ref=e1110]:
+                            - strong [ref=e1111]: "Non-GAAP EPS:"
+                            - text: Delivered **
+                            - generic [ref=e1112]:
+                              - math [ref=e1114]:
+                                - generic [ref=e1116]:
+                                  - generic [ref=e1117]: "0.91"
+                                  - generic [ref=e1118]: ∗
+                                  - generic [ref=e1119]: ∗
+                                  - generic [ref=e1120]: ","
+                                  - generic [ref=e1121]: o
+                                  - generic [ref=e1122]: u
+                                  - generic [ref=e1123]: t
+                                  - generic [ref=e1124]: p
+                                  - generic [ref=e1125]: e
+                                  - generic [ref=e1126]: r
+                                  - generic [ref=e1127]: f
+                                  - generic [ref=e1128]: o
+                                  - generic [ref=e1129]: r
+                                  - generic [ref=e1130]: m
+                                  - generic [ref=e1131]: i
+                                  - generic [ref=e1132]: "n"
+                                  - generic [ref=e1133]: g
+                                  - generic [ref=e1134]: t
+                                  - generic [ref=e1135]: h
+                                  - generic [ref=e1136]: e
+                                  - generic [ref=e1137]: a
+                                  - generic [ref=e1138]: "n"
+                                  - generic [ref=e1139]: a
+                                  - generic [ref=e1140]: l
+                                  - generic [ref=e1141]: "y"
+                                  - generic [ref=e1142]: s
+                                  - generic [ref=e1143]: t
+                                  - generic [ref=e1144]: e
+                                  - generic [ref=e1145]: s
+                                  - generic [ref=e1146]: t
+                                  - generic [ref=e1147]: i
+                                  - generic [ref=e1148]: m
+                                  - generic [ref=e1149]: a
+                                  - generic [ref=e1150]: t
+                                  - generic [ref=e1151]: e
+                                  - generic [ref=e1152]: o
+                                  - generic [ref=e1153]: f
+                              - generic [ref=e1154]:
+                                - generic [ref=e1155]: 0.91 ∗
+                                - generic [ref=e1156]: ∗, outperformingtheanalystestimateof
+                            - text: 0.86.
+                          - listitem [ref=e1157]:
+                            - strong [ref=e1158]: "Profitability:"
+                            - text: Non-GAAP gross margins expanded significantly to
+                            - strong [ref=e1159]: 38.5%
+                            - text: (up 490 bps Y/Y), driven by a favorable product mix and internal cost-reduction initiatives.
+                          - listitem [ref=e1160]:
+                            - strong [ref=e1161]: "Balance Sheet:"
+                            - text: Management highlighted the repayment of **
+                            - generic [ref=e1162]:
+                              - math [ref=e1164]:
+                                - generic [ref=e1166]:
+                                  - generic [ref=e1167]: "136"
+                                  - generic [ref=e1168]: m
+                                  - generic [ref=e1169]: i
+                                  - generic [ref=e1170]: l
+                                  - generic [ref=e1171]: l
+                                  - generic [ref=e1172]: i
+                                  - generic [ref=e1173]: o
+                                  - generic [ref=e1174]: "n"
+                                  - generic [ref=e1175]: ∗
+                                  - generic [ref=e1176]: ∗
+                                  - generic [ref=e1177]: i
+                                  - generic [ref=e1178]: "n"
+                                  - generic [ref=e1179]: d
+                                  - generic [ref=e1180]: e
+                                  - generic [ref=e1181]: b
+                                  - generic [ref=e1182]: t
+                                  - generic [ref=e1183]: d
+                                  - generic [ref=e1184]: u
+                                  - generic [ref=e1185]: r
+                                  - generic [ref=e1186]: i
+                                  - generic [ref=e1187]: "n"
+                                  - generic [ref=e1188]: g
+                                  - generic [ref=e1189]: t
+                                  - generic [ref=e1190]: h
+                                  - generic [ref=e1191]: e
+                                  - generic [ref=e1192]: q
+                                  - generic [ref=e1193]: u
+                                  - generic [ref=e1194]: a
+                                  - generic [ref=e1195]: r
+                                  - generic [ref=e1196]: t
+                                  - generic [ref=e1197]: e
+                                  - generic [ref=e1198]: r
+                                  - generic [ref=e1199]: (
+                              - generic [ref=e1200]:
+                                - generic [ref=e1201]: 136million ∗
+                                - generic [ref=e1202]: ∗indebtduringthequarter(
+                            - text: 386 million fiscal year-to-date), reflecting a disciplined approach to capital allocation and leverage reduction.
+                        - separator [ref=e1203]
+                        - heading "2. Analyst Sentiment and Price Target Revisions (May 8–12, 2025)" [level=3] [ref=e1205]:
+                          - strong [ref=e1207]: 2. Analyst Sentiment and Price Target Revisions (May 8–12, 2025)
+                          - generic [ref=e1208]:
+                            - link "Link to heading":
+                              - /url: "#2-analyst-sentiment-and-price-target-revisions-may-8-12-2025"
+                              - img
+                        - paragraph [ref=e1209]: Following the results, several tier-1 firms issued constructive notes, citing Coherent's critical role as a "plumbing" provider for the AI infrastructure supercycle.
+                        - list [ref=e1210]:
+                          - listitem [ref=e1211]:
+                            - strong [ref=e1212]: "Rosenblatt Securities (May 8):"
+                            - text: Analyst Mike Genovese raised his price target from
+                            - strong [ref=e1213]:
+                              - generic [ref=e1214]:
+                                - math [ref=e1216]:
+                                  - generic [ref=e1218]:
+                                    - generic [ref=e1219]: "80.00"
+                                    - generic [ref=e1220]: t
+                                    - generic [ref=e1221]: o
+                                - generic [ref=e1223]: 80.00to
+                              - text: "95.00"
+                            - text: ", maintaining a"
+                            - strong [ref=e1224]: Buy
+                            - text: rating. The hike was predicated on the company's vertically integrated model and its supply-side advantage in Indium Phosphide (InP) lasers.
+                          - listitem [ref=e1225]:
+                            - strong [ref=e1226]: "Benchmark Co. (May 8):"
+                            - text: Analyst Mark Miller adjusted his target to **
+                            - generic [ref=e1227]:
+                              - math [ref=e1229]:
+                                - generic [ref=e1231]:
+                                  - generic [ref=e1232]: "95.00"
+                                  - generic [ref=e1233]: ∗
+                                  - generic [ref=e1234]: ∗
+                                  - generic [ref=e1235]: (
+                                  - generic [ref=e1236]: f
+                                  - generic [ref=e1237]: r
+                                  - generic [ref=e1238]: o
+                                  - generic [ref=e1239]: m
+                              - generic [ref=e1240]:
+                                - generic [ref=e1241]: 95.00 ∗
+                                - generic [ref=e1242]: ∗(from
+                            - text: 105.00 previously, reflecting a valuation recalibration despite the quarterly beat), maintaining a Buy rating.
+                          - listitem [ref=e1243]:
+                            - strong [ref=e1244]: "Consensus View:"
+                            - text: The general analyst consensus shifted toward a "Moderate Buy" during this window, with an average price target of approximately
+                            - strong [ref=e1245]: $94.43
+                            - text: . Concerns remained regarding the slower recovery in the industrial and consumer electronics segments, though these were largely overshadowed by the
+                            - strong [ref=e1246]: 46% Y/Y growth
+                            - text: in the Datacenter & Communications segment.
+                        - separator [ref=e1247]
+                        - heading "3. Strategic Guidance and Future Catalysts" [level=3] [ref=e1249]:
+                          - strong [ref=e1251]: 3. Strategic Guidance and Future Catalysts
+                          - generic [ref=e1252]:
+                            - link "Link to heading":
+                              - /url: "#3-strategic-guidance-and-future-catalysts"
+                              - img
+                        - paragraph [ref=e1253]: "During the investor calls and press updates between May 8 and May 15, management provided a roadmap for the remainder of the fiscal year:"
+                        - list [ref=e1254]:
+                          - listitem [ref=e1255]:
+                            - strong [ref=e1256]: "Q4 FY25 Guidance:"
+                            - text: The company projected revenue between
+                            - strong [ref=e1257]:
+                              - generic [ref=e1258]:
+                                - math [ref=e1260]:
+                                  - generic [ref=e1262]:
+                                    - generic [ref=e1263]: "1.425"
+                                    - generic [ref=e1264]: B
+                                    - generic [ref=e1265]: a
+                                    - generic [ref=e1266]: "n"
+                                    - generic [ref=e1267]: d
+                                - generic [ref=e1269]: 1.425Band
+                              - text: 1.575B
+                            - text: ", with non-GAAP EPS in the range of"
+                            - strong [ref=e1270]:
+                              - generic [ref=e1271]:
+                                - math [ref=e1273]:
+                                  - generic [ref=e1275]:
+                                    - generic [ref=e1276]: "0.81"
+                                    - generic [ref=e1277]: t
+                                    - generic [ref=e1278]: o
+                                - generic [ref=e1280]: 0.81to
+                              - text: "1.01"
+                            - text: .
+                          - listitem [ref=e1281]:
+                            - strong [ref=e1282]: "Upcoming Analyst Day:"
+                            - text: A major focus of the news cycle was the announcement of the
+                            - strong [ref=e1283]: 2025 Analyst and Investor Day
+                            - text: ", scheduled for May 28, 2025, at the New York Stock Exchange. Investors were signaled to expect a detailed long-term financial model and deeper insights into the co-packaged optics (CPO) roadmap."
+                        - separator [ref=e1284]
+                        - heading "4. Stock Performance and Market Reaction" [level=3] [ref=e1286]:
+                          - strong [ref=e1288]: 4. Stock Performance and Market Reaction
+                          - generic [ref=e1289]:
+                            - link "Link to heading":
+                              - /url: "#4-stock-performance-and-market-reaction"
+                              - img
+                        - list [ref=e1290]:
+                          - listitem [ref=e1291]:
+                            - strong [ref=e1292]: "May 8 Reaction:"
+                            - text: The stock opened higher on May 8, reacting to the $0.05 EPS beat and the robust AI-related outlook.
+                          - listitem [ref=e1293]:
+                            - strong [ref=e1294]: "Price Levels:"
+                            - text: During this window, the stock traded in the
+                            - strong [ref=e1295]:
+                              - generic [ref=e1296]:
+                                - math [ref=e1298]:
+                                  - generic [ref=e1300]:
+                                    - generic [ref=e1301]: "70"
+                                    - generic [ref=e1302]: –
+                                - generic [ref=e1304]: 70–
+                              - text: 75 range
+                            - text: ", consolidating after its year-to-date rally. Market volatility remained high as investors weighed the \"overvalued\" concerns from valuation-focused firms (e.g., GuruFocus) against the \"supply-led growth\" setup in AI optics."
+                        - heading "Analyst Conclusion" [level=3] [ref=e1306]:
+                          - strong [ref=e1308]: Analyst Conclusion
+                          - generic [ref=e1309]:
+                            - link "Link to heading":
+                              - /url: "#analyst-conclusion"
+                              - img
+                        - paragraph [ref=e1310]: The period of May 8–15, 2025, served as a fundamental validation for COHR. The company successfully pivoted its narrative from a diversified industrial laser firm to a high-growth AI component leader. The significant margin expansion and aggressive debt paydown provided a "margin of safety" for the valuation, setting a bullish tone ahead of the late-May Analyst Day.
+                  - group [ref=e433]:
+                    - generic "keyboard_arrow_right Insider Transactions (0 records)" [ref=e434] [cursor=pointer]:
+                      - generic [ref=e435]:
+                        - generic [ref=e437]: keyboard_arrow_right
+                        - paragraph [ref=e440]: Insider Transactions (0 records)
+  - generic:
+    - document
+  - img [ref=e441]

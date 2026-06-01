@@ -1,0 +1,100 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e24]:
+      - heading "📈 AIStock" [level=2] [ref=e29]
+      - paragraph [ref=e34]: Trading Platform
+      - separator [ref=e39]
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e356]: Stock Data
+          - combobox "Selected Stock Data. Navigation" [ref=e357]
+        - img "open" [ref=e49]
+      - separator [ref=e55]
+      - heading "Quick Stats" [level=3] [ref=e59]
+      - generic [ref=e61]:
+        - generic [ref=e66]:
+          - paragraph [ref=e69]: Total
+          - paragraph [ref=e72]: "8991"
+        - generic [ref=e77]:
+          - paragraph [ref=e80]: Active
+          - paragraph [ref=e83]: "3062"
+      - generic [ref=e86]:
+        - paragraph [ref=e89]: Bullish
+        - paragraph [ref=e92]: "344"
+    - generic [ref=e3]:
+      - banner [ref=e4]:
+        - generic [ref=e7]:
+          - button "Deploy" [ref=e9] [cursor=pointer]:
+            - generic [ref=e11]: Deploy
+          - button "Main menu" [ref=e13] [cursor=pointer]:
+            - img [ref=e14]
+      - generic [ref=e95]:
+        - heading "Stock Data" [level=2] [ref=e358]:
+          - text: Stock Data
+          - generic [ref=e101]:
+            - link "Link to heading":
+              - /url: "#platform-overview"
+              - img
+        - generic [ref=e360]:
+          - tablist [ref=e362]:
+            - tab "Lookup" [ref=e363] [cursor=pointer]:
+              - paragraph [ref=e365]: Lookup
+            - tab "Technical Analysis" [ref=e366] [cursor=pointer]:
+              - paragraph [ref=e368]: Technical Analysis
+            - tab "Screener" [ref=e369] [cursor=pointer]:
+              - paragraph [ref=e371]: Screener
+            - tab "Manager" [ref=e372] [cursor=pointer]:
+              - paragraph [ref=e374]: Manager
+            - tab "Predictions" [active] [selected] [ref=e375] [cursor=pointer]:
+              - paragraph [ref=e377]: Predictions
+          - tabpanel "Predictions" [ref=e1349]:
+            - generic [ref=e1350]:
+              - generic [ref=e1355]: PREDICTIONS
+              - generic [ref=e1357]:
+                - generic [ref=e1361]:
+                  - paragraph [ref=e1365]: Sector
+                  - generic [ref=e1367]:
+                    - generic [ref=e1368]:
+                      - generic [ref=e1369]: All
+                      - combobox "Selected All. Sector" [ref=e1371]
+                    - img "open" [ref=e1373]
+                - generic [ref=e1378]:
+                  - paragraph [ref=e1382]: Search symbol / name
+                  - textbox "Search symbol / name" [ref=e1385]:
+                    - /placeholder: ""
+                - generic [ref=e1389]:
+                  - paragraph [ref=e1393]: Market Cap
+                  - generic [ref=e1395]:
+                    - generic [ref=e1396]:
+                      - generic [ref=e1397]: All
+                      - combobox "Selected All. Market Cap" [ref=e1399]
+                    - img "open" [ref=e1401]
+              - generic [ref=e1404]:
+                - generic [ref=e1409]:
+                  - paragraph [ref=e1412]: Total
+                  - paragraph [ref=e1415]: "3062"
+                - generic [ref=e1420]:
+                  - paragraph [ref=e1423]: Bullish (≥65%)
+                  - paragraph [ref=e1426]: "344"
+                - generic [ref=e1431]:
+                  - paragraph [ref=e1434]: Bearish (<35%)
+                  - paragraph [ref=e1437]: "1810"
+                - generic [ref=e1442]:
+                  - paragraph [ref=e1445]: Last updated
+                  - paragraph [ref=e1448]: 2026-05-18 17:46
+              - separator [ref=e1453]
+              - button "Export CSV" [ref=e1460] [cursor=pointer]:
+                - paragraph [ref=e1464]: Export CSV
+              - paragraph [ref=e1471]: 💡 Click any row to view signal attribution.
+              - generic [ref=e1476]:
+                - button "Show/hide columns" [ref=e1480] [cursor=pointer]:
+                  - img [ref=e1481]
+                - button "Download as CSV" [ref=e1486] [cursor=pointer]:
+                  - img [ref=e1487]
+                - button "Search" [ref=e1492] [cursor=pointer]:
+                  - img [ref=e1493]
+                - button "Fullscreen" [ref=e1498] [cursor=pointer]:
+                  - img [ref=e1499]
+  - generic:
+    - document
+  - img [ref=e294]

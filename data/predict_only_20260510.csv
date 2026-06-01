@@ -1,0 +1,2 @@
+ticker,predicted_return,model_name,bucket,datadate
+NVDA,0.16681575864577458,ExtraTrees,growth_tech,2026-03-01

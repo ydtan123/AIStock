@@ -31,7 +31,6 @@ def test_no_unhandled_errors_on_load(app: Page) -> None:
     "Selected Stocks",
     "Fast Evaluation",
     "Deep Evaluation",
-    "ML Pipeline",
     "Settings",
     "Job History",
 ])

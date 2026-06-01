@@ -1,0 +1,14 @@
+{
+  "step_name": "data_update",
+  "status": "success",
+  "summary": {
+    "source": "alpha_vantage",
+    "symbols_attempted": 31,
+    "symbols_succeeded": 31,
+    "symbols_failed": 0,
+    "failed_symbols": [],
+    "duration_s": 34.06
+  },
+  "payload": {},
+  "error": null
+}

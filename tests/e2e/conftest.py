@@ -21,7 +21,6 @@ PAGES = [
     "Fast Evaluation",
     "Deep Evaluation",
     "Stock Data",
-    "ML Pipeline",
     "Strategy Backtesting",
     "Live Trading",
     "Paper Trading",
@@ -35,7 +34,6 @@ PAGE_HEADERS = {
     "Selected Stocks": "Selected Stocks",
     "Fast Evaluation": "Fast Evaluation",
     "Deep Evaluation": "Deep Evaluation",
-    "ML Pipeline": "ML Pipeline",
     "Settings": "Settings",
     "Job History": "Job History",
 }

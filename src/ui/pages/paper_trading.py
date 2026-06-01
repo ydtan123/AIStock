@@ -34,7 +34,7 @@ def render(ctx) -> None:
             break
 
     if weights_path is None:
-        ctx.st.info("No weights file. Run the ML Pipeline first.")
+        ctx.st.info("No weights file. Run the Full Pipeline first.")
         return
 
     mtime = weights_path.stat().st_mtime

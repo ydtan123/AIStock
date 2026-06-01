@@ -1,0 +1,142 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - button "keyboard_double_arrow_left" [ref=e307] [cursor=pointer]:
+        - generic [ref=e309]: keyboard_double_arrow_left
+      - generic [ref=e8]:
+        - heading "📈 AIStock" [level=2] [ref=e13]
+        - paragraph [ref=e18]: Trading Platform
+        - separator [ref=e23]
+        - generic [ref=e156]:
+          - generic [ref=e157]:
+            - generic [ref=e158]: ML Pipeline
+            - combobox "Selected ML Pipeline. Navigation" [active] [ref=e1499]
+          - img "open" [ref=e162]
+        - separator [ref=e30]
+        - heading "Quick Stats" [level=3] [ref=e34]
+        - generic [ref=e36]:
+          - generic [ref=e165]:
+            - paragraph [ref=e168]: Total
+            - paragraph [ref=e171]: "8991"
+          - generic [ref=e173]:
+            - paragraph [ref=e176]: Active
+            - paragraph [ref=e179]: "3062"
+        - generic [ref=e181]:
+          - paragraph [ref=e184]: Bullish
+          - paragraph [ref=e187]: "829"
+    - generic [ref=e49]:
+      - banner [ref=e50]:
+        - generic [ref=e53]:
+          - button "Deploy" [ref=e55] [cursor=pointer]:
+            - generic [ref=e57]: Deploy
+          - button "Main menu" [ref=e59] [cursor=pointer]:
+            - img [ref=e60]
+      - generic [ref=e65]:
+        - heading "ML Pipeline" [level=2] [ref=e1500]:
+          - text: ML Pipeline
+          - generic [ref=e71]:
+            - link "Link to heading":
+              - /url: "#platform-overview"
+              - img
+        - group [ref=e1503]:
+          - generic "keyboard_arrow_right How stocks are selected" [ref=e1504] [cursor=pointer]:
+            - generic [ref=e1505]:
+              - generic [ref=e1507]: keyboard_arrow_right
+              - paragraph [ref=e1510]: How stocks are selected
+        - generic [ref=e1513]:
+          - heading "Configuration" [level=3] [ref=e1518]:
+            - text: Configuration
+            - generic [ref=e1519]:
+              - link "Link to heading":
+                - /url: "#configuration"
+                - img
+          - generic [ref=e1521]:
+            - generic [ref=e1525]:
+              - paragraph [ref=e1529]: Data Source
+              - generic [ref=e1531]:
+                - generic [ref=e1532]:
+                  - generic [ref=e1533]: AISTOCK_DB
+                  - combobox "Selected AISTOCK_DB. Data Source" [ref=e1535]
+                - img "open" [ref=e1537]
+            - generic [ref=e1542]:
+              - paragraph [ref=e1546]: Start Date
+              - textbox "Start Date" [ref=e1549]:
+                - /placeholder: ""
+                - text: 2020-01-01
+            - generic [ref=e1553]:
+              - paragraph [ref=e1557]: End Date
+              - textbox "End Date" [ref=e1560]:
+                - /placeholder: ""
+                - text: 2025-12-31
+          - generic [ref=e1562]:
+            - generic [ref=e1567]:
+              - paragraph [ref=e1571]: Top Quantile
+              - generic [ref=e1572]:
+                - slider "Top Quantile" [ref=e1576]:
+                  - generic:
+                    - generic:
+                      - paragraph: "0.75"
+                - generic:
+                  - generic:
+                    - paragraph: "0.00"
+                  - generic:
+                    - paragraph: "1.00"
+            - generic [ref=e1581]:
+              - paragraph [ref=e1585]: Test Quarters
+              - generic [ref=e1586]:
+                - spinbutton "Test Quarters" [ref=e1589]: "20"
+                - generic [ref=e1590]:
+                  - button [ref=e1591] [cursor=pointer]:
+                    - img [ref=e1592]
+                  - button [ref=e1594] [cursor=pointer]:
+                    - img [ref=e1595]
+            - generic [ref=e1600]:
+              - paragraph [ref=e1604]: Prediction Mode
+              - generic [ref=e1606]:
+                - generic [ref=e1607]:
+                  - generic [ref=e1608]: regression
+                  - combobox "Selected regression. Prediction Mode" [ref=e1610]
+                - img "open" [ref=e1612]
+          - generic [ref=e1615]:
+            - generic [ref=e1619]:
+              - paragraph [ref=e1623]: Weight Method
+              - generic [ref=e1625]:
+                - generic [ref=e1626]:
+                  - generic [ref=e1627]: equal
+                  - combobox "Selected equal. Weight Method" [ref=e1629]
+                - img "open" [ref=e1631]
+            - generic [ref=e1636]:
+              - paragraph [ref=e1640]: Rebalance Freq
+              - generic [ref=e1642]:
+                - generic [ref=e1643]:
+                  - generic [ref=e1644]: Q
+                  - combobox "Selected Q. Rebalance Freq" [ref=e1646]
+                - img "open" [ref=e1648]
+            - generic [ref=e1653]:
+              - paragraph [ref=e1657]: Initial Capital ($)
+              - generic [ref=e1658]:
+                - spinbutton "Initial Capital ($)" [ref=e1661]: "1000000"
+                - generic [ref=e1662]:
+                  - button [ref=e1663] [cursor=pointer]:
+                    - img [ref=e1664]
+                  - button [ref=e1666] [cursor=pointer]:
+                    - img [ref=e1667]
+          - button "Run Pipeline" [ref=e1672] [cursor=pointer]:
+            - paragraph [ref=e1676]: Run Pipeline
+        - paragraph [ref=e1681]:
+          - strong [ref=e1682]: "Status:"
+          - text: "Idle | Elapsed: 0s"
+        - heading "Log Output" [level=3] [ref=e1687]:
+          - text: Log Output
+          - generic [ref=e1688]:
+            - link "Link to heading":
+              - /url: "#log-output"
+              - img
+        - generic [ref=e1690]:
+          - paragraph [ref=e1694]: Pipeline Log
+          - textbox "Pipeline Log" [disabled] [ref=e1697]:
+            - /placeholder: ""
+            - text: No runs yet. Configure and click Run Pipeline.
+  - img [ref=e304]
+  - generic:
+    - document

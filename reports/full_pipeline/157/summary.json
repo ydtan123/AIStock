@@ -1,0 +1,42 @@
+{
+  "status": "success",
+  "finished_at": "2026-06-01T03:10:22.440594",
+  "steps": {
+    "data_update": {
+      "status": "success",
+      "summary": {
+        "source": "alpha_vantage",
+        "symbols_attempted": 31,
+        "symbols_succeeded": 31,
+        "symbols_failed": 0,
+        "failed_symbols": [],
+        "duration_s": 35.41
+      },
+      "error": null
+    },
+    "stock_selection": {
+      "status": "success",
+      "summary": {
+        "backend": "finrl",
+        "count": 255
+      },
+      "error": null
+    },
+    "fast_evaluation": {
+      "status": "success",
+      "summary": {
+        "backend": "ai_hedge_fund",
+        "tickers_evaluated": 3
+      },
+      "error": null
+    },
+    "deep_evaluation": {
+      "status": "success",
+      "summary": {
+        "backend": "trading_agents",
+        "tickers_evaluated": 1
+      },
+      "error": null
+    }
+  }
+}

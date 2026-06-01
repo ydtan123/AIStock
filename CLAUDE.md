@@ -73,7 +73,7 @@ fetcher/          FetcherBase + AlphaVantage/Yahoo implementations, TokenBucket 
 ingestion/        pipeline.py (batch ingest), indicators.py, symbols.py
 scheduler.py      APScheduler wrapping ingestion pipeline
 app.py            Streamlit entry point (~350 lines); routes to src/ui/pages/
-ui/pages/         one module per page (overview, selected_stocks, fast_evaluation_page, deep_evaluation_page, ml_pipeline, stock_lookup, stock_technical, stock_screener, stock_manager, strategy_backtest, live_trading, paper_trading, portfolio, settings, job_history)
+ui/pages/         one module per page (overview, selected_stocks, fast_evaluation_page, deep_evaluation_page, stock_lookup, stock_technical, stock_screener, stock_manager, strategy_backtest, live_trading, paper_trading, portfolio, settings, job_history)
 ml_bucket_selector.py  MLBucketSelector class wrapping external run_bucket()
 full_pipeline.py  CLI shim for OOP pipeline orchestrator
 pipeline/         OOP pipeline package
@@ -122,24 +122,12 @@ Sidebar `st.selectbox` routes to these page functions:
 | Fast Evaluation | `render_fast_evaluation()` | Per-run/per-stock analyst breakdown |
 | Deep Evaluation | `render_deep_evaluation()` | Per-run/per-stock LLM agent reports |
 | Stock Data | `page_stock_data()` | Tabs: Lookup, Technical, Screener, Manager, Predictions |
-| ML Pipeline | `render_ml_pipeline()` | Runs FinRL ML pipeline in background thread; streams logs |
 | Strategy Backtesting | `render_strategy_backtest()` | |
 | Live Trading | `render_live_trading()` | |
 | Paper Trading | `render_paper_trading()` | |
 | Portfolio Analysis | `render_portfolio()` | |
 | Settings | `render_settings()` | |
 | Job History | `render_job_history()` | |
-
-### ML Pipeline Data Flow
-
-1. `finrl_pipeline.run_pipeline_and_save_report(cfg)` → writes to `data/`
-2. `AIStockDBSource.get_sp500_components()` → tickers from DB
-3. `AIStockDBSource.get_fundamental_data()` → quarterly fundamentals → `data/fundamentals.csv`
-4. `MLBucketSelector.fit_predict()` → calls `run_bucket()` per sector → `data/ml_weights_sector.csv`
-5. `_run_simple_backtest()` → fetches price data including benchmarks (SPY/QQQ by default) → `data/backtest_result_YYYYMMDD.json`
-6. `data/selection_report_YYYYMMDD.csv` — final output
-
-Log streaming: a `_QueueHandler` + `_StdoutToQueue` wrapper redirect both `logging` and `print()` from the pipeline thread into a `queue.Queue` that the Streamlit UI polls every 0.5 s.
 
 ### Benchmark Comparison
 
@@ -196,6 +184,10 @@ When explicitly requested:
 - **Security audit checklist**: hardcoded secrets in .yaml/.env/.py, XSS in Streamlit, .env in .gitignore. Output to docs/security-audit.md.
 - **Performance audit categories**: DB/N+1 queries, caching gaps, Streamlit re-renders, I/O blocking, algorithmic complexity. Output to docs/performance-audit.md with severity ratings.
 - **Test coverage**: `pytest --cov --cov-report=term-missing` → identify untested modules → docs/coverage-gap-analysis.md.
+
+## Tests
+
+**Always** add end to end tests to cover the new functionalities when new functionalities are added in the web app. **Always** run all tests after the web app is changed. Make sure all tests passed before continue.  
 
 ## Output Conventions
 

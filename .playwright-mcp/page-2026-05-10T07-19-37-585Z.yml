@@ -1,0 +1,155 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - button "keyboard_double_arrow_left" [ref=e307] [cursor=pointer]:
+        - generic [ref=e309]: keyboard_double_arrow_left
+      - generic [ref=e8]:
+        - heading "📈 AIStock" [level=2] [ref=e69]
+        - paragraph [ref=e70]: Trading Platform
+        - separator [ref=e23]
+        - generic [ref=e73]:
+          - generic [ref=e74]:
+            - generic [ref=e75]: ML Pipeline
+            - combobox "Selected ML Pipeline. Navigation" [active] [ref=e356]
+          - img "open" [ref=e79]
+        - separator [ref=e30]
+        - heading "Quick Stats" [level=3] [ref=e34]
+        - generic [ref=e36]:
+          - generic [ref=e82]:
+            - paragraph [ref=e85]: Total
+            - paragraph [ref=e88]: "8991"
+          - generic [ref=e90]:
+            - paragraph [ref=e93]: Active
+            - paragraph [ref=e96]: "3062"
+        - generic [ref=e99]:
+          - paragraph [ref=e102]: Bullish
+          - paragraph [ref=e105]: "829"
+    - generic [ref=e47]:
+      - banner [ref=e48]:
+        - generic [ref=e51]:
+          - button "Deploy" [ref=e53] [cursor=pointer]:
+            - generic [ref=e55]: Deploy
+          - button "Main menu" [ref=e57] [cursor=pointer]:
+            - img [ref=e58]
+      - generic [ref=e63]:
+        - heading "ML Pipeline" [level=2] [ref=e357]:
+          - text: ML Pipeline
+          - generic [ref=e111]:
+            - link "Link to heading":
+              - /url: "#platform-overview"
+              - img
+        - group [ref=e359]:
+          - generic "keyboard_arrow_right How stocks are selected" [ref=e360] [cursor=pointer]:
+            - generic [ref=e361]:
+              - generic [ref=e363]: keyboard_arrow_right
+              - paragraph [ref=e366]: How stocks are selected
+        - generic [ref=e369]:
+          - heading "Configuration" [level=3] [ref=e374]:
+            - text: Configuration
+            - generic [ref=e375]:
+              - link "Link to heading":
+                - /url: "#configuration"
+                - img
+          - generic [ref=e377]:
+            - generic [ref=e381]:
+              - paragraph [ref=e385]: Data Source
+              - generic [ref=e387]:
+                - generic [ref=e388]:
+                  - generic [ref=e389]: AISTOCK_DB
+                  - combobox "Selected AISTOCK_DB. Data Source" [ref=e391]
+                - img "open" [ref=e393]
+            - generic [ref=e398]:
+              - paragraph [ref=e402]: Start Date
+              - textbox "Start Date" [ref=e405]:
+                - /placeholder: ""
+                - text: 2020-01-01
+            - generic [ref=e409]:
+              - paragraph [ref=e413]: End Date
+              - textbox "End Date" [ref=e416]:
+                - /placeholder: ""
+                - text: 2025-12-31
+          - generic [ref=e418]:
+            - generic [ref=e423]:
+              - paragraph [ref=e427]: Top Quantile
+              - generic [ref=e428]:
+                - slider "Top Quantile" [ref=e432]:
+                  - generic:
+                    - generic:
+                      - paragraph: "0.75"
+                - generic:
+                  - generic:
+                    - paragraph: "0.00"
+                  - generic:
+                    - paragraph: "1.00"
+            - generic [ref=e437]:
+              - paragraph [ref=e441]: Test Quarters
+              - generic [ref=e442]:
+                - spinbutton "Test Quarters" [ref=e445]: "20"
+                - generic [ref=e446]:
+                  - button [ref=e447] [cursor=pointer]:
+                    - img [ref=e448]
+                  - button [ref=e450] [cursor=pointer]:
+                    - img [ref=e451]
+            - generic [ref=e456]:
+              - paragraph [ref=e460]: Prediction Mode
+              - generic [ref=e462]:
+                - generic [ref=e463]:
+                  - generic [ref=e464]: regression
+                  - combobox "Selected regression. Prediction Mode" [ref=e466]
+                - img "open" [ref=e468]
+          - generic [ref=e471]:
+            - generic [ref=e475]:
+              - paragraph [ref=e479]: Weight Method
+              - generic [ref=e481]:
+                - generic [ref=e482]:
+                  - generic [ref=e483]: equal
+                  - combobox "Selected equal. Weight Method" [ref=e485]
+                - img "open" [ref=e487]
+            - generic [ref=e492]:
+              - paragraph [ref=e496]: Rebalance Freq
+              - generic [ref=e498]:
+                - generic [ref=e499]:
+                  - generic [ref=e500]: Q
+                  - combobox "Selected Q. Rebalance Freq" [ref=e502]
+                - img "open" [ref=e504]
+            - generic [ref=e509]:
+              - paragraph [ref=e513]: Initial Capital ($)
+              - generic [ref=e514]:
+                - spinbutton "Initial Capital ($)" [ref=e517]: "1000000"
+                - generic [ref=e518]:
+                  - button [ref=e519] [cursor=pointer]:
+                    - img [ref=e520]
+                  - button [ref=e522] [cursor=pointer]:
+                    - img [ref=e523]
+          - generic [ref=e526]:
+            - generic [ref=e527]:
+              - paragraph [ref=e530]: Benchmarks
+              - button "Help for Benchmarks" [ref=e534] [cursor=pointer]:
+                - img [ref=e535]
+            - generic [ref=e540]:
+              - generic [ref=e541]:
+                - button "SPY, close by backspace":
+                  - generic "SPY" [ref=e542]
+                  - img [ref=e544] [cursor=pointer]
+                - button "QQQ, close by backspace":
+                  - generic "QQQ" [ref=e546]
+                  - img [ref=e548] [cursor=pointer]
+                - combobox "Selected SPY, QQQ. Benchmarks" [ref=e551]
+              - generic [ref=e552]:
+                - button "Clear all" [ref=e553] [cursor=pointer]
+                - img "open" [ref=e555] [cursor=pointer]
+          - button "Run Pipeline" [ref=e560] [cursor=pointer]:
+            - paragraph [ref=e564]: Run Pipeline
+        - paragraph [ref=e569]:
+          - strong [ref=e570]: "Status:"
+          - text: "Idle | Elapsed: 0s"
+        - heading "Log Output" [level=3] [ref=e574]:
+          - text: Log Output
+          - generic [ref=e575]:
+            - link "Link to heading":
+              - /url: "#log-output"
+              - img
+        - code [ref=e579]: No runs yet. Configure and click Run Pipeline.
+  - generic:
+    - document
+  - img [ref=e304]

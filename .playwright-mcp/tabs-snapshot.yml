@@ -1,0 +1,26 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e15]:
+      - heading "📈 AIStock" [level=2] [ref=e20]
+      - paragraph [ref=e25]: Trading Platform
+      - separator [ref=e30]
+      - generic [ref=e34]:
+        - generic [ref=e35]
+        - img "open" [ref=e40]
+      - separator [ref=e46]
+      - heading "Quick Stats" [level=3] [ref=e50]
+      - generic [ref=e52]:
+        - generic [ref=e57]
+        - generic [ref=e68]
+      - generic [ref=e77]:
+        - paragraph [ref=e80]: Bullish
+        - paragraph [ref=e83]: "344"
+    - generic [ref=e3]:
+      - banner [ref=e86]:
+        - generic [ref=e89]
+      - generic [ref=e99]:
+        - heading "Stock Data" [level=2] [ref=e365]
+        - generic [ref=e367]
+  - generic:
+    - document
+  - img [ref=e298]

@@ -1,0 +1,170 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e11]:
+      - heading "📈 AIStock" [level=2] [ref=e16]
+      - paragraph [ref=e21]: Trading Platform
+      - separator [ref=e26]
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e32]: TradingAgents
+          - combobox "Selected TradingAgents. Navigation" [ref=e356]
+        - img "open" [ref=e36]
+      - separator [ref=e42]
+      - heading "Quick Stats" [level=3] [ref=e46]
+      - generic [ref=e48]:
+        - generic [ref=e53]:
+          - paragraph [ref=e56]: Total
+          - paragraph [ref=e59]: "8991"
+        - generic [ref=e64]:
+          - paragraph [ref=e67]: Active
+          - paragraph [ref=e70]: "3062"
+      - generic [ref=e73]:
+        - paragraph [ref=e76]: Bullish
+        - paragraph [ref=e79]: "829"
+    - generic [ref=e3]:
+      - banner [ref=e82]:
+        - generic [ref=e85]:
+          - generic [ref=e738]:
+            - img "Running..." [ref=e739]:
+              - img [ref=e740]
+            - button "Stop" [ref=e744] [cursor=pointer]
+          - button "Deploy" [ref=e87] [cursor=pointer]:
+            - generic [ref=e89]: Deploy
+          - button "Main menu" [ref=e91] [cursor=pointer]:
+            - img [ref=e92]
+      - generic [ref=e95]:
+        - paragraph [ref=e360]: TRADINGAGENTS
+        - heading "TradingAgents Analysis" [level=1] [ref=e365]:
+          - text: TradingAgents Analysis
+          - generic [ref=e366]:
+            - link "Link to heading":
+              - /url: "#trading-agents-analysis"
+              - img
+        - paragraph [ref=e367]: "Multi-agent LLM framework: Analyst Team → Bull/Bear Debate → Trader → Risk Team → Portfolio Manager"
+        - group [ref=e369]:
+          - generic "keyboard_arrow_right How it works" [ref=e370] [cursor=pointer]:
+            - generic [ref=e371]:
+              - generic [ref=e373]: keyboard_arrow_right
+              - paragraph [ref=e376]: How it works
+        - generic [ref=e379]:
+          - heading "Configuration" [level=3] [ref=e384]:
+            - text: Configuration
+            - generic [ref=e385]:
+              - link "Link to heading":
+                - /url: "#configuration"
+                - img
+          - generic [ref=e387]:
+            - generic [ref=e391]:
+              - paragraph [ref=e395]: Tickers (comma-separated)
+              - textbox "Tickers (comma-separated)" [ref=e398]:
+                - /placeholder: AAPL, NVDA, MSFT
+                - text: AMD
+            - generic [ref=e402]:
+              - paragraph [ref=e406]: Analysis Date
+              - textbox "Select a date." [ref=e410]:
+                - /placeholder: YYYY/MM/DD
+                - text: 2026/05/04
+              - paragraph: Press the down arrow key to interact with the calendar and select a date. Press the escape button to close the calendar.
+              - paragraph: Selected date is 2026/05/04. Select the second date.
+          - generic [ref=e412]:
+            - generic [ref=e416]:
+              - paragraph [ref=e420]: LLM Provider
+              - generic [ref=e422]:
+                - generic [ref=e423]:
+                  - generic [ref=e424]: google
+                  - combobox "Selected google. LLM Provider" [ref=e426]
+                - img "open" [ref=e428]
+            - generic [ref=e433]:
+              - generic [ref=e434]:
+                - paragraph [ref=e437]: Skip Analysts
+                - button "Help for Skip Analysts" [ref=e441] [cursor=pointer]:
+                  - img [ref=e442]
+              - generic [ref=e447]:
+                - generic [ref=e448]:
+                  - combobox "Skip Analysts" [ref=e450]
+                  - generic: Choose options
+                - img "open" [ref=e452] [cursor=pointer]
+          - generic [ref=e455]:
+            - generic [ref=e459]:
+              - generic [ref=e460]:
+                - paragraph [ref=e463]: Deep-Think Model
+                - button "Help for Deep-Think Model" [ref=e467] [cursor=pointer]:
+                  - img [ref=e468]
+              - textbox "Deep-Think Model" [ref=e473]:
+                - /placeholder: ""
+                - text: gemini-2.5-pro
+            - generic [ref=e477]:
+              - generic [ref=e478]:
+                - paragraph [ref=e481]: Quick-Think Model
+                - button "Help for Quick-Think Model" [ref=e485] [cursor=pointer]:
+                  - img [ref=e486]
+              - textbox "Quick-Think Model" [ref=e491]:
+                - /placeholder: ""
+                - text: gemini-2.5-flash
+          - paragraph [ref=e496]:
+            - strong [ref=e497]: Data Sources
+          - generic [ref=e499]:
+            - generic [ref=e503]:
+              - paragraph [ref=e507]: Price / OHLCV
+              - generic [ref=e509]:
+                - generic [ref=e510]:
+                  - generic [ref=e511]: alpha_vantage
+                  - combobox "Selected alpha_vantage. Price / OHLCV" [ref=e513]
+                - img "open" [ref=e515]
+            - generic [ref=e520]:
+              - paragraph [ref=e524]: Technical Indicators
+              - generic [ref=e526]:
+                - generic [ref=e527]:
+                  - generic [ref=e528]: alpha_vantage
+                  - combobox "Selected alpha_vantage. Technical Indicators" [ref=e530]
+                - img "open" [ref=e532]
+            - generic [ref=e537]:
+              - paragraph [ref=e541]: Fundamentals
+              - generic [ref=e543]:
+                - generic [ref=e544]:
+                  - generic [ref=e545]: alpha_vantage
+                  - combobox "Selected alpha_vantage. Fundamentals" [ref=e547]
+                - img "open" [ref=e549]
+            - generic [ref=e554]:
+              - paragraph [ref=e558]: News
+              - generic [ref=e560]:
+                - generic [ref=e561]:
+                  - generic [ref=e562]: google
+                  - combobox "Selected google. News" [ref=e564]
+                - img "open" [ref=e566]
+          - generic [ref=e569]:
+            - generic [ref=e573]:
+              - paragraph [ref=e577]: Bull/Bear Debate Rounds
+              - generic [ref=e578]:
+                - spinbutton "Bull/Bear Debate Rounds" [ref=e581]: "1"
+                - generic [ref=e582]:
+                  - button [disabled] [ref=e583]:
+                    - img [ref=e584]
+                  - button [ref=e586] [cursor=pointer]:
+                    - img [ref=e587]
+            - generic [ref=e592]:
+              - paragraph [ref=e596]: Risk Debate Rounds
+              - generic [ref=e597]:
+                - spinbutton "Risk Debate Rounds" [ref=e600]: "1"
+                - generic [ref=e601]:
+                  - button [disabled] [ref=e602]:
+                    - img [ref=e603]
+                  - button [ref=e605] [cursor=pointer]:
+                    - img [ref=e606]
+          - button "▶ Analyze" [active] [ref=e611] [cursor=pointer]:
+            - paragraph [ref=e615]: ▶ Analyze
+        - paragraph [ref=e619]:
+          - strong [ref=e620]: "Status:"
+          - text: "Running | Elapsed: 1s"
+        - alert [ref=e746]:
+          - paragraph [ref=e751]: "Analysis failed: Process exited with code 1"
+        - heading "Log" [level=3] [ref=e755]:
+          - text: Log
+          - generic [ref=e756]:
+            - link "Link to heading":
+              - /url: "#log"
+              - img
+        - code [ref=e761]: "Traceback (most recent call last): File \"/Users/yudongtan/projects/AIStock/src/ta_run.py\", line 36, in <module> class _CallTracker: ...<21 lines>... return _CallTracker._Inner(self) File \"/Users/yudongtan/projects/AIStock/src/ta_run.py\", line 39, in _CallTracker from langchain_core.callbacks import BaseCallbackHandler ModuleNotFoundError: No module named 'langchain_core'"
+  - generic:
+    - document
+  - img [ref=e294]

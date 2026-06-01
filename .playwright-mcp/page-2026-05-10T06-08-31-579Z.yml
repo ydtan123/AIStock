@@ -1,0 +1,68 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - button "keyboard_double_arrow_left" [ref=e307] [cursor=pointer]:
+        - generic [ref=e309]: keyboard_double_arrow_left
+      - generic [ref=e8]:
+        - heading "📈 AIStock" [level=2] [ref=e13]
+        - paragraph [ref=e18]: Trading Platform
+        - separator [ref=e23]
+        - generic [ref=e156]:
+          - generic [ref=e157]:
+            - generic [ref=e158]: Settings
+            - combobox "Selected Settings. Navigation" [active] [ref=e2178]
+          - img "open" [ref=e162]
+        - separator [ref=e30]
+        - heading "Quick Stats" [level=3] [ref=e34]
+        - generic [ref=e36]:
+          - generic [ref=e165]:
+            - paragraph [ref=e168]: Total
+            - paragraph [ref=e171]: "8991"
+          - generic [ref=e173]:
+            - paragraph [ref=e176]: Active
+            - paragraph [ref=e179]: "3062"
+        - generic [ref=e181]:
+          - paragraph [ref=e184]: Bullish
+          - paragraph [ref=e187]: "829"
+    - generic [ref=e49]:
+      - banner [ref=e50]:
+        - generic [ref=e53]:
+          - button "Deploy" [ref=e55] [cursor=pointer]:
+            - generic [ref=e57]: Deploy
+          - button "Main menu" [ref=e59] [cursor=pointer]:
+            - img [ref=e60]
+      - generic [ref=e65]:
+        - heading "Settings" [level=2] [ref=e2179]:
+          - text: Settings
+          - generic [ref=e71]:
+            - link "Link to heading":
+              - /url: "#platform-overview"
+              - img
+        - generic [ref=e2013]:
+          - tablist [ref=e2015]:
+            - tab "General" [selected] [ref=e2180] [cursor=pointer]:
+              - paragraph [ref=e2018]: General
+            - tab "Trading" [ref=e2181] [cursor=pointer]:
+              - paragraph [ref=e2021]: Trading
+            - tab "Data" [ref=e2182] [cursor=pointer]:
+              - paragraph [ref=e2024]: Data
+          - tabpanel "General" [ref=e2183]:
+            - generic [ref=e2031]:
+              - heading "General Settings" [level=3] [ref=e2184]:
+                - text: General Settings
+                - generic [ref=e2037]:
+                  - link "Link to heading":
+                    - /url: "#performance-analysis"
+                    - img
+              - generic [ref=e2186]:
+                - paragraph [ref=e2190]: Logging Level
+                - generic [ref=e2192]:
+                  - generic [ref=e2193]:
+                    - generic [ref=e2194]: DEBUG
+                    - combobox "Selected DEBUG. Logging Level" [ref=e2196]
+                  - img "open" [ref=e2198]
+              - button "Apply Logging Level" [ref=e2202] [cursor=pointer]:
+                - paragraph [ref=e2206]: Apply Logging Level
+  - img [ref=e304]
+  - generic:
+    - document

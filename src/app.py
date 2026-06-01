@@ -75,13 +75,6 @@ if "ml_log_lines" not in st.session_state:
     st.session_state.ml_log_lines = []
 if "ml_report_path" not in st.session_state:
     st.session_state.ml_report_path = None
-if "ml_error" not in st.session_state:
-    st.session_state.ml_error = None
-if "ml_start_time" not in st.session_state:
-    st.session_state.ml_start_time = 0.0
-if "ml_log_queue" not in st.session_state:
-    st.session_state.ml_log_queue = queue.Queue()
-
 MAX_LOG_LINES = 1000
 
 # ── PageContext ───────────────────────────────────────────────────────────────
@@ -92,96 +85,7 @@ class PageContext:
     st: Any  # streamlit module
     repo: StockRepository
     session_state: Any  # st.session_state
-    pipeline_thread_target: Callable[..., None] = field(default=lambda *_: None)
-    predict_only_thread_target: Callable[..., None] = field(default=lambda *_: None)
     full_pipeline_thread_target: Callable[..., None] = field(default=lambda *_: None)
-
-
-# ── ML Pipeline Thread Infrastructure ─────────────────────────────────────────
-
-def _pipeline_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> None:
-    handler, orig_stdout = attach_queue_logging(log_queue)
-    pl = logging.getLogger("pipeline.thread")
-    pl.info("=== Pipeline thread started ===")
-    pl.info("Config: %s", cfg_overrides)
-    try:
-        from finrl_runner import run_pipeline_and_save_report
-        report_path, _ = run_pipeline_and_save_report(cfg_overrides)
-        pl.info("=== Pipeline complete. Report: %s ===", report_path)
-        log_queue.put_nowait(f"__REPORT__:{report_path}")
-    except Exception as exc:
-        pl.error("Pipeline failed: %s", exc, exc_info=True)
-        log_queue.put_nowait(f"__ERROR__:{exc}")
-    finally:
-        detach_queue_logging(handler, orig_stdout)
-
-
-def _predict_only_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> None:
-    handler, orig_stdout = attach_queue_logging(log_queue)
-    pl = logging.getLogger("predict.thread")
-    pl.info("=== Predict-only thread started ===")
-    try:
-        from finrl_runner import run_predict_only, MODELS_DIR
-        _repo = StockRepository()
-        rows = _repo.get_latest_selected_stocks()
-        symbols = [r["ticker"] for r in rows] if rows else None
-        if not symbols:
-            pl.warning("No selected stocks in DB — run full pipeline first.")
-            log_queue.put_nowait("__ERROR__:No selected stocks in DB. Run the pipeline first.")
-            return
-        source = cfg_overrides.get("source", "AISTOCK_DB")
-        pl.info("Predicting %d stocks from selected_stocks table", len(symbols))
-        pred_df = run_predict_only(symbols=symbols, source=source)
-
-        import pandas as _pd
-        from datetime import date as _date
-        actual_returns: list = []
-        unique_symbols = pred_df["ticker"].dropna().unique().tolist()
-        stock_map = _repo.find_stocks_batch(unique_symbols)
-        price_requests = [(stock_map[str(row.ticker).upper()].id,
-                           _pd.to_datetime(row.datadate).date(),
-                           _date.today())
-                          for row in pred_df.itertuples()
-                          if stock_map.get(str(row.ticker).upper())]
-        prices_batch = _repo.get_prices_batch(price_requests)
-
-        for row in pred_df.itertuples():
-            ticker = str(row.ticker).upper()
-            stock = stock_map.get(ticker)
-            if stock is None:
-                actual_returns.append(None)
-                continue
-            prices = prices_batch.get(stock.id, _pd.DataFrame())
-            if prices.empty or len(prices) < 2:
-                actual_returns.append(None)
-                continue
-            start_price = float(prices["adj_close"].iloc[0])
-            end_price = float(prices["adj_close"].iloc[-1])
-            actual_returns.append(
-                float((end_price / start_price) - 1) if start_price > 0 else None
-            )
-        pred_df["actual_return"] = actual_returns
-        n_actual = sum(1 for a in actual_returns if a is not None)
-        pl.info("Computed actual returns for %d/%d stocks", n_actual, len(pred_df))
-
-        try:
-            records = pred_df.assign(
-                model_file=str(MODELS_DIR),
-                ml_score=lambda d: d["predicted_return"],
-            ).to_dict("records")
-            n = _repo.save_predict_only_results(records)
-            pl.info("Saved %d predictions to selected_stocks table", n)
-        except Exception as exc:
-            pl.warning("Failed to save predictions to DB: %s", exc)
-
-        log_queue.put_nowait(f"__PREDICT_DF__:{pred_df.to_json(orient='records')}")
-        log_queue.put_nowait(f"__REPORT__:{MODELS_DIR}")
-        pl.info("=== Predict-only complete. %d predictions ===", len(pred_df))
-    except Exception as exc:
-        pl.error("Predict-only failed: %s", exc, exc_info=True)
-        log_queue.put_nowait(f"__ERROR__:{exc}")
-    finally:
-        detach_queue_logging(handler, orig_stdout)
 
 
 def _full_pipeline_thread_target(
@@ -257,7 +161,7 @@ def display_quick_stats(repo: StockRepository) -> None:
 
 
 from ui.pages import (  # noqa: E402 — imports after sys.path setup
-    render_job_history, render_live_trading, render_ml_pipeline,
+    render_job_history, render_live_trading,
     render_full_pipeline, render_paper_trading, render_portfolio,
     render_deep_evaluation, render_fast_evaluation, render_selected_stocks,
     render_settings, render_stock_lookup,
@@ -288,8 +192,6 @@ def _build_ctx() -> PageContext:
             st=st,
             repo=repo,
             session_state=st.session_state,
-            pipeline_thread_target=_pipeline_thread_target,
-            predict_only_thread_target=_predict_only_thread_target,
             full_pipeline_thread_target=_full_pipeline_thread_target,
         )
     return st.session_state.ctx
@@ -300,7 +202,7 @@ def _build_ctx() -> PageContext:
 def sidebar_nav():
     page = st.selectbox(
         "Navigation",
-        ["Full Pipeline", "Selected Stocks", "Fast Evaluation", "Deep Evaluation", "Stock Data", "ML Pipeline",
+        ["Full Pipeline", "Selected Stocks", "Fast Evaluation", "Deep Evaluation", "Stock Data",
          "Strategy Backtesting", "Live Trading", "Paper Trading",
          "Portfolio Analysis", "Settings", "Job History"],
         label_visibility="collapsed",
@@ -321,8 +223,6 @@ def render_page_content(page, ctx):
         render_deep_evaluation(ctx)
     elif page == "Stock Data":
         page_stock_data(ctx)
-    elif page == "ML Pipeline":
-        render_ml_pipeline(ctx)
     elif page == "Strategy Backtesting":
         render_strategy_backtest(ctx)
     elif page == "Live Trading":

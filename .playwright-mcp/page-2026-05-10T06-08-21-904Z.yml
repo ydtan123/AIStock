@@ -1,0 +1,150 @@
+- generic:
+  - generic:
+    - generic [ref=e2]:
+      - generic [ref=e4]:
+        - button "keyboard_double_arrow_left" [ref=e307] [cursor=pointer]:
+          - generic [ref=e309]: keyboard_double_arrow_left
+        - generic [ref=e8]:
+          - heading "📈 AIStock" [level=2] [ref=e13]
+          - paragraph [ref=e18]: Trading Platform
+          - separator [ref=e23]
+          - generic [ref=e156]:
+            - generic [ref=e157]:
+              - generic [ref=e158]: Portfolio Analysis
+              - combobox "Selected Portfolio Analysis. Navigation" [expanded] [active] [ref=e2010]
+            - img "open" [ref=e162]
+          - separator [ref=e30]
+          - heading "Quick Stats" [level=3] [ref=e34]
+          - generic [ref=e36]:
+            - generic [ref=e165]:
+              - paragraph [ref=e168]: Total
+              - paragraph [ref=e171]: "8991"
+            - generic [ref=e173]:
+              - paragraph [ref=e176]: Active
+              - paragraph [ref=e179]: "3062"
+          - generic [ref=e181]:
+            - paragraph [ref=e184]: Bullish
+            - paragraph [ref=e187]: "829"
+      - generic [ref=e49]:
+        - banner [ref=e50]:
+          - generic [ref=e53]:
+            - button "Deploy" [ref=e55] [cursor=pointer]:
+              - generic [ref=e57]: Deploy
+            - button "Main menu" [ref=e59] [cursor=pointer]:
+              - img [ref=e60]
+        - generic [ref=e65]:
+          - heading "Portfolio Analysis" [level=2] [ref=e2011]:
+            - text: Portfolio Analysis
+            - generic [ref=e71]:
+              - link "Link to heading":
+                - /url: "#platform-overview"
+                - img
+          - generic [ref=e2013]:
+            - tablist [ref=e2015]:
+              - tab "Performance" [selected] [ref=e2016] [cursor=pointer]:
+                - paragraph [ref=e2018]: Performance
+              - tab "Risk Analysis" [ref=e2019] [cursor=pointer]:
+                - paragraph [ref=e2021]: Risk Analysis
+              - tab "Attribution" [ref=e2022] [cursor=pointer]:
+                - paragraph [ref=e2024]: Attribution
+              - tab "Benchmarking" [ref=e2025] [cursor=pointer]:
+                - paragraph [ref=e2027]: Benchmarking
+            - tabpanel "Performance" [ref=e2030]:
+              - generic [ref=e2031]:
+                - heading "Performance Analysis" [level=3] [ref=e2036]:
+                  - text: Performance Analysis
+                  - generic [ref=e2037]:
+                    - link "Link to heading":
+                      - /url: "#performance-analysis"
+                      - img
+                - generic [ref=e2043]:
+                  - img:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic: Jan 142024
+                          - generic:
+                            - generic: Jan 28
+                          - generic:
+                            - generic: Feb 11
+                          - generic:
+                            - generic: Feb 25
+                          - generic:
+                            - generic: Mar 10
+                          - generic:
+                            - generic: Mar 24
+                          - generic:
+                            - generic: Apr 7
+                        - generic:
+                          - generic:
+                            - generic: 1M
+                          - generic:
+                            - generic: 1.05M
+                          - generic:
+                            - generic: 1.1M
+                          - generic:
+                            - generic: 1.15M
+                  - img:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: Portfolio Performance
+                      - generic:
+                        - generic: x
+                      - generic:
+                        - generic: "y"
+                  - toolbar [ref=e2057]:
+                    - button "Download plot as a PNG" [ref=e2059] [cursor=pointer]:
+                      - img [ref=e2060]
+                    - generic [ref=e2062]:
+                      - button "Zoom" [ref=e2063] [cursor=pointer]:
+                        - img [ref=e2064]
+                      - button "Pan" [ref=e2066] [cursor=pointer]:
+                        - img [ref=e2067]
+                    - generic [ref=e2069]:
+                      - button "Zoom in" [ref=e2070] [cursor=pointer]:
+                        - img [ref=e2071]
+                      - button "Zoom out" [ref=e2073] [cursor=pointer]:
+                        - img [ref=e2074]
+                      - button "Autoscale" [ref=e2076] [cursor=pointer]:
+                        - img [ref=e2077]
+                      - button "Reset axes" [ref=e2079] [cursor=pointer]:
+                        - img [ref=e2080]
+                    - button "Fullscreen" [ref=e2083] [cursor=pointer]:
+                      - img [ref=e2084]
+                  - img
+                - generic [ref=e2087]:
+                  - generic [ref=e2092]:
+                    - paragraph [ref=e2095]: Total Return
+                    - paragraph [ref=e2098]: 14.73%
+                  - generic [ref=e2103]:
+                    - paragraph [ref=e2106]: Annual Return
+                    - paragraph [ref=e2109]: 35.60%
+                  - generic [ref=e2114]:
+                    - paragraph [ref=e2117]: Volatility
+                    - paragraph [ref=e2120]: 11.00%
+                  - generic [ref=e2125]:
+                    - paragraph [ref=e2128]: Sharpe Ratio
+                    - paragraph [ref=e2131]: "3.24"
+    - list [ref=e2135]:
+      - generic [ref=e2137]:
+        - option "Overview" [ref=e2138] [cursor=pointer]:
+          - generic [ref=e2142]: Overview
+        - option "Stock Data" [ref=e2143] [cursor=pointer]:
+          - generic [ref=e2147]: Stock Data
+        - option "ML Pipeline" [ref=e2148] [cursor=pointer]:
+          - generic [ref=e2152]: ML Pipeline
+        - option "Strategy Backtesting" [ref=e2153] [cursor=pointer]:
+          - generic [ref=e2157]: Strategy Backtesting
+        - option "Live Trading" [ref=e2158] [cursor=pointer]:
+          - generic [ref=e2162]: Live Trading
+        - option "Paper Trading" [ref=e2163] [cursor=pointer]:
+          - generic [ref=e2167]: Paper Trading
+        - option "Portfolio Analysis" [selected] [ref=e2168] [cursor=pointer]:
+          - generic [ref=e2172]: Portfolio Analysis
+        - option "Settings" [ref=e2173] [cursor=pointer]:
+          - generic [ref=e2177]: Settings
+  - img [ref=e304]
+  - generic:
+    - document

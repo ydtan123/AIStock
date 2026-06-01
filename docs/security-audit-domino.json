@@ -1,0 +1,132 @@
+{
+  "target": "@mixmark-io/domino@2.2.0 (server-side DOM implementation)",
+  "scope": "20 source files from .bun/install/cache — full lib/ directory + package.json",
+  "analysisDate": "2026-05-30T23:01+08:00",
+  "analysisVersion": 3,
+  "previousAuditRefs": ["obs-1155", "obs-1162", "obs-1198"],
+  "vulnerabilities": [
+    {
+      "severity": "high",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/HTMLParser.js",
+      "line": 1,
+      "description": "HTML parser faithfully processes ALL HTML features including script tags, iframe, event handler attributes (onerror, onload, onclick), and javascript: URLs. No sanitization layer exists between parsing and serialization. If consuming application parses untrusted HTML then serializes output to client without sanitizing, stored/reflected XSS is possible. The parser is spec-compliant — this is expected DOM behavior — but the risk to consuming applications is high."
+    },
+    {
+      "severity": "high",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/Element.js",
+      "line": 105,
+      "description": "outerHTML setter (unlike innerHTML which is utils.nyi stub) has partial implementation that calls mozHTMLParser to parse user-supplied HTML, then replaces node in DOM tree. This is the only HTML setter with a live implementation path. Inconsistent with innerHTML stub behavior — developers may test with innerHTML (no-op), assume safety, then deploy outerHTML (live parser) in production."
+    },
+    {
+      "severity": "medium",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/Location.js",
+      "line": 22,
+      "description": "Location.assign(url) resolves and navigates to user-supplied URLs without protocol validation. javascript:, data:, vbscript: URLs pass through unchecked. No origin comparison or allowlist. If assign() is reachable from user-controlled input (redirect parameter, hash fragment), attacker can redirect to arbitrary origins or execute JavaScript in renderer context."
+    },
+    {
+      "severity": "medium",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/package.json",
+      "line": 0,
+      "description": "Library version 2.2.0 is outdated. Latest release is 2.3.x. Known CVE history for domino includes prototype pollution and parser bypass issues in prior versions. Run `bun audit` or `npm audit` to check current dependency tree for known vulnerabilities."
+    },
+    {
+      "severity": "medium",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/CustomEvent.js",
+      "line": 8,
+      "description": "CustomEvent constructor copies ALL enumerable properties from user-supplied dictionary onto the event object via `for(var p in dictionary) { this[p] = dictionary[p]; }`. No property allowlist. Attacker can set __proto__, constructor, or other internal properties. While modern JS runtimes block __proto__ assignment on ordinary objects, this pattern is fragile and vulnerable to prototype pollution in older engines."
+    },
+    {
+      "severity": "low",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/CSSStyleDeclaration.js",
+      "line": 10,
+      "description": "Proxy `has` trap returns `true` unconditionally — every property check succeeds. `'__proto__' in style`, `'constructor' in style`, `'toString' in style` all return true. Masks missing properties; could confuse security-sensitive feature detection or sandbox checks relying on `in` operator."
+    },
+    {
+      "severity": "low",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/EventTarget.js",
+      "line": 80,
+      "description": "_dispatchEvent accesses `target._handlers[type]` via bracket notation with event.type as key. If type equals '__proto__', 'constructor', or 'toString', prototype pollution may occur. String-type coercion of event.type mitigates direct exploitation, but the pattern is fragile — no Object.create(null) guard on _handlers lookup."
+    },
+    {
+      "severity": "low",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/Event.js",
+      "line": 22,
+      "description": "Event constructor sets `this.timeStamp = Date.now()`. Exposes server-side system time to any code that creates or dispatches events. Minor information disclosure — attacker can determine server clock skew for timing attacks."
+    },
+    {
+      "severity": "low",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/CharacterData.js",
+      "line": 83,
+      "description": "replaceData converts `count` via `>>> 0` (unsigned right shift) which transforms negative values into very large positive integers (e.g., -1 becomes 4294967295). If count originates from untrusted source (XPath expression, DOM manipulation from user input), this creates unbounded substring operation that could exhaust memory or cause denial of service."
+    },
+    {
+      "severity": "low",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/DOMTokenList.js",
+      "line": 127,
+      "description": "getList() splits attribute value on whitespace regex without input length limit. Attacker-controlled class attribute with extremely long whitespace-delimited token string (e.g., megabyte-scale) could cause CPU exhaustion in split() and subsequent filter() operations. Add max-length guard before split."
+    },
+    {
+      "severity": "low",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/FilteredElementList.js",
+      "line": 37,
+      "description": "traverse() method iterates DOM via `elt.nextElement(this.root)` with NO iteration counter or safety limit. If DOM tree becomes cyclic due to corruption or other bugs, infinite loop results. Add maxIterations guard (e.g., 100,000 nodes) to prevent hang."
+    },
+    {
+      "severity": "low",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/DocumentFragment.js",
+      "line": 47,
+      "description": "innerHTML and outerHTML setters are both stubbed to `utils.nyi` (no-op). Contrasts with Element.js where outerHTML has a live parser-backed setter. Inconsistent API surface — developers testing innerHTML assignment on DocumentFragment will see silent no-op behavior, potentially masking XSS bugs that manifest only when ported to Element.outerHTML."
+    },
+    {
+      "severity": "info",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/Event.js",
+      "line": 30,
+      "description": "Event constructor and initEvent provide two initialization paths with subtly different flag handling. Constructor sets _initialized=true and _dispatching=false. initEvent resets these plus _propagationStopped, _immediatePropagationStopped, defaultPrevented, isTrusted. CustomEvent delegates to Event constructor then applies dictionary properties. Two initialization paths increase attack surface for subclass confusion."
+    }
+  ],
+  "riskScore": 34,
+  "riskBreakdown": {
+    "hardcodedSecrets": { "score": 0, "weight": 25, "note": "No credential surface — pure DOM library with zero network/auth code" },
+    "sqlInjection": { "score": 0, "weight": 20, "note": "No database interaction — library operates on in-memory DOM trees only" },
+    "xssVectors": { "score": 18, "weight": 25, "note": "HTML parser faithfully preserves unsafe content; outerHTML setter live-parses; innerHTML stub creates false safety signal" },
+    "authenticationAuthorization": { "score": 0, "weight": 15, "note": "No auth mechanism — server-side DOM has no concept of users/sessions" },
+    "dependencyRisk": { "score": 10, "weight": 10, "note": "Version 2.2.0 outdated; known CVE history for prototype pollution and parser bypass" },
+    "urlProtocolSafety": { "score": 6, "weight": 5, "note": "Location.assign() and URL.js expose user/pass properties without protocol allowlisting or SSRF guard (no network I/O = limited practical impact)" }
+  },
+  "notFound": [
+    "No hardcoded API keys, passwords, tokens, or secrets in library source",
+    "No SQL queries, database connections, or ORM usage",
+    "No eval(), Function(), setTimeout(), setInterval(), or fetch() calls",
+    "No file system access (fs, path, require.resolve with user input)",
+    "No ReDoS-vulnerable regex patterns (nested quantifiers like (a+)+$)",
+    "No child_process, exec, or spawn calls",
+    "No crypto operations with hardcoded keys/IVs",
+    "No prototype pollution via __proto__ assignment in property copy loops (defensive Object.create(null) used in 105+ locations)"
+  ],
+  "positiveFindings": [
+    "Object.create(null) used consistently (105+ locations) to block prototype pollution on dictionaries, ID maps, listener stores, and attribute maps",
+    "NodeUtils.js escape() and escapeAttr() functions encode <, >, &, \",   as HTML entities during serialization",
+    "escapeMatchingClosingTag() prevents script/style content injection by escaping </ sequences in raw text elements",
+    "HTMLParser implements full HTML5 tokenizer with script_data_state for safe script tag content parsing",
+    "Test suite includes 29 XSS test cases (test/xss.js) validating mutation-based XSS vectors per Cure53 research",
+    "Template element isolates content in separate DocumentFragment (template context document)",
+    "insertAdjacentHTML validates context element — blocks insertion when context is Document or html root",
+    "Script elements have NO execution mechanism — text setter creates TextNode, no runScript() hook exists",
+    "innerHTML/outerHTML getters use proper serialization with entity encoding, preventing XSS on read path",
+    "CSSStyleDeclaration._parsed cache keyed on cssText comparison with _lastParsedText, preventing stale attribute reflection"
+  ],
+  "recommendations": [
+    "CRITICAL: If application parses untrusted HTML via domino, ALWAYS sanitize output with DOMPurify (server-side) or equivalent before sending to client — the parser preserves all scripts, event handlers, and javascript: URLs by design.",
+    "Upgrade domino to latest 2.3.x release: `bun update @mixmark-io/domino`. Check changelog for security fixes between 2.2.0 and current.",
+    "Run `bun audit` or `npm audit` to check dependency tree for known CVEs, including transitive dependencies.",
+    "Validate URL protocols before passing to Location.assign() — reject javascript:, data:, vbscript: schemes. Implement origin allowlist for redirect targets.",
+    "Do not rely on Element.innerHTML setter for sanitization — it is a no-op stub. Implement explicit HTML sanitization pipeline if application sets innerHTML/outerHTML from user input.",
+    "Consider replacing domino with actively maintained alternative (linkedom, happy-dom) that has current security patching, full innerHTML support, and larger test coverage.",
+    "Add Content-Security-Policy headers with script-src 'self' and object-src 'none' in any application consuming this library's serialized output.",
+    "Add max-length guard on DOMTokenList.getList() input (e.g., 64KB) before regex split to prevent CPU exhaustion from oversized class attributes.",
+    "Add iteration cap (100,000 nodes) to FilteredElementList.traverse() to prevent infinite loops on corrupted DOM trees.",
+    "Validate offset/count parameters in CharacterData.replaceData to reject negative count values before >>> 0 conversion.",
+    "Audit all code paths where event.type, CSS property names, or DOM attribute names derive from user input — validate against allowlists before passing to domino APIs.",
+    "Application-layer: never expose domino directly to user-supplied HTML. Always parse, sanitize, then serialize in a controlled pipeline with CSP headers on the output."
+  ]
+}

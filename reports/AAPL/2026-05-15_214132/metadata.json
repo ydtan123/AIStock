@@ -1,0 +1,13 @@
+{
+  "ticker": "AAPL",
+  "date": "2026-05-15",
+  "decision": "HOLD",
+  "llm_calls": 20,
+  "generated_at": "2026-05-15 21:41:32",
+  "bullet_summaries": {
+    "Market Analysis": ["Strong momentum with RSI at 65", "50 SMA trending above 200 SMA", "Volume confirming price action"],
+    "Social Sentiment": ["Reddit sentiment is moderately bullish", "Twitter mentions up 15% this week"],
+    "News Analysis": ["Positive earnings surprise last quarter", "New product launch generating buzz"],
+    "Fundamentals": ["P/E ratio within industry range", "Strong cash position with low debt"]
+  }
+}

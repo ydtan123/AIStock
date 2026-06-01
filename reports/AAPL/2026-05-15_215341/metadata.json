@@ -1,0 +1,13 @@
+{
+  "ticker": "AAPL",
+  "date": "2026-05-15",
+  "decision": "HOLD",
+  "llm_calls": 20,
+  "generated_at": "2026-05-15 21:53:41",
+  "bullet_summaries": {
+    "Market Analysis": ["Bull flag pattern forming on daily", "Volume declining in consolidation"],
+    "Social Sentiment": ["Positive buzz around upcoming product event"],
+    "News Analysis": ["Services revenue growth accelerating"],
+    "Fundamentals": ["Buyback program providing support", "International expansion progress"]
+  }
+}

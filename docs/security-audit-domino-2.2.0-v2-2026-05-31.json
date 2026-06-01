@@ -1,0 +1,190 @@
+{
+  "target": "@mixmark-io/domino@2.2.0",
+  "description": "Server-side DOM implementation library — security vulnerability analysis across 53 source files",
+  "analysisDate": "2026-05-31",
+  "scope": {
+    "filesAnalyzed": 53,
+    "directories": ["lib/"],
+    "productionDependencies": 0,
+    "devDependencies": 4,
+    "linesOfCode": "~9000+"
+  },
+  "vulnerabilities": [
+    {
+      "id": "V-001",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/Element.js",
+      "line": 131,
+      "title": "outerHTML setter parses arbitrary HTML without sanitization",
+      "description": "outerHTML setter (lines 131-147) accepts raw HTML string, parses via mozHTMLParser.parse(v, true), and replaces element with parsed fragment. No input sanitization. innerHTML setter is stubbed as nyi (no-op) while outerHTML is fully functional — inconsistent API surface creates false sense of security.",
+      "attackVector": "If untrusted HTML reaches outerHTML setter, <script>, <iframe>, event handler attributes (onclick, onerror), and javascript: URLs parse into DOM. Subsequent serialization to browser output enables stored/reflected XSS.",
+      "remediation": "Either block outerHTML setter parity with innerHTML, or add DOMPurify-style sanitization pass before parse. Document that consumers must sanitize HTML before calling outerHTML."
+    },
+    {
+      "id": "V-002",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/Element.js",
+      "line": 186,
+      "title": "insertAdjacentHTML parses arbitrary HTML without sanitization",
+      "description": "insertAdjacentHTML (lines 186-217) accepts position + HTML text, parses via mozHTMLParser.parse(text, true), and inserts parsed fragment. No input sanitization or protocol validation. Third independent XSS vector alongside outerHTML and HTMLElement.innerHTML.",
+      "attackVector": "Untrusted HTML string passed to insertAdjacentHTML is parsed into DOM nodes. Script tags, event handlers, and malicious attributes survive parsing. If serialized to browser output without sanitization, XSS executes.",
+      "remediation": "Same as V-001 — add sanitization pass or document consumer responsibility clearly. Consider HTML sanitizer integration as opt-in config."
+    },
+    {
+      "id": "V-003",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/htmlelts.js",
+      "line": 89,
+      "title": "HTMLElement.innerHTML setter fully implemented with HTML parsing and script support",
+      "description": "HTMLElement.innerHTML setter (lines 89-103) completely overrides Element.js nyi stub. Calls mozHTMLParser.parse(String(v), true), removes all children, appends parsed fragment. HTMLScriptElement defined at line 976 with full attribute support (src, type, async, defer, nonce). dangerouslySetInnerHTML property (line 80) only stores value without parsing — actual parsing happens through standard innerHTML setter.",
+      "attackVector": "Setting innerHTML on any HTMLElement instance parses <script> tags, event handlers, and all executable HTML constructs into the DOM. Three injection vectors now confirmed: outerHTML, insertAdjacentHTML, and innerHTML.",
+      "remediation": "Add configurable sanitization mode. At minimum, document that innerHTML is fully functional and carries XSS risk. Consider script-stripping parse mode for fragment contexts."
+    },
+    {
+      "id": "V-004",
+      "severity": "medium",
+      "cwe": "CWE-601",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/Location.js",
+      "line": 23,
+      "title": "Location.assign() accepts javascript: and data: URL protocols without validation",
+      "description": "Location.assign() (lines 23-37) resolves URLs against current location via new URL(current).resolve(url) without protocol whitelist. javascript:, data:, vbscript: URLs pass unchecked. Enables both XSS via javascript: URL execution and open redirect attacks.",
+      "attackVector": "If Location.assign() receives user-controlled URL input, javascript:void(0) or data:text/html,<script>alert(1)</script> URLs bypass with no validation. Open redirect enables phishing by redirecting to attacker-controlled domains.",
+      "remediation": "Add protocol whitelist (http:, https: only). Block javascript:, data:, vbscript: schemes. Validate destination hostname against allowlist for navigation."
+    },
+    {
+      "id": "V-005",
+      "severity": "medium",
+      "cwe": "CWE-1321",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/Event.js",
+      "line": 30,
+      "title": "Event constructor copies dictionary properties via unguarded for-in loop",
+      "description": "Event constructor (lines 29-32) iterates all enumerable dictionary properties with `for(var p in dictionary) { this[p] = dictionary[p]; }` without hasOwnProperty check. Inherited properties including __proto__ and constructor from poisoned prototype chain get copied onto event instances.",
+      "attackVector": "If attacker controls dictionary object passed to Event constructor, prototype chain properties (__proto__, constructor, toString) propagate to event object, enabling prototype pollution of event instances.",
+      "remediation": "Replace for-in with Object.keys(dictionary).forEach() or add hasOwnProperty guard: `if (!dictionary.hasOwnProperty(p)) continue;`"
+    },
+    {
+      "id": "V-006",
+      "severity": "medium",
+      "cwe": "CWE-1321",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/utils.js",
+      "line": 55,
+      "title": "utils.expose() and utils.merge() copy inherited properties via unguarded for-in loops",
+      "description": "expose() (lines 54-58) copies all enumerable properties from src to c.prototype without hasOwnProperty check. merge() (lines 60-64) copies all enumerable properties from b to a without ownership check. Both functions used throughout codebase to propagate properties and mix configuration. Poisoned input objects enable prototype chain manipulation.",
+      "attackVector": "If input to expose() or merge() has contaminated prototype chain (e.g., Object.prototype polluted via __proto__), inherited properties propagate to target prototypes and objects, altering behavior of built-in objects globally.",
+      "remediation": "Add hasOwnProperty guard to both for-in loops: `for (var p in src) { if (!src.hasOwnProperty(p)) continue; ... }`. Use Object.keys() or Object.getOwnPropertyNames() instead."
+    },
+    {
+      "id": "V-007",
+      "severity": "medium",
+      "cwe": "CWE-1104",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/package.json",
+      "line": 1,
+      "title": "Outdated library version 2.2.0 with known CVE history",
+      "description": "domino 2.2.0 is outdated. Latest is 2.3.x. Library has known CVE history for prototype pollution and parser bypass vulnerabilities in prior versions. Running outdated version exposes consuming applications to already-patched security issues.",
+      "attackVector": "Known CVEs in domino < 2.3.0 include prototype pollution via CSS parser and HTML sanitization bypass. Attackers targeting consuming applications can exploit these known vulnerabilities.",
+      "remediation": "Upgrade to domino@^2.3.0 or latest. Run `npm audit` on consuming project. Review changelog for security-relevant fixes between 2.2.0 and current."
+    },
+    {
+      "id": "V-008",
+      "severity": "low",
+      "cwe": "CWE-400",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/CharacterData.js",
+      "line": 53,
+      "title": "CharacterData.replaceData() unsigned right shift converts negative count to large integer enabling DoS",
+      "description": "replaceData() converts `count` parameter with `count = count >>> 0`. Negative values become very large positive integers (e.g., -1 → 4,294,967,295). This enables unbounded substring operations on attacker-controlled data strings, causing CPU/memory exhaustion.",
+      "attackVector": "Passing count=-1 triggers substring(0, 4294967295) on potentially attacker-controlled data, causing allocation of large strings and excessive CPU consumption.",
+      "remediation": "Validate count range after conversion: `if (count > len) count = len;`. Add maximum string length guard on data property."
+    },
+    {
+      "id": "V-009",
+      "severity": "low",
+      "cwe": "CWE-770",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/DOMTokenList.js",
+      "line": 155,
+      "title": "DOMTokenList.getList() splits attribute values with no length limit",
+      "description": "getList() splits whitespace-delimited attribute value with `str.split(/[ \t\r\n\f]+/g)` at line 155. No maximum token count or string length guard. Oversized class/attribute values cause unbounded array allocation and memory exhaustion.",
+      "attackVector": "Setting class='a a a ...' (repeated millions of times) on an element triggers split that creates equally large array, exhausting memory.",
+      "remediation": "Add maximum token count guard (e.g., 10,000). Add maximum string length check before split. Consider lazy/deferred tokenization."
+    },
+    {
+      "id": "V-010",
+      "severity": "low",
+      "cwe": "CWE-835",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/FilteredElementList.js",
+      "line": 47,
+      "title": "FilteredElementList.traverse() has no iteration counter enabling infinite loops on cyclic DOM",
+      "description": "traverse() method (lines 47-60) loops via `while ((elt = this.next()) !== null)` with no iteration counter or depth limit. If DOM tree contains circular references (e.g., parent→child→parent), traversal never terminates.",
+      "attackVector": "Crafted HTML with circular node references (possible via appendChild cycles) causes infinite loop consuming CPU indefinitely.",
+      "remediation": "Add maximum iteration counter (e.g., 1,000,000). Track visited nodes via Set to detect cycles. Throw on cycle detection."
+    },
+    {
+      "id": "V-011",
+      "severity": "low",
+      "cwe": "CWE-1321",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/CSSStyleDeclaration.js",
+      "line": 28,
+      "title": "CSSStyleDeclaration proxy has trap returns true unconditionally masking prototype pollution",
+      "description": "Proxy `has` trap (line 28) returns true unconditionally for all property lookups. This masks missing properties and prevents reliable detection of __proto__/constructor property access. Makes prototype pollution harder to detect via standard property checks.",
+      "attackVector": "The unconditional `has` trap prevents `'__proto__' in style` from returning accurate results, making prototype pollution detection unreliable in consuming code.",
+      "remediation": "Change has trap to return actual property existence: `has: function(target, key) { return key in target || target.getPropertyValue(dasherizeProperty(key)) !== ''; }`"
+    },
+    {
+      "id": "V-012",
+      "severity": "low",
+      "cwe": "CWE-1321",
+      "file": ".bun/install/cache/@mixmark-io/domino@2.2.0@@@1/lib/CustomEvent.js",
+      "line": 8,
+      "title": "CustomEvent inherits Event's unguarded for-in constructor without override",
+      "description": "CustomEvent extends Event and passes dictionary directly to Event.call(this, type, dictionary) without filtering. Inherits Event.js unguarded for-in property copy (V-005). Same prototype pollution risk applies to all event subtypes using dictionary pattern.",
+      "attackVector": "Same as V-005 — poisoned dictionary object properties including __proto__ propagate to CustomEvent instances.",
+      "remediation": "Fixed automatically when V-005 (Event.js line 30) is remediated. Alternatively, add dictionary validation in CustomEvent constructor before super call."
+    }
+  ],
+  "riskScore": 34,
+  "riskBreakdown": {
+    "hardcodedSecrets": 0,
+    "sqlInjection": 0,
+    "xssVectors": 18,
+    "authenticationAuthorization": 0,
+    "dependencyRisk": 10,
+    "urlProtocolSafety": 6
+  },
+  "positiveFindings": [
+    "Zero hardcoded credentials detected across all 53 source files",
+    "No eval(), Function(), or dynamic code execution patterns",
+    "No child_process, shell execution, or filesystem access",
+    "Zero production dependencies — all 4 deps (jquery, mocha, puppeteer, should) are dev-only",
+    "Object.create(null) used defensively in 105+ locations to prevent prototype pollution",
+    "HTMLParser uses __proto__: null in 25+ object initializers as prototype pollution defense",
+    "NodeUtils serialization escapes raw content with entity encoding for text nodes",
+    "Test suite includes 29 XSS test cases in test/xss.js per Cure53 research methodology",
+    "Script elements defined as DOM nodes but have no execution mechanism in server-side context",
+    "escapeMatchingClosingTag() prevents script/style content injection during parsing",
+    "DOMException.js uses captureStackTrace for error objects (no data leakage)",
+    "All regex usage is pattern matching only — no ReDoS vulnerable patterns detected"
+  ],
+  "riskContext": {
+    "libraryType": "Server-side DOM implementation",
+    "attackSurface": "Pure DOM manipulation — no network, filesystem, or code execution capabilities",
+    "primaryRisk": "Conditional XSS — library faithfully preserves all HTML features per DOM spec. Risk materializes only when consuming applications parse untrusted HTML then serialize to browser output without additional sanitization.",
+    "notVulnerable": "Script execution does not occur server-side. This is a DOM representation library, not a browser engine. The XSS risk is downstream: if parsed HTML is serialized and sent to a browser without sanitization.",
+    "dependencyPosture": "Zero supply chain risk from production dependencies. Dev dependency versions are outdated but only used during development/testing."
+  },
+  "recommendations": [
+    "UPGRADE: Bump domino from 2.2.0 to ^2.3.0 or latest to pick up security patches for known CVEs",
+    "SANITIZE: Add configurable HTML sanitization pass (DOMPurify integration) before parse() calls in innerHTML/outerHTML/insertAdjacentHTML setters",
+    "DOCUMENT: Add security section to README clearly stating that HTML parsing preserves all features and consumers must sanitize output before browser delivery",
+    "HARDEN: Replace all unguarded for-in loops with Object.keys() or add hasOwnProperty checks in Event.js:30, utils.js:55/61, DOMException.js:130, NodeList.es6.js:8",
+    "VALIDATE: Add protocol whitelist (http:, https: only) to Location.assign() — block javascript:, data:, vbscript: schemes",
+    "GUARD: Add maximum iteration counters and cycle detection to FilteredElementList.traverse()",
+    "LIMIT: Add maximum string length guard to CharacterData.replaceData() and maximum token count to DOMTokenList.getList()",
+    "FIX: Change CSSStyleDeclaration proxy has trap from unconditional true to actual property existence check",
+    "TEST: Add security-focused test suite covering prototype pollution, XSS injection vectors, DoS boundaries, and URL protocol validation",
+    "AUDIT: Run `npm audit` on devDependencies (jquery@^3.5.1, mocha@^6.2.3, puppeteer@^21.3.5, should@^13.2.3) for known vulnerabilities",
+    "MONITOR: Subscribe to domino GitHub releases and security advisories for future CVE notifications",
+    "DEFENSE-IN-DEPTH: If library output reaches browsers, implement CSP headers (script-src 'self', object-src 'none', base-uri 'self') on serving application"
+  ]
+}

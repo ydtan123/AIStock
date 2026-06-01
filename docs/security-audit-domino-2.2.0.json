@@ -1,0 +1,113 @@
+{
+  "target": "@mixmark-io/domino@2.2.0",
+  "description": "Server-side DOM implementation based on Mozilla's dom.js",
+  "analysisDate": "2026-05-31",
+  "scope": {
+    "totalSourceFiles": 53,
+    "productionDependencies": 0,
+    "runtimeEnvironment": "Server-side (Node.js/Bun)",
+    "filesProvidedInContext": [
+      "CSSStyleDeclaration.js",
+      "CharacterData.js",
+      "ChildNode.js",
+      "Comment.js",
+      "ContainerNode.js",
+      "CustomEvent.js",
+      "DOMException.js",
+      "DOMImplementation.js",
+      "DOMTokenList.js",
+      "Document.js (truncated)",
+      "DocumentFragment.js",
+      "DocumentType.js",
+      "Element.js (truncated)",
+      "Event.js",
+      "EventTarget.js (truncated)",
+      "FilteredElementList.js",
+      "HTMLParser.js (truncated)",
+      "Leaf.js",
+      "LinkedList.js",
+      "Location.js"
+    ]
+  },
+  "vulnerabilities": [
+    {
+      "severity": "medium",
+      "file": "lib/Element.js",
+      "line": 141,
+      "description": "outerHTML setter parses arbitrary HTML via mozHTMLParser without sanitization. Attacker-controlled HTML parsed into DOM tree including <script>, <iframe>, and event handler attributes. Base class innerHTML setter correctly marked utils.nyi (not implemented), but htmlelts.js overrides this on HTMLElement with full HTML parsing.",
+      "cwe": "CWE-79",
+      "remediation": "Add HTML sanitization before parsing. Strip <script>, <iframe>, <object>, <embed> tags and event handler attributes."
+    },
+    {
+      "severity": "medium",
+      "file": "lib/htmlelts.js",
+      "line": 90,
+      "description": "HTMLElement.innerHTML setter fully implemented with HTML parsing via mozHTMLParser. Parses arbitrary HTML without sanitization — <script> tags, event handler attributes, and other dangerous content pass through unchecked.",
+      "cwe": "CWE-79",
+      "remediation": "Sanitize parsed HTML or document that consumers must sanitize output before serving to browsers."
+    },
+    {
+      "severity": "low",
+      "file": "lib/Event.js",
+      "line": 30,
+      "description": "Event constructor copies all enumerable properties from dictionary argument via unguarded for...in loop: `for(var p in dictionary) { this[p] = dictionary[p]; }`. If Object.prototype is polluted elsewhere, attacker-controlled properties can inject into Event instances.",
+      "cwe": "CWE-1321",
+      "remediation": "Replace with Object.keys(dictionary).forEach(p => { this[p] = dictionary[p]; }) or whitelist known Event properties."
+    },
+    {
+      "severity": "low",
+      "file": "lib/htmlelts.js",
+      "line": 80,
+      "description": "dangerouslySetInnerHTML property exists and parses HTML without sanitization. Name mirrors React's API and acknowledges danger but provides no built-in protection. Acts as direct passthrough to innerHTML parsing.",
+      "cwe": "CWE-79",
+      "remediation": "Add JSDoc warning about XSS risks. Consider adding sanitization flag to the setter."
+    },
+    {
+      "severity": "low",
+      "file": "lib/Element.js",
+      "line": 212,
+      "description": "insertAdjacentHTML implementation parses arbitrary HTML via mozHTMLParser without sanitization. Accepts position+text and parses text as HTML, inserting into DOM at specified position. Same XSS risk profile as innerHTML/outerHTML.",
+      "cwe": "CWE-79",
+      "remediation": "Sanitize parsed HTML fragment before insertion into DOM tree."
+    },
+    {
+      "severity": "low",
+      "file": "lib/Location.js",
+      "line": 24,
+      "description": "Location.assign() resolves relative URLs against current href without protocol validation. javascript: and data: URLs pass through unchecked. Server-side only so limited practical impact, but could affect URL resolution in DOM serialization scenarios.",
+      "cwe": "CWE-79",
+      "remediation": "Validate protocol before navigation. Block javascript: and data: URL schemes."
+    }
+  ],
+  "riskScore": 22,
+  "riskBreakdown": {
+    "hardcodedSecrets": { "score": 0, "findings": 0, "maxScore": 25 },
+    "sqlInjection": { "score": 0, "findings": 0, "maxScore": 20, "note": "N/A - no database interaction" },
+    "xssAndInjection": { "score": 12, "findings": 4, "maxScore": 25, "note": "Server-side HTML parsing without sanitization" },
+    "insecureDependencies": { "score": 0, "findings": 0, "maxScore": 15, "note": "Zero production dependencies" },
+    "authenticationAuthorization": { "score": 0, "findings": 0, "maxScore": 10, "note": "N/A - DOM library" },
+    "other": { "score": 10, "findings": 2, "maxScore": 5, "note": "Event prototype pollution + Location.js protocol bypass (minor, server-side only)" }
+  },
+  "positiveFindings": [
+    "Zero production dependencies — no supply chain attack surface from npm packages",
+    "No hardcoded secrets, API keys, passwords, or tokens found in any source file",
+    "No eval(), new Function(), or dynamic code execution found",
+    "No filesystem access (fs module not imported)",
+    "No child_process, shell execution, or network calls",
+    "Element.prototype.innerHTML setter correctly marked utils.nyi at base class level",
+    "HTMLParser uses __proto__: null objects for lookups (null-prototype safety)",
+    "Library is server-side only — scripts parsed as DOM nodes but never executed in browser context",
+    "dangerouslySetInnerHTML name explicitly signals danger to consumers",
+    "DOMTokenList properly validates token strings (no whitespace, non-empty) before operations"
+  ],
+  "riskContext": "Domino is a server-side DOM library with ZERO attack surface from dependencies. Primary risk is misuse: if consumer applications parse untrusted HTML via innerHTML/outerHTML/insertAdjacentHTML setters and serialize DOM back to HTML served to browsers without sanitization, stored/persistent XSS is possible. Library itself does not execute scripts, access filesystem, or make network calls. Risk score 22/100 reflects low inherent risk — medium risk contingent on consumer usage patterns.",
+  "recommendations": [
+    "DOCUMENT: Add prominent security warning in README that innerHTML/outerHTML/insertAdjacentHTML parse arbitrary HTML without sanitization. Consumers MUST sanitize output before serving to browsers.",
+    "SANITIZE: Add optional HTML sanitization mode to HTMLParser that strips <script>, <iframe>, <object>, <embed> tags and on* event attributes when enabled.",
+    "HARDEN: Replace for...in loop in Event constructor (Event.js:30) with Object.keys(dictionary).forEach() to prevent prototype pollution risk.",
+    "VALIDATE: Add protocol validation in Location.assign() to block javascript: and data: URL schemes.",
+    "CONFIG: Add configurable allowlist/blocklist for HTML elements and attributes during parsing.",
+    "TEST: Add security test cases verifying that dangerous content in HTML parsing paths is handled appropriately.",
+    "MONITOR: Track devDependencies (mocha, puppeteer) for vulnerabilities despite being dev-only."
+  ]
+}

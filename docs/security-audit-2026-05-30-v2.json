@@ -1,0 +1,204 @@
+{
+  "audit": {
+    "timestamp": "2026-05-30T23:55:00+08:00",
+    "codebase": "AIStock",
+    "branch": "main",
+    "commit": "9d2cd9c",
+    "methodology": "Static analysis: grep for hardcoded secrets, XSS patterns, unsafe deserialization, SQL injection, credential exposure",
+    "references": ["OWASP Top 10 (2021)", "CWE-798", "CWE-79", "CWE-502", "CWE-89", "CWE-200", "CWE-306"]
+  },
+  "vulnerabilities": [
+    {
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "file": "config.yaml",
+      "line": 6,
+      "description": "Hardcoded DeepSeek API key (sk-96c8c...) in config.yaml — tracked in git history. Even though .gitignore now excludes config.yaml, the key is present in all historical commits and must be rotated.",
+      "remediation": "Rotate the DeepSeek API key immediately. Use environment variables with python-dotenv. Add config.yaml to .gitignore (already done). Run git filter-branch or bfg to purge from history, or rotate all keys and force-push."
+    },
+    {
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "file": "config.yaml",
+      "line": 9,
+      "description": "Hardcoded Google API key (AIzaSyBWR...) in config.yaml — committed to git history. Same key exposed in deep_evaluation config section (line 18).",
+      "remediation": "Rotate the Google API key. Restrict in Google Cloud Console to specific APIs. Use environment variable GOOGLE_API_KEY instead."
+    },
+    {
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "file": "config.yaml",
+      "line": 15,
+      "description": "Hardcoded Alpha Vantage API key (FQZDH795...) in config.yaml — committed to git history.",
+      "remediation": "Rotate the Alpha Vantage API key. Use environment variable ALPHA_VANTAGE_API_KEY."
+    },
+    {
+      "severity": "critical",
+      "cwe": "CWE-200",
+      "file": "reports/full_pipeline/104/effective_config.yaml",
+      "line": 2,
+      "description": "Full config snapshot including live API keys (DeepSeek, Google, Alpha Vantage) dumped to effective_config.yaml per pipeline run. 11 such files found. reports/ is NOT in .gitignore — these API keys are at risk of being committed.",
+      "remediation": "Add 'reports/' to .gitignore immediately. Redact secrets from effective_config.yaml dumps. Delete existing files containing secrets."
+    },
+    {
+      "severity": "critical",
+      "cwe": "CWE-200",
+      "file": "reports/full_pipeline/73/effective_config.yaml",
+      "line": 2,
+      "description": "Another leaked effective config with live API keys in reports directory.",
+      "remediation": "Same as above — add 'reports/' to .gitignore and redact or delete secrets from dumped configs."
+    },
+    {
+      "severity": "high",
+      "cwe": "CWE-502",
+      "file": "src/finrl_runner.py",
+      "line": 149,
+      "description": "Unsafe deserialization: joblib.load() uses pickle, which can execute arbitrary code. Loading untrusted model artifacts is a remote code execution (RCE) vector.",
+      "remediation": "Verify model integrity with cryptographic checksum before loading. Use safer formats (ONNX, safetensors). Restrict to trusted directories only."
+    },
+    {
+      "severity": "high",
+      "cwe": "CWE-502",
+      "file": "src/finrl_runner.py",
+      "line": 359,
+      "description": "Second unsafe joblib.load() call — same RCE vulnerability via pickle deserialization.",
+      "remediation": "Same as above. Apply consistent model-loading security across both call sites."
+    },
+    {
+      "severity": "high",
+      "cwe": "CWE-200",
+      "file": "external/TradingAgents/.env",
+      "line": 1,
+      "description": "External submodule contains .env file with Alpaca trading API credentials. Even if gitignored in the submodule, its presence on disk is a data-exfiltration risk if any pipeline step reads it.",
+      "remediation": "Verify .env is gitignored in the submodule. Audit that no pipeline code reads from external .env files."
+    },
+    {
+      "severity": "high",
+      "cwe": "CWE-306",
+      "file": "src/app.py",
+      "line": 1,
+      "description": "Streamlit dashboard has NO authentication. Anyone with network access can view financial data, trigger pipeline runs, and modify settings. Settings page API key inputs are cosmetic only — they accept input but do not persist or validate.",
+      "remediation": "Add streamlit-authenticator or OAuth2 proxy (nginx/oauth2-proxy). At minimum, add server-side password gate using Streamlit secrets."
+    },
+    {
+      "severity": "medium",
+      "cwe": "CWE-79",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 37,
+      "description": "Stored XSS: stock metadata (name, exchange, sector, industry) from database rendered via f-string into unsafe_allow_html=True markup. If attacker injects HTML/JS into the stocks table, it executes in admin browsers.",
+      "remediation": "HTML-escape all DB-sourced values before inserting into markdown with unsafe_allow_html. Use st.markdown with default safe mode for user-supplied data."
+    },
+    {
+      "severity": "medium",
+      "cwe": "CWE-79",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 65,
+      "description": "Reflected XSS: numeric values (last_close, pct_change) and chg string interpolated into unsafe_allow_html markdown. Currently safe (numeric only) but fragile pattern.",
+      "remediation": "Replace custom HTML metric cards with st.metric() or ensure all interpolated values are strictly numeric/escaped."
+    },
+    {
+      "severity": "medium",
+      "cwe": "CWE-79",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 68,
+      "description": "Reflected XSS: pe_ratio (can be string '—') interpolated into unsafe_allow_html markup. If pe_ratio becomes user-controllable, this is an injection point.",
+      "remediation": "Use st.metric() or escape all values before HTML interpolation."
+    },
+    {
+      "severity": "medium",
+      "cwe": "CWE-200",
+      "file": "src/pipeline/backends/fast_evaluators.py",
+      "line": 89,
+      "description": "6 API secrets from config.yaml injected into os.environ at runtime. Any child process or library can read them. Visible to error tracebacks and subprocess listings.",
+      "remediation": "Pass API keys explicitly as function arguments. Use context manager to set/restore env vars per backend call instead of polluting global os.environ."
+    },
+    {
+      "severity": "medium",
+      "cwe": "CWE-200",
+      "file": "src/pipeline/backends/deep_evaluators.py",
+      "line": 71,
+      "description": "Same os.environ injection — API keys pushed to global process environment.",
+      "remediation": "Same — apply uniform secrets-handling across all backends."
+    },
+    {
+      "severity": "medium",
+      "cwe": "CWE-200",
+      "file": "src/ingestion/pipeline.py",
+      "line": 62,
+      "description": "Third os.environ injection point — database credentials and API keys pushed to global env.",
+      "remediation": "Stop writing secrets to os.environ globally. Use scoped environment or explicit parameter passing."
+    },
+    {
+      "severity": "low",
+      "cwe": "CWE-16",
+      "file": ".gitignore",
+      "line": 1,
+      "description": "reports/ directory NOT in .gitignore. 11 effective_config.yaml files with live API keys exist. One git add . would commit all of them.",
+      "remediation": "Add 'reports/' and 'effective_config.yaml' to .gitignore immediately."
+    },
+    {
+      "severity": "low",
+      "cwe": "CWE-79",
+      "file": "src/app.py",
+      "line": 47,
+      "description": "13 total unsafe_allow_html sites across 6 files. All current uses are static strings — no active XSS — but the pattern normalizes unsafe markup usage.",
+      "remediation": "Migrate static HTML to Streamlit native components. Where raw HTML essential, use helper that HTML-escapes inputs."
+    },
+    {
+      "severity": "low",
+      "cwe": "CWE-778",
+      "file": "src/app.py",
+      "line": 1,
+      "description": "No Content-Security-Policy or security headers. Streamlit doesn't support CSP natively; must configure at reverse-proxy level.",
+      "remediation": "Deploy behind nginx/Caddy with CSP, HSTS, X-Frame-Options, and X-Content-Type-Options headers."
+    },
+    {
+      "severity": "low",
+      "cwe": "CWE-770",
+      "file": "src/app.py",
+      "line": 1,
+      "description": "No rate limiting on any endpoint or pipeline operation. Attacker could trigger repeated expensive pipeline runs, exhausting API rate limits and incurring costs.",
+      "remediation": "Add rate limiting at reverse-proxy level or application level. Throttle pipeline runs."
+    }
+  ],
+  "sql_injection_assessment": {
+    "finding": "PASS — No SQL injection vectors detected",
+    "details": "All 25+ raw text() SQL queries use parameterized bind params (:sid, :now, :ids). SQLAlchemy ORM usage is safe. One dynamic SQL construction at ingestion/pipeline.py:334 uses OR-join on hardcoded fragments — no user input, but worth monitoring."
+  },
+  "risk_score": 86,
+  "risk_score_breakdown": {
+    "critical": 5,
+    "high": 4,
+    "medium": 6,
+    "low": 4,
+    "total": 19
+  },
+  "recommendations": [
+    "IMMEDIATE: Rotate DeepSeek API key (sk-96c8c56a71f64942bf5c6630bd8a9924) — in git history + 11 report dumps.",
+    "IMMEDIATE: Rotate Google API key (AIzaSyBWRCPmYpHwI_yF3MHWMCrmMe2A92-QkbU) — in git history + 11 report dumps.",
+    "IMMEDIATE: Rotate Alpha Vantage API key (FQZDH795B6P1JXSU) — in git history + 11 report dumps.",
+    "IMMEDIATE: Rotate Alpaca trading credentials from external/TradingAgents/.env — trading keys exposed on disk.",
+    "IMMEDIATE: Rotate database password (stockdb123 in config.yaml history) and restrict MySQL to localhost only.",
+    "IMMEDIATE: Add 'reports/' to .gitignore. Delete all effective_config.yaml files with secrets from reports/full_pipeline/.",
+    "CRITICAL: Move ALL secrets to environment variables or .env + python-dotenv. Use config.yaml.example as committed template.",
+    "CRITICAL: Purge git history of secrets using BFG Repo-Cleaner or rotate all keys and force-push rewritten history.",
+    "HIGH: Replace joblib.load() with ONNX/safetensors. If joblib required, validate model with SHA-256 checksum before loading.",
+    "HIGH: Add authentication to Streamlit (streamlit-authenticator for quick fix, OAuth2 proxy for production).",
+    "HIGH: Stop writing API secrets to os.environ globally. Use explicit argument passing or temporary context manager.",
+    "MEDIUM: Replace unsafe_allow_html f-string patterns with st.metric() and safe Streamlit components.",
+    "MEDIUM: Redact API keys from effective_config.yaml dumps — mask values as '***REDACTED***'.",
+    "MEDIUM: Add bandit to CI/CD: bandit -r src/ -f json.",
+    "LOW: Deploy behind reverse proxy with CSP, HSTS, X-Frame-Options, X-Content-Type-Options.",
+    "LOW: Add rate limiting to pipeline endpoints and expensive operations.",
+    "LOW: Audit all 13 unsafe_allow_html sites and convert to safe rendering."
+  ],
+  "prior_audit_comparison": {
+    "prior_version": "docs/security-audit-2026-05-30.json",
+    "delta": "No vulnerabilities fixed since v1. Risk score unchanged at 86/100.",
+    "new_findings": [
+      "reports/ directory leak confirmed — 11 effective_config.yaml files with live keys",
+      "XSS f-string analysis deepened — stock name/industry from DB is stored XSS vector",
+      "os.environ injection quantified — 3 injection points across backends + ingestion"
+    ]
+  }
+}

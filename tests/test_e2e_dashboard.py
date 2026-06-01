@@ -228,51 +228,6 @@ def test_manager_tab(page):
     assert _has_text(page, "Activate") or _has_text(page, "Deactivate")
 
 
-# ── Tests: ML Pipeline Page ──────────────────────────────────────────────────────
-
-
-@pytest.mark.e2e
-def test_ml_pipeline_page_loads(page):
-    """ML Pipeline page should show configuration form and Run button."""
-    _switch_page(page, "ML Pipeline")
-    page.wait_for_timeout(1000)
-    # Should have "Configuration" or pipeline-related text
-    assert _has_text(page, "Run Pipeline") or _has_text(page, "Configuration")
-
-
-@pytest.mark.e2e
-def test_ml_pipeline_has_config_form(page):
-    """ML Pipeline configuration form should have Data Source, Start Date, Run Pipeline."""
-    _switch_page(page, "ML Pipeline")
-    # Wait for configuration section to render
-    page.wait_for_timeout(1500)
-    page.wait_for_selector('text="Data Source"', timeout=10000)
-    assert _has_text(page, "Start Date")
-    assert page.get_by_role("button", name="Run Pipeline").is_visible()
-
-
-@pytest.mark.e2e
-def test_ml_pipeline_has_log_section(page):
-    """ML Pipeline page should have a Log Output section."""
-    _switch_page(page, "ML Pipeline")
-    page.wait_for_timeout(1000)
-    assert _has_text(page, "Log Output")
-
-
-@pytest.mark.e2e
-def test_ml_pipeline_has_status_indicator(page):
-    """ML Pipeline page should show status (Idle, Running, Complete, or Error)."""
-    _switch_page(page, "ML Pipeline")
-    page.wait_for_timeout(1000)
-    # Status bar shows one of the valid statuses
-    assert (
-        _has_text(page, "Idle")
-        or _has_text(page, "Running")
-        or _has_text(page, "Complete")
-        or _has_text(page, "Error")
-    )
-
-
 # ── Tests: Strategy Backtesting Page ─────────────────────────────────────────────
 
 

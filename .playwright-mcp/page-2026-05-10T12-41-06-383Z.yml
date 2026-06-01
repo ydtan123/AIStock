@@ -1,0 +1,467 @@
+- generic:
+  - generic:
+    - generic [ref=e2]:
+      - generic [ref=e11]:
+        - heading "📈 AIStock" [level=2] [ref=e16]
+        - paragraph [ref=e21]: Trading Platform
+        - separator [ref=e26]
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e32]: ML Pipeline
+            - combobox "Selected ML Pipeline. Navigation" [ref=e34]
+          - img "open" [ref=e36]
+        - separator [ref=e42]
+        - heading "Quick Stats" [level=3] [ref=e46]
+        - generic [ref=e48]:
+          - generic [ref=e53]:
+            - paragraph [ref=e56]: Total
+            - paragraph [ref=e59]: "8991"
+          - generic [ref=e64]:
+            - paragraph [ref=e67]: Active
+            - paragraph [ref=e70]: "3062"
+        - generic [ref=e73]:
+          - paragraph [ref=e76]: Bullish
+          - paragraph [ref=e79]: "829"
+      - generic [ref=e3]:
+        - banner [ref=e82]:
+          - generic [ref=e85]:
+            - button "Deploy" [ref=e87] [cursor=pointer]:
+              - generic [ref=e89]: Deploy
+            - button "Main menu" [ref=e91] [cursor=pointer]:
+              - img [ref=e92]
+        - generic [ref=e95]:
+          - heading "ML Pipeline" [level=2] [ref=e100]:
+            - text: ML Pipeline
+            - generic [ref=e101]:
+              - link "Link to heading":
+                - /url: "#platform-overview"
+                - img
+          - group [ref=e104]:
+            - generic "keyboard_arrow_right How stocks are selected" [ref=e105] [cursor=pointer]:
+              - generic [ref=e106]:
+                - generic [ref=e108]: keyboard_arrow_right
+                - paragraph [ref=e111]: How stocks are selected
+          - generic [ref=e114]:
+            - heading "Configuration" [level=3] [ref=e119]:
+              - text: Configuration
+              - generic [ref=e120]:
+                - link "Link to heading":
+                  - /url: "#configuration"
+                  - img
+            - generic [ref=e122]:
+              - generic [ref=e126]:
+                - paragraph [ref=e130]: Data Source
+                - generic [ref=e132]:
+                  - generic [ref=e133]:
+                    - generic [ref=e134]: AISTOCK_DB
+                    - combobox "Selected AISTOCK_DB. Data Source" [ref=e136]
+                  - img "open" [ref=e138]
+              - generic [ref=e143]:
+                - paragraph [ref=e147]: Start Date
+                - textbox "Start Date" [ref=e150]:
+                  - /placeholder: ""
+                  - text: 2020-01-01
+              - generic [ref=e154]:
+                - paragraph [ref=e158]: End Date
+                - textbox "End Date" [ref=e161]:
+                  - /placeholder: ""
+                  - text: 2025-12-31
+            - generic [ref=e163]:
+              - generic [ref=e168]:
+                - paragraph [ref=e172]: Top Quantile
+                - generic [ref=e173]:
+                  - slider "Top Quantile" [ref=e177]:
+                    - generic:
+                      - generic:
+                        - paragraph: "0.05"
+                  - generic:
+                    - generic:
+                      - paragraph: "0.00"
+                    - generic:
+                      - paragraph: "1.00"
+              - generic [ref=e182]:
+                - paragraph [ref=e186]: Test Quarters
+                - generic [ref=e187]:
+                  - spinbutton "Test Quarters" [ref=e190]: "20"
+                  - generic [ref=e191]:
+                    - button [ref=e192] [cursor=pointer]:
+                      - img [ref=e193]
+                    - button [ref=e195] [cursor=pointer]:
+                      - img [ref=e196]
+              - generic [ref=e201]:
+                - paragraph [ref=e205]: Prediction Mode
+                - generic [ref=e207]:
+                  - generic [ref=e208]:
+                    - generic [ref=e209]: regression
+                    - combobox "Selected regression. Prediction Mode" [ref=e211]
+                  - img "open" [ref=e213]
+            - generic [ref=e216]:
+              - generic [ref=e220]:
+                - paragraph [ref=e224]: Weight Method
+                - generic [ref=e226]:
+                  - generic [ref=e227]:
+                    - generic [ref=e228]: equal
+                    - combobox "Selected equal. Weight Method" [ref=e230]
+                  - img "open" [ref=e232]
+              - generic [ref=e237]:
+                - paragraph [ref=e241]: Rebalance Freq
+                - generic [ref=e243]:
+                  - generic [ref=e244]:
+                    - generic [ref=e245]: Q
+                    - combobox "Selected Q. Rebalance Freq" [ref=e247]
+                  - img "open" [ref=e249]
+              - generic [ref=e254]:
+                - paragraph [ref=e258]: Initial Capital ($)
+                - generic [ref=e259]:
+                  - spinbutton "Initial Capital ($)" [ref=e262]: "1000000"
+                  - generic [ref=e263]:
+                    - button [ref=e264] [cursor=pointer]:
+                      - img [ref=e265]
+                    - button [ref=e267] [cursor=pointer]:
+                      - img [ref=e268]
+            - generic [ref=e271]:
+              - generic [ref=e272]:
+                - paragraph [ref=e275]: Benchmarks
+                - button "Help for Benchmarks" [ref=e279] [cursor=pointer]:
+                  - img [ref=e280]
+              - generic [ref=e285]:
+                - generic [ref=e286]:
+                  - button "SPY, close by backspace":
+                    - generic "SPY" [ref=e287]
+                    - img [ref=e289] [cursor=pointer]
+                  - button "QQQ, close by backspace":
+                    - generic "QQQ" [ref=e291]
+                    - img [ref=e293] [cursor=pointer]
+                  - combobox "Selected SPY, QQQ. Benchmarks" [ref=e296]
+                - generic [ref=e297]:
+                  - button "Clear all" [ref=e298] [cursor=pointer]
+                  - img "open" [ref=e300] [cursor=pointer]
+            - button "Run Pipeline" [ref=e305] [cursor=pointer]:
+              - paragraph [ref=e309]: Run Pipeline
+          - paragraph [ref=e314]:
+            - strong [ref=e315]: "Status:"
+            - text: "Complete | Elapsed: 63s"
+          - heading "Log Output" [level=3] [ref=e320]:
+            - text: Log Output
+            - generic [ref=e321]:
+              - link "Link to heading":
+                - /url: "#log-output"
+                - img
+          - code [ref=e326]: "project_root: /Users/yudongtan/projects/AIStock/external/FinRL-Trading 2026-05-10 20:37:52,109 WARNING ml_bucket_selector: 48 rows have unmapped gsector → dropped ============================================================ Bucket: DEFENSIVE Train: 189 | Val: 1305 (20Q: 2020-12-01 ~ 2025-09-01) | Infer: 67 Infer dates: ['2025-12-01'] (1Q) ============================================================ RF : MSE = 0.016962 XGB : MSE = 0.018372 LGBM : MSE = 0.018150 HistGBM : MSE = 0.018596 ExtraTrees : MSE = 0.017321 Ridge : MSE = 0.268969 Stacking : MSE = 0.014910 (base: ['RF', 'ExtraTrees', 'LGBM']) >> Best: Stacking (MSE=0.014910) Retrained on train+val: 1494 samples Ranking (2025-12-01, 67 stocks): 1. INSM pred= +4.2% actual=-36.8% *** 2. HCA pred= +4.0% actual=+5.9% *** 3. COR pred= +3.3% actual=+3.6% *** 4. CAH pred= +3.3% actual=+10.2% 5. EL pred= +3.1% actual=+5.9% 6. MCK pred= +2.8% actual=+14.6% 7. EIX pred= +2.8% actual=+26.2% 8. BTI pred= +2.7% actual=+8.0% 9. DEO pred= +2.7% actual=-6.5% 10. KHC pred= +2.7% actual=-3.4% Top 5 Features (Stacking): ocf_ratio 0.085 pe 0.083 debt_ratio 0.078 solvency_ratio 0.076 ev_multiple 0.068 ============================================================ Bucket: GROWTH_TECH Train: 153 | Val: 1083 (20Q: 2020-12-01 ~ 2025-09-01) | Infer: 57 Infer dates: ['2025-12-01'] (1Q) ============================================================ RF : MSE = 0.036761 XGB : MSE = 0.041933 LGBM : MSE = 0.038807 HistGBM : MSE = 0.038244 ExtraTrees : MSE = 0.035526 Ridge : MSE = 0.072100 Stacking : MSE = 0.035877 (base: ['ExtraTrees', 'RF', 'HistGBM']) >> Best: ExtraTrees (MSE=0.035526) Retrained on train+val: 1236 samples Ranking (2025-12-01, 57 stocks): 1. CLS pred= +27.7% actual=-17.6% *** 2. ALAB pred= +20.3% actual=-31.5% *** 3. APP pred= +15.8% actual=-36.5% *** 4. FLEX pred= +10.0% actual=+14.7% 5. JBL pred= +9.9% actual=+21.8% 6. NVDA pred= +9.8% actual=+1.4% 7. DDOG pred= +9.1% actual=-35.1% 8. CRDO pred= +8.5% actual=-40.4% 9. KLAC pred= +7.6% actual=+28.4% 10. CIEN pred= +7.5% actual=+56.6% Top 5 Features (ExtraTrees): cur_ratio 0.144 operating_margin 0.069 asset_turnover 0.060 pe 0.059 fcf_to_ocf 0.058 ============================================================ Bucket: CYCLICAL Train: 320 | Val: 2261 (20Q: 2020-12-01 ~ 2025-09-01) | Infer: 114 Infer dates: ['2025-12-01'] (1Q) ============================================================ RF : MSE = 0.031251 XGB : MSE = 0.037616 LGBM : MSE = 0.036154 HistGBM : MSE = 0.037957 ExtraTrees : MSE = 0.027732 Ridge : MSE = 440841.547457 Stacking : MSE = 0.027501 (base: ['ExtraTrees', 'RF', 'LGBM']) >> Best: Stacking (MSE=0.027501) Retrained on train+val: 2581 samples Ranking (2025-12-01, 114 stocks): 1. BA pred= +4.6% actual=+20.9% *** 2. AXON pred= +4.1% actual=+7.0% *** 3. MCD pred= +3.9% actual=+9.8% *** 4. IX pred= +3.9% actual=+22.4% 5. DAL pred= +3.9% actual=+0.4% 6. GM pred= +3.9% actual=+6.6% 7. BX pred= +3.9% actual=-22.7% 8. CNI pred= +3.9% actual=+17.4% 9. JCI pred= +3.9% actual=+23.9% 10. CME pred= +3.9% actual=+16.2% Top 5 Features (Stacking): pe 0.154 ev_multiple 0.109 pb 0.103 operating_margin 0.096 ps 0.065 ============================================================ Bucket: REAL_ASSETS Train: 135 | Val: 901 (20Q: 2020-12-01 ~ 2025-09-01) | Infer: 46 Infer dates: ['2025-12-01'] (1Q) ============================================================ RF : MSE = 0.028896 XGB : MSE = 0.034796 LGBM : MSE = 0.033258 HistGBM : MSE = 0.034196 ExtraTrees : MSE = 0.026307 Ridge : MSE = 8.950579 Stacking : MSE = 0.024334 (base: ['ExtraTrees', 'RF', 'LGBM']) >> Best: Stacking (MSE=0.024334) Retrained on train+val: 1036 samples Ranking (2025-12-01, 46 stocks): 1. KGC pred= +5.2% actual=+26.1% *** 2. APD pred= +4.7% actual=+6.5% *** 3. AEM pred= +4.6% actual=+38.4% *** 4. DOW pred= +4.6% actual=+26.1% 5. B pred= +4.5% actual=+18.6% 6. CTVA pred= +4.4% actual=+19.3% 7. FNV pred= +4.2% actual=+29.6% 8. FTI pred= +4.2% actual=+39.1% 9. FCX pred= +4.2% actual=+46.3% 10. ET pred= +4.2% actual=+14.5% Top 5 Features (Stacking): operating_margin 0.130 ps 0.101 acc_rec_turnover 0.082 solvency_ratio 0.070 EPS 0.064"
+          - alert [ref=e329]:
+            - paragraph [ref=e334]:
+              - text: "Complete. Report:"
+              - code [ref=e335]: /Users/yudongtan/projects/AIStock/data/selection_report_20260510.csv
+          - heading "Results" [level=2] [ref=e340]:
+            - text: Results
+            - generic [ref=e341]:
+              - link "Link to heading":
+                - /url: "#results"
+                - img
+          - heading "Selected Stocks" [level=3] [ref=e346]:
+            - text: Selected Stocks
+            - generic [ref=e347]:
+              - link "Link to heading":
+                - /url: "#selected-stocks"
+                - img
+          - generic [ref=e352]:
+            - button "Show/hide columns" [ref=e356] [cursor=pointer]:
+              - img [ref=e357]
+            - button "Download as CSV" [ref=e362] [cursor=pointer]:
+              - img [ref=e363]
+            - button "Search" [ref=e368] [cursor=pointer]:
+              - img [ref=e369]
+            - button "Fullscreen" [ref=e374] [cursor=pointer]:
+              - img [ref=e375]
+          - generic [ref=e391]:
+            - paragraph [ref=e395]: View Stock Details
+            - generic [ref=e397]:
+              - generic [ref=e398]:
+                - generic [ref=e399]: AAPL
+                - combobox "Selected AAPL. View Stock Details" [expanded] [active] [ref=e401]
+              - img "open" [ref=e403]
+          - generic [ref=e408]:
+            - generic [ref=e416]:
+              - img:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: FINANCIAL SERVICES
+                      - generic:
+                        - generic: TECHNOLOGY
+                      - generic:
+                        - generic: INDUSTRIALS
+                      - generic:
+                        - generic: HEALTHCARE
+                      - generic:
+                        - generic: CONSUMER CYCLICAL
+                      - generic:
+                        - generic: ENERGY
+                      - generic:
+                        - generic: CONSUMER DEFENSIVE
+                      - generic:
+                        - generic: BASIC MATERIALS
+                      - generic:
+                        - generic: UTILITIES
+                      - generic:
+                        - generic: COMMUNICATION SERVICES
+                      - generic:
+                        - generic: REAL ESTATE
+                    - generic:
+                      - generic:
+                        - generic: "0"
+                      - generic:
+                        - generic: "10"
+                      - generic:
+                        - generic: "20"
+                      - generic:
+                        - generic: "30"
+                      - generic:
+                        - generic: "40"
+                      - generic:
+                        - generic: "50"
+              - img:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: Stock Count per Sector
+                  - generic:
+                    - generic: gsector
+                  - generic:
+                    - generic: stock_count
+              - toolbar [ref=e430]:
+                - button "Download plot as a PNG" [ref=e432] [cursor=pointer]:
+                  - img [ref=e433]
+                - generic [ref=e435]:
+                  - button "Zoom" [ref=e436] [cursor=pointer]:
+                    - img [ref=e437]
+                  - button "Pan" [ref=e439] [cursor=pointer]:
+                    - img [ref=e440]
+                - generic [ref=e442]:
+                  - button "Zoom in" [ref=e443] [cursor=pointer]:
+                    - img [ref=e444]
+                  - button "Zoom out" [ref=e446] [cursor=pointer]:
+                    - img [ref=e447]
+                  - button "Autoscale" [ref=e449] [cursor=pointer]:
+                    - img [ref=e450]
+                  - button "Reset axes" [ref=e452] [cursor=pointer]:
+                    - img [ref=e453]
+                - button "Fullscreen" [ref=e456] [cursor=pointer]:
+                  - img [ref=e457]
+              - img
+            - generic [ref=e466]:
+              - img:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: FINANCIAL SERVICES
+                      - generic:
+                        - generic: TECHNOLOGY
+                      - generic:
+                        - generic: INDUSTRIALS
+                      - generic:
+                        - generic: HEALTHCARE
+                      - generic:
+                        - generic: CONSUMER CYCLICAL
+                      - generic:
+                        - generic: ENERGY
+                      - generic:
+                        - generic: CONSUMER DEFENSIVE
+                      - generic:
+                        - generic: BASIC MATERIALS
+                      - generic:
+                        - generic: UTILITIES
+                      - generic:
+                        - generic: COMMUNICATION SERVICES
+                      - generic:
+                        - generic: REAL ESTATE
+                    - generic:
+                      - generic:
+                        - generic: "0"
+                      - generic:
+                        - generic: "0.05"
+                      - generic:
+                        - generic: "0.1"
+                      - generic:
+                        - generic: "0.15"
+              - img:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: Total Weight per Sector
+                  - generic:
+                    - generic: gsector
+                  - generic:
+                    - generic: total_weight
+              - toolbar [ref=e480]:
+                - button "Download plot as a PNG" [ref=e482] [cursor=pointer]:
+                  - img [ref=e483]
+                - generic [ref=e485]:
+                  - button "Zoom" [ref=e486] [cursor=pointer]:
+                    - img [ref=e487]
+                  - button "Pan" [ref=e489] [cursor=pointer]:
+                    - img [ref=e490]
+                - generic [ref=e492]:
+                  - button "Zoom in" [ref=e493] [cursor=pointer]:
+                    - img [ref=e494]
+                  - button "Zoom out" [ref=e496] [cursor=pointer]:
+                    - img [ref=e497]
+                  - button "Autoscale" [ref=e499] [cursor=pointer]:
+                    - img [ref=e500]
+                  - button "Reset axes" [ref=e502] [cursor=pointer]:
+                    - img [ref=e503]
+                - button "Fullscreen" [ref=e506] [cursor=pointer]:
+                  - img [ref=e507]
+              - img
+          - heading "Backtest Results" [level=2] [ref=e513]:
+            - text: Backtest Results
+            - generic [ref=e514]:
+              - link "Link to heading":
+                - /url: "#backtest-results"
+                - img
+          - generic [ref=e519]:
+            - button "Show/hide columns" [ref=e523] [cursor=pointer]:
+              - img [ref=e524]
+            - button "Download as CSV" [ref=e529] [cursor=pointer]:
+              - img [ref=e530]
+            - button "Search" [ref=e535] [cursor=pointer]:
+              - img [ref=e536]
+            - button "Fullscreen" [ref=e541] [cursor=pointer]:
+              - img [ref=e542]
+          - generic [ref=e558]:
+            - img:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: "2021"
+                    - generic:
+                      - generic: "2022"
+                    - generic:
+                      - generic: "2023"
+                    - generic:
+                      - generic: "2024"
+                    - generic:
+                      - generic: "2025"
+                  - generic:
+                    - generic:
+                      - generic: 100.0%
+                    - generic:
+                      - generic: 150.0%
+                    - generic:
+                      - generic: 200.0%
+                    - generic:
+                      - generic: 250.0%
+                    - generic:
+                      - generic: 300.0%
+            - img:
+              - generic:
+                - generic [ref=e575]:
+                  - generic [ref=e577]: Portfolio
+                  - generic [ref=e580]: SPY
+                  - generic [ref=e583]: QQQ
+                - generic:
+                  - generic: Date
+                - generic:
+                  - generic: Cumulative Return
+            - toolbar [ref=e585]:
+              - button "Download plot as a PNG" [ref=e587] [cursor=pointer]:
+                - img [ref=e588]
+              - generic [ref=e590]:
+                - button "Zoom" [ref=e591] [cursor=pointer]:
+                  - img [ref=e592]
+                - button "Pan" [ref=e594] [cursor=pointer]:
+                  - img [ref=e595]
+              - generic [ref=e597]:
+                - button "Zoom in" [ref=e598] [cursor=pointer]:
+                  - img [ref=e599]
+                - button "Zoom out" [ref=e601] [cursor=pointer]:
+                  - img [ref=e602]
+                - button "Autoscale" [ref=e604] [cursor=pointer]:
+                  - img [ref=e605]
+                - button "Reset axes" [ref=e607] [cursor=pointer]:
+                  - img [ref=e608]
+              - button "Fullscreen" [ref=e611] [cursor=pointer]:
+                - img [ref=e612]
+            - img
+          - generic [ref=e619]:
+            - img:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: "2021"
+                    - generic:
+                      - generic: "2022"
+                    - generic:
+                      - generic: "2023"
+                    - generic:
+                      - generic: "2024"
+                    - generic:
+                      - generic: "2025"
+                  - generic:
+                    - generic:
+                      - generic: −40.0%
+                    - generic:
+                      - generic: −30.0%
+                    - generic:
+                      - generic: −20.0%
+                    - generic:
+                      - generic: −10.0%
+                    - generic:
+                      - generic: 0.0%
+            - img:
+              - generic:
+                - generic [ref=e636]:
+                  - generic [ref=e638]: Portfolio
+                  - generic [ref=e644]: SPY
+                  - generic [ref=e647]: QQQ
+                - generic:
+                  - generic: Drawdown
+            - toolbar [ref=e649]:
+              - button "Download plot as a PNG" [ref=e651] [cursor=pointer]:
+                - img [ref=e652]
+              - generic [ref=e654]:
+                - button "Zoom" [ref=e655] [cursor=pointer]:
+                  - img [ref=e656]
+                - button "Pan" [ref=e658] [cursor=pointer]:
+                  - img [ref=e659]
+              - generic [ref=e661]:
+                - button "Zoom in" [ref=e662] [cursor=pointer]:
+                  - img [ref=e663]
+                - button "Zoom out" [ref=e665] [cursor=pointer]:
+                  - img [ref=e666]
+                - button "Autoscale" [ref=e668] [cursor=pointer]:
+                  - img [ref=e669]
+                - button "Reset axes" [ref=e671] [cursor=pointer]:
+                  - img [ref=e672]
+              - button "Fullscreen" [ref=e675] [cursor=pointer]:
+                - img [ref=e676]
+            - img
+    - list [ref=e739]:
+      - generic [ref=e741]:
+        - option "— Select a stock —" [ref=e742] [cursor=pointer]:
+          - generic [ref=e746]: — Select a stock —
+        - option "A" [ref=e747] [cursor=pointer]:
+          - generic [ref=e751]: A
+        - option "AAPL" [selected] [ref=e752] [cursor=pointer]:
+          - generic [ref=e756]: AAPL
+        - option "ABBV" [ref=e757] [cursor=pointer]:
+          - generic [ref=e761]: ABBV
+        - option "ABEV" [ref=e762] [cursor=pointer]:
+          - generic [ref=e766]: ABEV
+        - option "ABNB" [ref=e767] [cursor=pointer]:
+          - generic [ref=e771]: ABNB
+        - option "ABT" [ref=e772] [cursor=pointer]:
+          - generic [ref=e776]: ABT
+        - option "ACGL" [ref=e777] [cursor=pointer]:
+          - generic [ref=e781]: ACGL
+        - option "ACN" [ref=e782] [cursor=pointer]:
+          - generic [ref=e786]: ACN
+        - option "ADBE" [ref=e787] [cursor=pointer]:
+          - generic [ref=e791]: ADBE
+  - generic:
+    - document
+  - img [ref=e678]

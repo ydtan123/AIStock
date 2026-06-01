@@ -1,0 +1,13 @@
+{
+  "step_name": "deep_evaluation",
+  "status": "success",
+  "summary": {
+    "backend": "trading_agents",
+    "tickers_evaluated": 0
+  },
+  "payload": {
+    "backend": "trading_agents",
+    "evaluations": []
+  },
+  "error": null
+}

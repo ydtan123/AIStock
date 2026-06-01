@@ -1,0 +1,34 @@
+{
+  "ticker": "AEM",
+  "date": "2026-05-16",
+  "decision": "Underweight",
+  "llm_calls": 25,
+  "generated_at": "2026-05-16 21:10:21",
+  "bullet_summaries": {
+    "Market Analysis": [
+      "\u2022 The medium-term trend is firmly bearish with price well below declining 50-day and 10-day moving averages and bearish volume distribution.",
+      "\u2022 Price clings to the 200-day SMA by a razor-thin margin while a death cross looms, marking a critical breakdown threat.",
+      "\u2022 Sell recommendation is issued, with a break below $174\u2013175 expected to accelerate losses."
+    ],
+    "Social Sentiment": [
+      "\u2022 Agnico Eagle's C$14B Ontario investment and zero-debt balance sheet anchor a transformative growth path to 4M+ ounces annually.",
+      "\u2022 Macro headwinds like rising yields, a stronger dollar, and India's gold tariff sparked a 6-7% weekly sell-off and a sentiment crash from extreme bullish to bearish.",
+      "\u2022 Institutional analysts see a fundamental disconnect, maintaining strong buy ratings with 32% upside, making the post-sell-off weakness an attractive accumulation opportunity."
+    ],
+    "News Analysis": [
+      "\u2022 A stagflationary macro regime with a hawkish new Fed chair and escalating geopolitical risk is reshaping markets, favoring gold but creating near-term headwinds from rising real yields and US dollar strength.",
+      "\u2022 Agnico Eagle's industry-leading low costs, robust growth pipeline, and fortress balance sheet position it as a top-quality gold miner for the medium term.",
+      "\u2022 Near-term technical weakness and yield pressure warrant a hold, with a more attractive entry on pullbacks ahead of binary catalysts like the Hope Bay decision."
+    ],
+    "Fundamentals": [
+      "\u2022 Revenue and margins have surged dramatically, with Q1 2026 gross margin reaching 66.4% driven by higher gold prices and operational leverage.",
+      "\u2022 The balance sheet is virtually debt-free with $3.1 billion in cash against just $319 million in total debt.",
+      "\u2022 Robust free cash flow funds aggressive shareholder returns through dividends, buybacks, and debt reduction while maintaining a reasonable valuation."
+    ],
+    "Final Decision": [
+      "\u2022 Immediately reduce the position by 50\u201370% to limit exposure to converging macro and technical headwinds.",
+      "\u2022 Retain a core stake because Agnico Eagle\u2019s fortress balance sheet protects against permanent capital impairment.",
+      "\u2022 Redeploy capital only after real yields decline, gold reclaims $2,250, and technicals stabilize."
+    ]
+  }
+}

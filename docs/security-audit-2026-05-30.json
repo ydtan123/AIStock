@@ -1,0 +1,254 @@
+{
+  "audit_metadata": {
+    "date": "2026-05-30",
+    "time": "23:39 GMT+8",
+    "scope": "AIStock source code (src/), config files, reports, dependencies",
+    "excluded": [".venv/", "external/ submodules", "node_modules/"],
+    "methodology": "Static analysis via grep/pattern matching + manual source review"
+  },
+  "summary": {
+    "total_vulnerabilities": 21,
+    "critical": 5,
+    "high": 12,
+    "medium": 3,
+    "low": 1,
+    "riskScore": 87
+  },
+  "vulnerabilities": [
+    {
+      "id": "SEC-001",
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "category": "hardcoded_credentials",
+      "file": "config.yaml",
+      "line": 6,
+      "description": "DeepSeek API key hardcoded as plaintext: sk-96c8c56a71f64942bf5c6630bd8a9924. Live production key, not a placeholder.",
+      "remediation": "Remove from config.yaml. Use DEEPSEEK_API_KEY env var. config.yaml IS in .gitignore but key may already be in git history. Rotate key immediately.",
+      "git_exposure": "Check with: git log -- config.yaml"
+    },
+    {
+      "id": "SEC-002",
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "category": "hardcoded_credentials",
+      "file": "config.yaml",
+      "line": 15,
+      "description": "Alpha Vantage API key hardcoded: FQZDH795B6P1JXSU. Live key exposed in plaintext.",
+      "remediation": "Use ALPHA_VANTAGE_API_KEY env var. Rotate key. fetcher/__init__.py:8 reads from config dict — change to read from env instead."
+    },
+    {
+      "id": "SEC-003",
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "category": "hardcoded_credentials",
+      "file": "config.yaml",
+      "line": 9,
+      "description": "Google API key hardcoded: AIzaSyBWRCPmYpHwI_yF3MHWMCrmMe2A92-QkbU. Duplicated at lines 9 (common) and 18 (google section). Also leaked into 10+ reports/full_pipeline/*/effective_config.yaml files.",
+      "remediation": "Use GOOGLE_API_KEY env var (already read at ingestion/pipeline.py:56). Remove hardcoded value. Rotate key."
+    },
+    {
+      "id": "SEC-004",
+      "severity": "critical",
+      "cwe": "CWE-798",
+      "category": "hardcoded_credentials",
+      "file": "config.yaml",
+      "line": 57,
+      "description": "MySQL database credentials in connection URL: mysql+pymysql://stockdb:stockdb123@localhost/stockdb. Username/password in plaintext.",
+      "remediation": "Use DATABASE_URL env var. Change password from stockdb123 to strong random value."
+    },
+    {
+      "id": "SEC-005",
+      "severity": "critical",
+      "cwe": "CWE-538",
+      "category": "credential_leakage_reports",
+      "file": "reports/full_pipeline/*/effective_config.yaml",
+      "line": 1,
+      "description": "10+ pipeline run directories contain effective_config.yaml with ALL API keys and DB credentials in plaintext. Files are untracked but NOT gitignored. Accidental git add reports/ would expose all secrets.",
+      "remediation": "Add reports/ to .gitignore. Sanitize config dump in src/pipeline/config.py:39 to redact api_key/password/secret fields. Purge existing report files with secrets."
+    },
+    {
+      "id": "SEC-006",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "category": "xss",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 37,
+      "description": "XSS via unsafe_allow_html=True with DB values. stock.get('name'), stock.get('exchange'), stock.get('sector'), stock.get('industry') interpolated into HTML via f-string. If DB compromised with malicious HTML, XSS executes in admin browser.",
+      "remediation": "Replace unsafe_allow_html with Streamlit-safe components: st.container() + st.metric() instead of raw HTML metric cards.",
+      "exploit_scenario": "Attacker with DB write access inserts <script> into company name → renders in Streamlit dashboard"
+    },
+    {
+      "id": "SEC-007",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "category": "xss",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 65,
+      "description": "XSS via unsafe_allow_html=True with f-string financial data (close price, change). Numeric DB values — lower direct risk but still HTML injection surface.",
+      "remediation": "Use st.metric() component instead of raw HTML."
+    },
+    {
+      "id": "SEC-008",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "category": "xss",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 68,
+      "description": "XSS via unsafe_allow_html=True — PE ratio f-string interpolation.",
+      "remediation": "Use st.metric() component."
+    },
+    {
+      "id": "SEC-009",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "category": "xss",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 71,
+      "description": "XSS via unsafe_allow_html=True — market cap f-string interpolation.",
+      "remediation": "Use st.metric() component."
+    },
+    {
+      "id": "SEC-010",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "category": "xss",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 74,
+      "description": "XSS via unsafe_allow_html=True — volume f-string interpolation.",
+      "remediation": "Use st.metric() component."
+    },
+    {
+      "id": "SEC-011",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "category": "xss",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 76,
+      "description": "unsafe_allow_html=True for static <br> tag. Unnecessary HTML injection surface.",
+      "remediation": "Replace with st.divider() or empty st.write('')."
+    },
+    {
+      "id": "SEC-012",
+      "severity": "high",
+      "cwe": "CWE-502",
+      "category": "insecure_deserialization",
+      "file": "src/finrl_runner.py",
+      "line": 149,
+      "description": "Unsafe deserialization via joblib.load() (uses pickle internally). Model files loaded from glob without integrity verification. Attacker who can write to models/ directory gets RCE.",
+      "remediation": "Add HMAC signature verification on model files before loading. Consider safetensors or ONNX format. Validate file path is within expected directory and check artifact structure.",
+      "exploit_scenario": "Malicious .pkl file placed in models/ → next pipeline run executes arbitrary Python code"
+    },
+    {
+      "id": "SEC-013",
+      "severity": "high",
+      "cwe": "CWE-502",
+      "category": "insecure_deserialization",
+      "file": "src/finrl_runner.py",
+      "line": 359,
+      "description": "Second instance of unsafe joblib.load() — _load_models_and_features(). Same RCE vector as SEC-012.",
+      "remediation": "Same as SEC-012 — add integrity verification before deserialization."
+    },
+    {
+      "id": "SEC-014",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "category": "xss_static_html",
+      "file": "src/app.py",
+      "line": 47,
+      "description": "unsafe_allow_html=True for CSS injection. Static content (low risk) but normalizes insecure pattern across codebase.",
+      "remediation": "Inject CSS via Streamlit's st.markdown() without unsafe_allow_html, or use external CSS file."
+    },
+    {
+      "id": "SEC-015",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "category": "xss_static_html",
+      "file": "src/app.py",
+      "line": 286,
+      "description": "Branding header uses unsafe_allow_html=True. Static content, low direct risk.",
+      "remediation": "Use st.title() or st.header() instead of raw HTML."
+    },
+    {
+      "id": "SEC-016",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "category": "xss_static_html",
+      "file": "src/ui/pages/stock_lookup.py",
+      "line": 25,
+      "description": "8 instances of unsafe_allow_html=True for tab headers across stock_lookup.py:25, stock_technical.py:21, stock_screener.py:37, stock_manager.py:41, job_history.py:15. Static content, but unnecessary HTML injection surface.",
+      "remediation": "Replace all tab-header unsafe_allow_html with st.subheader() or styled st.markdown() without HTML."
+    },
+    {
+      "id": "SEC-017",
+      "severity": "high",
+      "cwe": "CWE-79",
+      "category": "xss_static_html",
+      "file": "src/ui/pages/stock_screener.py",
+      "line": 37,
+      "description": "Tab header unsafe_allow_html — part of 8-instance pattern (SEC-016).",
+      "remediation": "Same as SEC-016."
+    },
+    {
+      "id": "SEC-018",
+      "severity": "medium",
+      "cwe": "CWE-454",
+      "category": "environment_injection",
+      "file": "src/ingestion/pipeline.py",
+      "line": 62,
+      "description": "Direct os.environ assignment: os.environ[_env_key] = _common[_cfg_key]. Writes API keys from config into process environment. Keys leak via subprocess inheritance and error tracebacks.",
+      "remediation": "Pass API keys as function parameters. If env vars required by third-party libs, use temporary context manager that restores original values."
+    },
+    {
+      "id": "SEC-019",
+      "severity": "medium",
+      "cwe": "CWE-454",
+      "category": "environment_injection",
+      "file": "src/pipeline/backends/deep_evaluators.py",
+      "line": 71,
+      "description": "Second os.environ injection — _inject_api_keys() writes 6 API keys to process environment.",
+      "remediation": "Same as SEC-018."
+    },
+    {
+      "id": "SEC-020",
+      "severity": "medium",
+      "cwe": "CWE-454",
+      "category": "environment_injection",
+      "file": "src/pipeline/backends/fast_evaluators.py",
+      "line": 89,
+      "description": "Third os.environ injection — _inject_api_keys() duplicates same pattern in fast evaluator backend.",
+      "remediation": "Same as SEC-018."
+    },
+    {
+      "id": "SEC-021",
+      "severity": "low",
+      "cwe": "CWE-306",
+      "category": "missing_authentication",
+      "file": "src/app.py",
+      "line": 1,
+      "description": "Streamlit application has no authentication. Settings page accepts API keys but does not validate or persist securely. App accessible to anyone who can reach host:port.",
+      "remediation": "Add Streamlit-Authenticator or OAuth proxy (nginx + oauth2-proxy) before production deployment. Document risk for local use."
+    }
+  ],
+  "riskScore": 87,
+  "sql_injection_assessment": {
+    "status": "PASS",
+    "details": "All SQL queries use SQLAlchemy text() with bound parameters (:param syntax). No string concatenation or f-string SQL construction found in repository.py, ingestion/pipeline.py, or ingestion/indicators.py."
+  },
+  "recommendations": [
+    "IMMEDIATE: Rotate ALL exposed API keys — DeepSeek, Alpha Vantage, Google. Keys appear in git history and 10+ report files.",
+    "IMMEDIATE: Rotate MySQL database password. Replace stockdb123 with strong random password.",
+    "IMMEDIATE: Add reports/ to .gitignore to prevent credential leakage via effective_config.yaml.",
+    "IMMEDIATE: Sanitize effective_config.yaml generation (pipeline/config.py:39) to redact api_key, password, secret, url fields.",
+    "HIGH: Replace all 11 unsafe_allow_html=True calls with safe Streamlit components (st.metric, st.container, st.write).",
+    "HIGH: Add HMAC signature verification before joblib.load() in finrl_runner.py:149 and :359.",
+    "HIGH: Replace os.environ injection with explicit API key passing. Use context manager for third-party lib env vars.",
+    "HIGH: Run git filter-repo/BFG to scrub config.yaml from git history if tracked.",
+    "MEDIUM: Add Streamlit authentication before production deployment (streamlit-authenticator or OAuth proxy).",
+    "MEDIUM: Run pip-audit or safety check on requirements.txt for vulnerable dependency versions.",
+    "LOW: Add bandit (bandit -r src/) to CI pipeline for ongoing static security analysis.",
+    "LOW: Add pre-commit hook for secret detection (detect-secrets or git-secrets).",
+    "LOW: Add data/ to .gitignore to prevent accidental commit of cached API responses.",
+    "PROCESS: Implement quarterly API key rotation policy.",
+    "PROCESS: Never store real credentials in config files — use YOUR_KEY_HERE placeholders in docs/examples."
+  ]
+}

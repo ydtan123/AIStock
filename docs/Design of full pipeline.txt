@@ -1,0 +1,25 @@
+The full pipeline consists of four steps. Re-organize these steps in object oriented way. All configurations are from config.yaml, which can be overriden on command line.
+Here are details of requirements for every step:
+
+Step 1: Fetch stock data up to date and compute tech indicators.
+1. Implement a class that provides methods to fetch data and compute tech indicators. 2. These methods use existing code in src/. 
+3. The data source is configurable, could be Alpha Advantage or Yahoo finance.
+
+Step 2: Select stocks using FinRL
+1. Implement a class that provides methods to select stocks. 
+2. The methods read stock prices, fundamentals, tech indicators from AISTOCK_DB, then use existing code in external/FinRL-Trading to build models, select stocks and write selected stocks back to DB.
+3. Make minimum changes in external/FinRL-Trading
+
+Step 3: Evaluate top stocks selected in Step 2 using ai-hedge-fund
+1. Impement a class that provides methods to evaluate stocks using ai-hedge-fund
+2. The methods reads top stocks from DB based on the recent ML scores from Step 2, evaluate top N stocks selected in Step 2. N is configurable.
+3. Write evaluation results back to DB. Save a snapshot of all analysts to "ai_hedge_fund_conclusion" table, including stock ticker, start date, end_date, evaluation date, the number of positive, negative and neutral opinions and the consensus score. Also save results of every analyst to table "ai_hedge_fund_stocks" including stock ticker, analyst name, analyst's opinion, analyst's reasoning, start date, end date, evaluation date. Create tables if they do not exist. 
+4. Make minimum changes in external/ai-hedge-fund 
+
+Step 4: Evaluate top stocks that have most positive consensus in Step 3
+1. Impement a class that provides methods to evaluate stocks using TradingAgents.
+2. The methods reads top N stocks that have the most positive consensus in the most recent evaluation in Step 3. N is configurable, and then evaluate using TradingAgents.
+3. Write the evaluation snapshot to table "TA_Evaluation" including stock ticker, evaluation date, each analyst's and researcher's conclusion, the final conclusion.
+4. Make minimum changes in external/TradingAgents
+
+Step 2, 3, 4 are implemented by call methods in corresponding submodules, do not use sub-process.

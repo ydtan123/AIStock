@@ -1,0 +1,174 @@
+- generic:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - button "keyboard_double_arrow_left" [ref=e307] [cursor=pointer]:
+        - generic [ref=e309]: keyboard_double_arrow_left
+      - generic [ref=e8]:
+        - heading "📈 AIStock" [level=2] [ref=e13]
+        - paragraph [ref=e18]: Trading Platform
+        - separator [ref=e23]
+        - generic [ref=e156]:
+          - generic [ref=e157]:
+            - generic [ref=e158]: Stock Data
+            - combobox "Selected Stock Data. Navigation" [active] [ref=e356]
+          - img "open" [ref=e162]
+        - separator [ref=e30]
+        - heading "Quick Stats" [level=3] [ref=e34]
+        - generic [ref=e36]:
+          - generic [ref=e165]:
+            - paragraph [ref=e168]: Total
+            - paragraph [ref=e171]: "8991"
+          - generic [ref=e173]:
+            - paragraph [ref=e176]: Active
+            - paragraph [ref=e179]: "3062"
+        - generic [ref=e181]:
+          - paragraph [ref=e184]: Bullish
+          - paragraph [ref=e187]: "829"
+    - generic [ref=e49]:
+      - banner [ref=e50]:
+        - generic [ref=e53]:
+          - button "Deploy" [ref=e55] [cursor=pointer]:
+            - generic [ref=e57]: Deploy
+          - button "Main menu" [ref=e59] [cursor=pointer]:
+            - img [ref=e60]
+      - generic [ref=e65]:
+        - heading "Stock Data" [level=2] [ref=e357]:
+          - text: Stock Data
+          - generic [ref=e71]:
+            - link "Link to heading":
+              - /url: "#platform-overview"
+              - img
+        - generic [ref=e359]:
+          - tablist [ref=e361]:
+            - tab "Lookup" [selected] [ref=e362] [cursor=pointer]:
+              - paragraph [ref=e364]: Lookup
+            - tab "Technical Analysis" [ref=e365] [cursor=pointer]:
+              - paragraph [ref=e367]: Technical Analysis
+            - tab "Screener" [ref=e368] [cursor=pointer]:
+              - paragraph [ref=e370]: Screener
+            - tab "Manager" [ref=e371] [cursor=pointer]:
+              - paragraph [ref=e373]: Manager
+            - tab "Predictions" [ref=e374] [cursor=pointer]:
+              - paragraph [ref=e376]: Predictions
+          - tabpanel "Lookup" [ref=e379]:
+            - generic [ref=e380]:
+              - generic [ref=e385]: LOOKUP
+              - generic [ref=e387]:
+                - generic [ref=e389]:
+                  - generic [ref=e391]:
+                    - paragraph [ref=e395]: Symbol
+                    - textbox "Symbol" [ref=e398]:
+                      - /placeholder: ""
+                      - text: AAPL
+                  - generic [ref=e400]:
+                    - paragraph [ref=e404]: Start date
+                    - textbox "Select a date." [ref=e408]:
+                      - /placeholder: YYYY/MM/DD
+                      - text: 2025/05/10
+                    - paragraph: Press the down arrow key to interact with the calendar and select a date. Press the escape button to close the calendar.
+                    - paragraph: Selected date is 2025/05/10. Select the second date.
+                  - generic [ref=e410]:
+                    - paragraph [ref=e414]: End date
+                    - textbox "Select a date." [ref=e418]:
+                      - /placeholder: YYYY/MM/DD
+                      - text: 2026/05/10
+                    - paragraph: Press the down arrow key to interact with the calendar and select a date. Press the escape button to close the calendar.
+                    - paragraph: Selected date is 2026/05/10. Select the second date.
+                  - generic [ref=e423]:
+                    - generic [ref=e424]: Apple Inc
+                    - generic [ref=e425]: NASDAQ · TECHNOLOGY
+                    - generic [ref=e426]: CONSUMER ELECTRONICS
+                    - generic [ref=e427]: ● Active
+                - generic [ref=e429]:
+                  - generic [ref=e431]:
+                    - generic [ref=e438]:
+                      - generic [ref=e439]: CLOSE
+                      - generic [ref=e440]: $276.83
+                      - generic [ref=e441]: ▼ -1.18%
+                    - generic [ref=e448]:
+                      - generic [ref=e449]: PE RATIO
+                      - generic [ref=e450]: "33.9"
+                      - generic [ref=e451]: trailing
+                    - generic [ref=e458]:
+                      - generic [ref=e459]: MKT CAP
+                      - generic [ref=e460]: $4.11T
+                      - generic [ref=e461]: USD
+                    - generic [ref=e468]:
+                      - generic [ref=e469]: VOLUME
+                      - generic [ref=e470]: 46.7M
+                      - generic [ref=e471]: daily
+                  - generic [ref=e481]:
+                    - img:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic: "200"
+                            - generic:
+                              - generic: "220"
+                            - generic:
+                              - generic: "240"
+                            - generic:
+                              - generic: "260"
+                            - generic:
+                              - generic: "280"
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic: Jul 2025
+                            - generic:
+                              - generic: Sep 2025
+                            - generic:
+                              - generic: Nov 2025
+                            - generic:
+                              - generic: Jan 2026
+                            - generic:
+                              - generic: Mar 2026
+                          - generic:
+                            - generic:
+                              - generic: "0"
+                            - generic:
+                              - generic: 50M
+                            - generic:
+                              - generic: 100M
+                            - generic:
+                              - generic: 150M
+                    - img:
+                      - generic [ref=e510]:
+                        - generic [ref=e512]: OHLC
+                        - generic [ref=e520]: Adj Close
+                        - generic [ref=e523]: Volume
+                    - toolbar [ref=e529]:
+                      - button "Download plot as a PNG" [ref=e531] [cursor=pointer]:
+                        - img [ref=e532]
+                      - generic [ref=e534]:
+                        - button "Zoom" [ref=e535] [cursor=pointer]:
+                          - img [ref=e536]
+                        - button "Pan" [ref=e538] [cursor=pointer]:
+                          - img [ref=e539]
+                      - generic [ref=e541]:
+                        - button "Zoom in" [ref=e542] [cursor=pointer]:
+                          - img [ref=e543]
+                        - button "Zoom out" [ref=e545] [cursor=pointer]:
+                          - img [ref=e546]
+                        - button "Autoscale" [ref=e548] [cursor=pointer]:
+                          - img [ref=e549]
+                        - button "Reset axes" [ref=e551] [cursor=pointer]:
+                          - img [ref=e552]
+                      - button "Fullscreen" [ref=e555] [cursor=pointer]:
+                        - img [ref=e556]
+                    - img
+                  - paragraph [ref=e562]:
+                    - strong [ref=e563]: Recent Prices
+                  - generic [ref=e568]:
+                    - button "Show/hide columns" [ref=e572] [cursor=pointer]:
+                      - img [ref=e573]
+                    - button "Download as CSV" [ref=e578] [cursor=pointer]:
+                      - img [ref=e579]
+                    - button "Search" [ref=e584] [cursor=pointer]:
+                      - img [ref=e585]
+                    - button "Fullscreen" [ref=e590] [cursor=pointer]:
+                      - img [ref=e591]
+  - img [ref=e304]
+  - generic:
+    - document
