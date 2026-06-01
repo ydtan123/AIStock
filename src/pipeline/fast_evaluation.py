@@ -1,7 +1,9 @@
 """FastEvaluationStep — step 3 of the pipeline."""
 from __future__ import annotations
 
+import ast
 import datetime as dt
+import json
 import traceback
 
 from sqlalchemy import desc
@@ -13,6 +15,118 @@ from models import (
 )
 from pipeline.backends.fast_evaluators import FAST_EVALUATOR_REGISTRY
 from pipeline.base import PipelineStep, StepContext, StepResult, open_session
+
+
+def _try_parse_dict(text: str) -> dict | None:
+    """Return parsed dict if text is a JSON or Python dict literal, else None."""
+    t = text.strip()
+    if not t.startswith("{"):
+        return None
+    try:
+        return json.loads(t)
+    except (json.JSONDecodeError, ValueError):
+        pass
+    try:
+        val = ast.literal_eval(t)
+        if isinstance(val, dict):
+            return val
+    except (ValueError, SyntaxError):
+        pass
+    return None
+
+
+def _explain_dict_reasoning(analyst_name: str, data: dict) -> str:
+    """Generate a prose explanation from a parsed analyst output dict."""
+    # news_sentiment_agent: {'news_sentiment': {signal, confidence, metrics}}
+    if set(data.keys()) == {"news_sentiment"}:
+        ns = data["news_sentiment"]
+        m = ns.get("metrics", {})
+        total = m.get("total_articles", 0)
+        bull = m.get("bullish_articles", 0)
+        bear = m.get("bearish_articles", 0)
+        neu = m.get("neutral_articles", 0)
+        sig = ns.get("signal", "neutral")
+        conf = ns.get("confidence", 0)
+        return (
+            f"Based on {total} news article{'s' if total != 1 else ''} analyzed "
+            f"({bull} bullish, {bear} bearish, {neu} neutral), "
+            f"the overall sentiment signal is **{sig}** with {conf:.1f}% confidence."
+        )
+
+    # sentiment_analyst_agent: insider_trading + news_sentiment + combined_analysis
+    if {"insider_trading", "news_sentiment", "combined_analysis"} <= set(data.keys()):
+        it = data["insider_trading"]
+        ns = data["news_sentiment"]
+        ca = data["combined_analysis"]
+        it_m = it.get("metrics", {})
+        ns_m = ns.get("metrics", {})
+        it_trades = it_m.get("total_trades", 0)
+        ns_arts = ns_m.get("total_articles", 0)
+        det = ca.get("signal_determination", "")
+        return (
+            f"Insider trading: {it_trades} trade{'s' if it_trades != 1 else ''} recorded "
+            f"(signal: **{it.get('signal', 'neutral')}**, confidence: {it.get('confidence', 0):.0f}%). "
+            f"News sentiment: {ns_arts} article{'s' if ns_arts != 1 else ''} analyzed "
+            f"(signal: **{ns.get('signal', 'neutral')}**, confidence: {ns.get('confidence', 0):.0f}%). "
+            f"Combined weighted analysis: {det}."
+        )
+
+    # fundamentals_analyst_agent / valuation / risk: has a 'summary' field
+    if "summary" in data:
+        lines = [data["summary"]]
+        signal_keys = [k for k in data if k.endswith("_signal")]
+        for key in signal_keys:
+            sig = data[key]
+            label = key.replace("_signal", "").replace("_", " ").title()
+            detail = sig.get("details", "") or sig.get("reasoning", "")
+            entry = f"**{label}** ({sig.get('signal', '').upper()})"
+            if detail:
+                entry += f": {detail}"
+            lines.append(entry)
+        return "\n\n".join(lines)
+
+    # Generic fallback: describe each top-level key that looks like a signal sub-dict
+    lines = []
+    for key, val in data.items():
+        label = key.replace("_", " ").title()
+        if isinstance(val, dict):
+            sig = val.get("signal", "")
+            detail = val.get("details", "") or val.get("reasoning", "") or val.get("description", "")
+            conf = val.get("confidence")
+            entry = f"**{label}**"
+            if sig:
+                entry += f": {sig.upper()}"
+            if conf is not None:
+                entry += f" ({conf:.0f}% confidence)" if isinstance(conf, (int, float)) else f" ({conf})"
+            if detail:
+                entry += f" — {detail}"
+            lines.append(entry)
+        elif isinstance(val, str) and val:
+            lines.append(f"**{label}**: {val}")
+    return "\n\n".join(lines)
+
+
+def _format_reasoning(analyst_name: str, reasoning: str) -> list[str]:
+    """Return markdown lines for an analyst's reasoning.
+
+    If the reasoning is a raw dict/JSON string, prepend a prose explanation
+    and render the raw data as a fenced code block.
+    """
+    raw = reasoning.strip()
+    parsed = _try_parse_dict(raw)
+    if parsed is None:
+        return [raw]
+
+    explanation = _explain_dict_reasoning(analyst_name, parsed)
+    pretty = json.dumps(parsed, indent=2, ensure_ascii=False)
+    out: list[str] = []
+    if explanation:
+        out.append(explanation)
+        out.append("")
+    out.append("```json")
+    out.append(pretty)
+    out.append("```")
+    return out
 
 
 def _count_by_opinion(opinions):
@@ -82,7 +196,7 @@ def _write_report(evaluations, report_dir, backend_name):
             )
             ticker_lines.append("")
             if op.reasoning:
-                ticker_lines.append(op.reasoning.strip())
+                ticker_lines.extend(_format_reasoning(op.analyst_name, op.reasoning))
             ticker_lines.append("")
 
         # Per-ticker output under <TICKER>/fast_evaluation/
@@ -113,7 +227,7 @@ def _write_report(evaluations, report_dir, backend_name):
             )
             lines.append("")
             if op.reasoning:
-                lines.append(op.reasoning.strip())
+                lines.extend(_format_reasoning(op.analyst_name, op.reasoning))
             lines.append("")
 
         lines.append("---")
