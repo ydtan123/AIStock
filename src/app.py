@@ -4,6 +4,7 @@ import logging
 import os
 import queue
 import sys
+import threading
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -20,6 +21,25 @@ if _src_dir not in sys.path:
 _finrl_src = os.path.abspath(os.path.join(_src_dir, "..", "external", "FinRL-Trading", "src"))
 if _finrl_src not in sys.path:
     sys.path.append(_finrl_src)
+
+# Pipeline imports at module level — sys.path is set above so AIStock config
+# is already cached before any FinRL sub-imports can shadow it.
+from database import get_session
+from pipeline.base import PipelineStopped
+from pipeline.config import ConfigLoader
+from pipeline.data_update import DataUpdateStep
+from pipeline.deep_evaluation import DeepEvaluationStep
+from pipeline.fast_evaluation import FastEvaluationStep
+from pipeline.logging_utils import attach_queue_logging, detach_queue_logging
+from pipeline.orchestrator import FullPipeline
+from pipeline.stock_selection import StockSelectionStep
+
+_STEP_CLASSES: dict[str, type] = {
+    "data_update": DataUpdateStep,
+    "stock_selection": StockSelectionStep,
+    "fast_evaluation": FastEvaluationStep,
+    "deep_evaluation": DeepEvaluationStep,
+}
 
 # ── Page config (exactly once) ────────────────────────────────────────────────
 st.set_page_config(
@@ -74,95 +94,34 @@ class PageContext:
     session_state: Any  # st.session_state
     pipeline_thread_target: Callable[..., None] = field(default=lambda *_: None)
     predict_only_thread_target: Callable[..., None] = field(default=lambda *_: None)
+    full_pipeline_thread_target: Callable[..., None] = field(default=lambda *_: None)
 
 
 # ── ML Pipeline Thread Infrastructure ─────────────────────────────────────────
 
-class _QueueHandler(logging.Handler):
-    def __init__(self, log_queue: queue.Queue, max_size: int = 10000) -> None:
-        super().__init__()
-        self.log_queue = log_queue
-        self.max_size = max_size
-        self._dropped = 0
-
-    def emit(self, record: logging.LogRecord) -> None:
-        try:
-            if self.log_queue.qsize() >= self.max_size:
-                self._dropped += 1
-                return
-            self.log_queue.put_nowait(self.format(record))
-        except queue.Full:
-            self._dropped += 1
-
-
-class _StdoutToQueue:
-    """Redirect sys.stdout writes to the log queue so print() appears in UI."""
-
-    def __init__(self, log_queue: queue.Queue, original) -> None:
-        self._q = log_queue
-        self._orig = original
-        self._buf = ""
-
-    def write(self, text: str) -> int:
-        self._buf += text
-        while "\n" in self._buf:
-            line, self._buf = self._buf.split("\n", 1)
-            if line:
-                try:
-                    self._q.put_nowait(line)
-                except Exception:
-                    pass
-        return len(text)
-
-    def flush(self) -> None:
-        if self._buf:
-            try:
-                self._q.put_nowait(self._buf)
-            except Exception:
-                pass
-            self._buf = ""
-
-    def __getattr__(self, name):
-        return getattr(self._orig, name)
-
-
 def _pipeline_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> None:
-    import sys as _sys
-    handler = _QueueHandler(log_queue)
-    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+    handler, orig_stdout = attach_queue_logging(log_queue)
     pl = logging.getLogger("pipeline.thread")
-    pl.addHandler(handler)
-    pl.propagate = False
-    orig_stdout = _sys.stdout
-    _sys.stdout = _StdoutToQueue(log_queue, orig_stdout)
     pl.info("=== Pipeline thread started ===")
     pl.info("Config: %s", cfg_overrides)
     try:
         from finrl_runner import run_pipeline_and_save_report
-        report_path = run_pipeline_and_save_report(cfg_overrides)
+        report_path, _ = run_pipeline_and_save_report(cfg_overrides)
         pl.info("=== Pipeline complete. Report: %s ===", report_path)
         log_queue.put_nowait(f"__REPORT__:{report_path}")
     except Exception as exc:
         pl.error("Pipeline failed: %s", exc, exc_info=True)
         log_queue.put_nowait(f"__ERROR__:{exc}")
     finally:
-        _sys.stdout = orig_stdout
-        pl.removeHandler(handler)
+        detach_queue_logging(handler, orig_stdout)
 
 
 def _predict_only_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> None:
-    import sys as _sys
-    handler = _QueueHandler(log_queue)
-    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+    handler, orig_stdout = attach_queue_logging(log_queue)
     pl = logging.getLogger("predict.thread")
-    pl.addHandler(handler)
-    pl.propagate = False
-    orig_stdout = _sys.stdout
-    _sys.stdout = _StdoutToQueue(log_queue, orig_stdout)
     pl.info("=== Predict-only thread started ===")
     try:
         from finrl_runner import run_predict_only, MODELS_DIR
-        from repository import StockRepository
         _repo = StockRepository()
         rows = _repo.get_latest_selected_stocks()
         symbols = [r["ticker"] for r in rows] if rows else None
@@ -174,7 +133,6 @@ def _predict_only_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> 
         pl.info("Predicting %d stocks from selected_stocks table", len(symbols))
         pred_df = run_predict_only(symbols=symbols, source=source)
 
-        # Compute actual returns from prediction date to today (batched)
         import pandas as _pd
         from datetime import date as _date
         actual_returns: list = []
@@ -189,7 +147,6 @@ def _predict_only_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> 
 
         for row in pred_df.itertuples():
             ticker = str(row.ticker).upper()
-            dd = _pd.to_datetime(row.datadate).date()
             stock = stock_map.get(ticker)
             if stock is None:
                 actual_returns.append(None)
@@ -207,7 +164,6 @@ def _predict_only_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> 
         n_actual = sum(1 for a in actual_returns if a is not None)
         pl.info("Computed actual returns for %d/%d stocks", n_actual, len(pred_df))
 
-        # Persist to DB
         try:
             records = pred_df.assign(
                 model_file=str(MODELS_DIR),
@@ -225,8 +181,66 @@ def _predict_only_thread_target(cfg_overrides: dict, log_queue: queue.Queue) -> 
         pl.error("Predict-only failed: %s", exc, exc_info=True)
         log_queue.put_nowait(f"__ERROR__:{exc}")
     finally:
-        _sys.stdout = orig_stdout
-        pl.removeHandler(handler)
+        detach_queue_logging(handler, orig_stdout)
+
+
+def _full_pipeline_thread_target(
+    cfg_overrides: dict,
+    selected_steps: list[str],
+    log_queue: queue.Queue,
+    stop_event: threading.Event | None = None,
+) -> None:
+    """Run the OOP full pipeline in a background thread, streaming logs to the UI."""
+    from pathlib import Path as _Path
+
+    handler, orig_stdout = attach_queue_logging(log_queue)
+    pl = logging.getLogger("pipeline.thread")
+    pl.info("=== Full Pipeline thread started ===")
+    pl.info("Steps: %s", selected_steps)
+    if stop_event is not None and stop_event.is_set():
+        pl.info("Stop requested before pipeline started — exiting.")
+        log_queue.put_nowait("__STOP__:Cancelled before start")
+        detach_queue_logging(handler, orig_stdout)
+        return
+    try:
+        steps = [_STEP_CLASSES[name]() for name in selected_steps if name in _STEP_CLASSES]
+        if not steps:
+            pl.error("No valid steps selected.")
+            log_queue.put_nowait("__ERROR__:No valid steps selected")
+            return
+
+        loader = ConfigLoader("config.yaml")
+        cfg = loader.load()
+        for key_path, value in cfg_overrides.items():
+            cfg_part = cfg
+            parts = key_path.split(".")
+            for part in parts[:-1]:
+                cfg_part = cfg_part.setdefault(part, {})
+            cfg_part[parts[-1]] = value
+
+        report_root = _Path("reports/full_pipeline")
+        report_root.mkdir(parents=True, exist_ok=True)
+
+        pipeline = FullPipeline(
+            steps=steps,
+            cfg=cfg,
+            session_factory=get_session,
+            report_root=report_root,
+            logger=pl,
+            stop_event=stop_event,
+        )
+        run_id = pipeline.run()
+        loader.write_effective(report_root / str(run_id) / "effective_config.yaml")
+        pl.info("=== Full Pipeline complete. Run ID: %d ===", run_id)
+        log_queue.put_nowait(f"__REPORT__:{report_root / str(run_id)}")
+    except PipelineStopped:
+        pl.info("=== Pipeline stopped by user ===")
+        log_queue.put_nowait("__STOP__:Stopped by user")
+    except Exception as exc:
+        pl.error("Full Pipeline failed: %s", exc, exc_info=True)
+        log_queue.put_nowait(f"__ERROR__:{exc}")
+    finally:
+        detach_queue_logging(handler, orig_stdout)
 
 
 # ── Sidebar helpers ──────────────────────────────────────────────────────────
@@ -244,9 +258,11 @@ def display_quick_stats(repo: StockRepository) -> None:
 
 from ui.pages import (  # noqa: E402 — imports after sys.path setup
     render_job_history, render_live_trading, render_ml_pipeline,
-    render_overview, render_paper_trading, render_portfolio,
-    render_settings, render_stock_lookup, render_stock_manager,
-    render_stock_screener, render_stock_technical, render_strategy_backtest,
+    render_full_pipeline, render_paper_trading, render_portfolio,
+    render_deep_evaluation, render_fast_evaluation, render_selected_stocks,
+    render_settings, render_stock_lookup,
+    render_stock_manager, render_stock_screener, render_stock_technical,
+    render_strategy_backtest,
 )
 
 
@@ -274,36 +290,35 @@ def _build_ctx() -> PageContext:
             session_state=st.session_state,
             pipeline_thread_target=_pipeline_thread_target,
             predict_only_thread_target=_predict_only_thread_target,
+            full_pipeline_thread_target=_full_pipeline_thread_target,
         )
     return st.session_state.ctx
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
-@st.fragment
 def sidebar_nav():
-    with st.sidebar:
-        st.markdown('<h2 style="color:#1e293b;margin:0 0 4px">📈 AIStock</h2>', unsafe_allow_html=True)
-        st.markdown('<p style="color:#64748b;font-size:12px;margin:0 0 16px">Trading Platform</p>', unsafe_allow_html=True)
-        st.divider()
-
-        page = st.selectbox(
-            "Navigation",
-            ["Overview", "Stock Data", "ML Pipeline", "Strategy Backtesting",
-             "Live Trading", "Paper Trading", "Portfolio Analysis", "Settings",
-             "Job History"],
-            label_visibility="collapsed",
-        )
-
-        st.divider()
-        display_quick_stats(repo)
+    page = st.selectbox(
+        "Navigation",
+        ["Full Pipeline", "Selected Stocks", "Fast Evaluation", "Deep Evaluation", "Stock Data", "ML Pipeline",
+         "Strategy Backtesting", "Live Trading", "Paper Trading",
+         "Portfolio Analysis", "Settings", "Job History"],
+        label_visibility="collapsed",
+        key="nav_selectbox",
+    )
     return page
 
 
 @st.fragment
 def render_page_content(page, ctx):
-    if page == "Overview":
-        render_overview(ctx)
+    if page == "Full Pipeline":
+        render_full_pipeline(ctx)
+    elif page == "Selected Stocks":
+        render_selected_stocks(ctx)
+    elif page == "Fast Evaluation":
+        render_fast_evaluation(ctx)
+    elif page == "Deep Evaluation":
+        render_deep_evaluation(ctx)
     elif page == "Stock Data":
         page_stock_data(ctx)
     elif page == "ML Pipeline":
@@ -323,7 +338,13 @@ def render_page_content(page, ctx):
 
 
 def main() -> None:
-    page = sidebar_nav()
+    with st.sidebar:
+        st.markdown('<h2 style="color:#1e293b;margin:0 0 4px">📈 AIStock</h2>', unsafe_allow_html=True)
+        st.markdown('<p style="color:#64748b;font-size:12px;margin:0 0 16px">Trading Platform</p>', unsafe_allow_html=True)
+        st.divider()
+        page = sidebar_nav()
+        st.divider()
+        display_quick_stats(repo)
     ctx = _build_ctx()
     render_page_content(page, ctx)
 

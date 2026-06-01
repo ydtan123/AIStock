@@ -16,6 +16,9 @@ class ScoredTicker:
     ticker: str
     ml_score: float
     sector: str | None = None
+    bucket: str | None = None
+    weight: float | None = None
+    predicted_return: float | None = None
 
 
 class _Registry:
@@ -63,8 +66,8 @@ class StockSelector(ABC):
 # --- Concrete backend: FinrlStockSelector ------------------------------------
 # NOTE: sys.path hazard — external/FinRL-Trading/src/data/data_fetcher.py
 # inserts itself at sys.path[0] on import. We pre-import AIStock's config/
-# database/repository/models inside _run_finrl_pipeline before importing
-# finrl_pipeline.
+# database/repository/models inside _run_finrl_runner before importing
+# finrl_runner.
 
 import logging
 
@@ -73,17 +76,17 @@ from repository import StockRepository
 logger = logging.getLogger(__name__)
 
 
-def _run_finrl_pipeline(cfg_overrides: dict) -> dict:
+def _run_finrl_runner(cfg_overrides: dict) -> dict:
     """Indirection seam — tests monkeypatch this."""
     import config  # noqa: F401
     import database  # noqa: F401
     import repository  # noqa: F401
     import models  # noqa: F401
 
-    from finrl_pipeline import run_pipeline_and_save_report
+    from finrl_runner import run_pipeline_and_save_report
 
-    csv_path = run_pipeline_and_save_report(cfg_overrides)
-    return {"csv_path": str(csv_path), "selected_stocks": []}
+    csv_path, selected_stocks = run_pipeline_and_save_report(cfg_overrides)
+    return {"csv_path": str(csv_path), "selected_stocks": selected_stocks}
 
 
 @SELECTOR_REGISTRY.register
@@ -96,17 +99,34 @@ class FinrlStockSelector(StockSelector):
     def select(self, ctx: StepContext) -> list[ScoredTicker]:
         sub_cfg = self.cfg or ctx.cfg.get("stock_selection", {}).get("finrl", {})
         ctx.logger.info("FinrlStockSelector starting with cfg=%s", sub_cfg)
-        _run_finrl_pipeline(sub_cfg)
+        result = _run_finrl_runner(sub_cfg)
+        selected_stocks = result.get("selected_stocks") or []
 
-        repo = StockRepository()
-        rows = repo.get_latest_selected_stocks()
-        out: list[ScoredTicker] = [
-            ScoredTicker(
-                ticker=row["ticker"],
-                ml_score=float(row.get("ml_score") or 0.0),
-                sector=row.get("sector") or row.get("bucket"),
-            )
-            for row in rows
-        ]
+        if selected_stocks:
+            out: list[ScoredTicker] = [
+                ScoredTicker(
+                    ticker=rec["ticker"],
+                    ml_score=float(rec.get("ml_score") or 0.0),
+                    sector=rec.get("bucket"),
+                    bucket=rec.get("bucket"),
+                    weight=float(rec["weight"]) if rec.get("weight") is not None else None,
+                    predicted_return=float(rec.get("ml_score") or 0.0),
+                )
+                for rec in selected_stocks
+            ]
+        else:
+            repo = StockRepository()
+            rows = repo.get_latest_selected_stocks()
+            out = [
+                ScoredTicker(
+                    ticker=row["ticker"],
+                    ml_score=float(row.get("ml_score") or 0.0),
+                    sector=row.get("sector") or row.get("bucket"),
+                    bucket=row.get("bucket"),
+                    weight=float(row["weight"]) if row.get("weight") is not None else None,
+                    predicted_return=float(row.get("ml_score") or 0.0),
+                )
+                for row in rows
+            ]
         ctx.logger.info("FinrlStockSelector produced %d tickers", len(out))
         return out

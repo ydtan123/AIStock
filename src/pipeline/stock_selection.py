@@ -57,13 +57,14 @@ class StockSelectionStep(PipelineStep):
                 ticker=t.ticker,
                 model_name=backend_name,
                 ml_score=t.ml_score,
-                bucket=None,
-                weight=None,
+                bucket=t.bucket,
+                weight=t.weight,
                 date_selected=now.date(),
                 pipeline_run_at=now,
                 pipeline_run_id=ctx.run_id,
                 sector=t.sector,
                 backend=backend_name,
+                predicted_return=t.predicted_return,
             ) for t in tickers]
             session.add_all(rows)
             session.commit()

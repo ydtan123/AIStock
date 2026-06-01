@@ -6,7 +6,11 @@ import pandas as pd
 from sqlalchemy import text
 
 from database import get_session
-from models import DailyPrice, ScheduledJobRun, SelectedStock, Stock, StockIndicator, StockSnapshot, TechnicalIndicator
+from models import (
+    DailyPrice, DeepEvaluationRow, FastEvaluationAnalyst,
+    FastEvaluationConclusion, PipelineRun, ScheduledJobRun,
+    SelectedStock, Stock, StockIndicator, StockSnapshot, TechnicalIndicator,
+)
 
 
 @dataclass
@@ -116,8 +120,19 @@ class StockRepository:
             )
             if df.empty:
                 return df
-            # Expand the JSON indicators column into separate columns
-            expanded = pd.json_normalize(df.pop("indicators").where(df["indicators"].notna(), {}))
+            if "indicators" not in df.columns:
+                return df
+            # Pop first — df.pop removes the column, so referencing
+            # df["indicators"] after the pop raises KeyError on newer pandas.
+            s = df.pop("indicators")
+            # pd.read_sql may return JSON columns as raw strings; parse them.
+            import json as _json
+            _parsed = s.apply(
+                lambda v: _json.loads(v)
+                if isinstance(v, str) and v.strip()
+                else (v if isinstance(v, dict) else {})
+            )
+            expanded = pd.json_normalize(_parsed)
             result = pd.concat([df, expanded], axis=1)
             return result
         return self._with_session(_query)
@@ -315,6 +330,101 @@ class StockRepository:
                 }
                 for r in rows
             ]
+        return self._with_session(_query)
+
+    # -- pipeline run queries --------------------------------------------------
+
+    def get_recent_pipeline_runs(self, limit: int = 20) -> list[dict]:
+        def _query(s):
+            rows = (
+                s.query(PipelineRun)
+                .order_by(PipelineRun.started_at.desc())
+                .limit(limit)
+                .all()
+            )
+            return [
+                {
+                    "id": r.id,
+                    "started_at": r.started_at,
+                    "finished_at": r.finished_at,
+                    "status": r.status,
+                }
+                for r in rows
+            ]
+        return self._with_session(_query)
+
+    def get_selected_stocks_for_run(self, run_id: int) -> list[dict]:
+        def _query(s):
+            rows = (
+                s.query(SelectedStock)
+                .filter(SelectedStock.pipeline_run_id == run_id)
+                .order_by(SelectedStock.ml_score.desc())
+                .all()
+            )
+            return [
+                {
+                    "ticker": r.ticker,
+                    "ml_score": r.ml_score,
+                    "sector": r.sector,
+                    "bucket": r.bucket,
+                    "weight": r.weight,
+                    "predicted_return": r.predicted_return,
+                    "date_selected": r.date_selected,
+                    "backend": r.backend,
+                }
+                for r in rows
+            ]
+        return self._with_session(_query)
+
+    def get_fast_eval_for_run(self, run_id: int) -> dict[str, dict]:
+        def _query(s):
+            rows = s.query(FastEvaluationConclusion).filter_by(pipeline_run_id=run_id).all()
+            return {
+                r.ticker: {
+                    "consensus_score": r.consensus_score,
+                    "positive": r.positive_count,
+                    "negative": r.negative_count,
+                    "neutral": r.neutral_count,
+                    "total": r.total_count,
+                    "model_name": r.model_name,
+                }
+                for r in rows
+            }
+        return self._with_session(_query)
+
+    def get_fast_eval_analysts_for_ticker(self, run_id: int, ticker: str) -> list[dict]:
+        def _query(s):
+            rows = (
+                s.query(FastEvaluationAnalyst)
+                .filter_by(pipeline_run_id=run_id, ticker=ticker)
+                .order_by(FastEvaluationAnalyst.confidence.desc())
+                .all()
+            )
+            return [
+                {
+                    "analyst": r.analyst_name,
+                    "opinion": r.opinion,
+                    "confidence": r.confidence,
+                    "reasoning": r.reasoning,
+                }
+                for r in rows
+            ]
+        return self._with_session(_query)
+
+    def get_deep_eval_for_run(self, run_id: int) -> dict[str, dict]:
+        def _query(s):
+            rows = s.query(DeepEvaluationRow).filter_by(pipeline_run_id=run_id).all()
+            return {
+                r.ticker: {
+                    "final_decision": r.final_decision,
+                    "research_manager_decision": r.research_manager_decision,
+                    "trader_plan": r.trader_plan,
+                    "bull_argument": r.bull_argument,
+                    "bear_argument": r.bear_argument,
+                    "market_report": r.market_report,
+                }
+                for r in rows
+            }
         return self._with_session(_query)
 
     def get_job_runs(self, limit: int = 100) -> pd.DataFrame:

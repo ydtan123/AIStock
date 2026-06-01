@@ -4,7 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Stock Data Ingestion, ML Stock Selection & Visualization System. Two parallel subsystems share a MySQL database: (1) AIStock — price/fundamental ingestion + XGBoost prediction per stock; (2) FinRL-Trading (git submodule at `external/FinRL-Trading/`) — sector-based ML pipeline that selects a portfolio from S&P 500.
+Stock Data Ingestion, ML Stock Selection, Evaluation & Visualization System. Four subsystems share a MySQL database:
+
+- **AIStock** (`src/`) — price/fundamental ingestion, 4-step pipeline orchestration, Streamlit web app
+- **FinRL-Trading** (`external/FinRL-Trading/`) — sector ML stock selection via `run_bucket()`
+- **TradingAgents** (`external/TradingAgents/`) — multi-agent LLM deep evaluation of selected stocks
+- **ai-hedge-fund** (`external/ai-hedge-fund/`) — multi-analyst LLM fast evaluation of selected stocks
 
 ## Tech Stack
 
@@ -13,7 +18,7 @@ Stock Data Ingestion, ML Stock Selection & Visualization System. Two parallel su
 - **Database**: MySQL via `pymysql`
 - **Data sources**: Alpha Vantage, yfinance, or AIStock DB (for FinRL pipeline)
 - **Web app**: Streamlit + Plotly (`plotly.graph_objects`)
-- **ML**: XGBoost (per-stock prediction), Ridge/Stacking ensemble (sector ML via FinRL)
+- **ML**: Ridge/Stacking ensemble (sector ML via FinRL)
 
 ## Commands
 
@@ -25,13 +30,6 @@ PYTHONPATH=src streamlit run src/app.py
 PYTHONPATH=src python src/full_pipeline.py
 PYTHONPATH=src python src/full_pipeline.py --resume-from fast_evaluation --run-id 42
 PYTHONPATH=src python src/full_pipeline.py --set fast_evaluation.top_n=5
-
-# Run ML pipeline (standalone)
-PYTHONPATH=src python src/finrl_pipeline.py --source AISTOCK_DB --start-date 2020-01-01
-
-# Fetch data for a symbol
-PYTHONPATH=src python src/main.py --symbol AAPL
-PYTHONPATH=src python src/main.py --symbol AAPL --incremental
 
 # Initialize DB tables
 python -c "import sys; sys.path.insert(0,'src'); from database import engine; from models import Base; Base.metadata.create_all(engine)"
@@ -69,18 +67,13 @@ database:
 ```
 config.py         loads config.yaml — import this before database.py
 database.py       engine + get_session() — depends on config.py
-models.py         SQLAlchemy models (~400 lines, 16 tables)
+models.py         SQLAlchemy models (~400 lines, 14 tables)
 repository.py     StockRepository — all DB queries go here
 fetcher/          FetcherBase + AlphaVantage/Yahoo implementations, TokenBucket rate limiter
 ingestion/        pipeline.py (batch ingest), indicators.py, symbols.py
-model/            XGBoost per-stock prediction
-  labels.py         LabelMethod subclasses registered in LABEL_METHODS list
-  feature_builder.py  rolling 5-day window features
-  train.py          train(label_method, ...) → metrics dict; stores to DB
-  inference.py      predict_stocks([symbols], label_method) → list[dict]
 scheduler.py      APScheduler wrapping ingestion pipeline
-app.py            Streamlit dashboard (single file, ~2200 lines)
-finrl_pipeline.py orchestrates FinRL ML pipeline; run standalone or called from app.py
+app.py            Streamlit entry point (~350 lines); routes to src/ui/pages/
+ui/pages/         one module per page (overview, selected_stocks, fast_evaluation_page, deep_evaluation_page, ml_pipeline, stock_lookup, stock_technical, stock_screener, stock_manager, strategy_backtest, live_trading, paper_trading, portfolio, settings, job_history)
 ml_bucket_selector.py  MLBucketSelector class wrapping external run_bucket()
 full_pipeline.py  CLI shim for OOP pipeline orchestrator
 pipeline/         OOP pipeline package
@@ -118,19 +111,24 @@ Only these paths matter for AIStock integration:
 - `strategies/ml_bucket_selection.py` — `run_bucket()`, `FEATURE_COLS`, `SECTOR_TO_BUCKET`
 - `data/data_fetcher.py` — `AIStockDBSource` added by this project; `create_data_source("aistock_db")`
 
-### Dashboard Pages (`src/app.py`)
+### Dashboard Pages (`src/app.py` + `src/ui/pages/`)
 
 Sidebar `st.selectbox` routes to these page functions:
 
 | Page | Function | Notes |
 |------|----------|-------|
-| Overview | `show_overview()` | Quick stats |
-| Stock Data | `page_stock_data()` | 5 tabs: Lookup, Technical, Screener, Manager, Predictions |
-| ML Pipeline | `show_ml_pipeline()` | Runs `finrl_pipeline` in background thread; streams logs via queue |
-| Strategy Backtesting | `show_strategy_backtesting()` | |
-| Live / Paper Trading | `show_live_trading()` / `show_paper_trading()` | |
-| Portfolio Analysis | `show_portfolio_analysis()` | |
-| Settings | `show_settings()` | |
+| Full Pipeline | `render_full_pipeline()` | 4-step OOP pipeline with real-time log streaming |
+| Selected Stocks | `render_selected_stocks()` | ML-selected stocks table with detail popup |
+| Fast Evaluation | `render_fast_evaluation()` | Per-run/per-stock analyst breakdown |
+| Deep Evaluation | `render_deep_evaluation()` | Per-run/per-stock LLM agent reports |
+| Stock Data | `page_stock_data()` | Tabs: Lookup, Technical, Screener, Manager, Predictions |
+| ML Pipeline | `render_ml_pipeline()` | Runs FinRL ML pipeline in background thread; streams logs |
+| Strategy Backtesting | `render_strategy_backtest()` | |
+| Live Trading | `render_live_trading()` | |
+| Paper Trading | `render_paper_trading()` | |
+| Portfolio Analysis | `render_portfolio()` | |
+| Settings | `render_settings()` | |
+| Job History | `render_job_history()` | |
 
 ### ML Pipeline Data Flow
 
@@ -142,14 +140,6 @@ Sidebar `st.selectbox` routes to these page functions:
 6. `data/selection_report_YYYYMMDD.csv` — final output
 
 Log streaming: a `_QueueHandler` + `_StdoutToQueue` wrapper redirect both `logging` and `print()` from the pipeline thread into a `queue.Queue` that the Streamlit UI polls every 0.5 s.
-
-### XGBoost Per-Stock Model
-
-- Features: rolling 5-day window of OHLCV + technical indicators
-- Labels: binary (defined by `LabelMethod` subclasses in `model/labels.py`; add new methods there)
-- Stored in DB: `sample_features`, `sample_labels` tables
-- Model files: `MODEL_DIR` (default `models/`) — one pickle per label method
-- `train()` runs parallel symbol processing with `ThreadPoolExecutor`
 
 ### Benchmark Comparison
 
@@ -166,11 +156,6 @@ Log streaming: a `_QueueHandler` + `_StdoutToQueue` wrapper redirect both `loggi
 - **stock_snapshots**: `stock_id` PK — screening fast-lookup table
 - **quarterly_fundamentals**: `(stock_id, symbol, datadate)` — 70+ financial metrics per stock-quarter
 
-### ML tables
-
-- **sample_features** / **sample_labels**: rolling window ML inputs/outputs per stock+date+label
-- **stock_predictions**: `(stock_id, label_method)` PK — `probability`, `input_end_date`
-
 ### Pipeline & scheduling
 
 - **pipeline_runs**: `id`, `started_at`, `finished_at`, `symbols_processed`, `errors_count`, `status`
@@ -179,7 +164,6 @@ Log streaming: a `_QueueHandler` + `_StdoutToQueue` wrapper redirect both `loggi
 - **fast_evaluation_analysts**: `(pipeline_run_id, ticker)` — one row per analyst opinion with `confidence` and `reasoning`
 - **deep_evaluation**: `(pipeline_run_id, ticker)` — wide row of per-agent text fields (`market_report`, `bull_argument`, `bear_argument`, `research_manager_decision`, `trader_plan`) plus `extra_outputs` JSON for backend-specific data; `final_decision` ∈ {BUY, SELL, HOLD}
 - **schema_migrations**: `version` PK — tracks applied raw-SQL migrations for idempotency
-- **scheduled_job_runs**: APScheduler job execution history
 
 ## MCP Tools: code-review-graph
 
@@ -204,8 +188,6 @@ Graph auto-updates on file changes via hooks. 7 communities, 0 cross-community e
 - Domain docs: `CONTEXT.md` + `docs/adr/` at repo root
 
 
-## Security Audit Checklist 
-
 ## Security / Performance Audits — On-Demand Only
 
 Security audits and performance audits are **gated**: only run when the user explicitly requests them via `/security-audit`, `/performance-audit`, or an explicit "run a security audit" / "run a performance audit" command. Do NOT auto-trigger on code changes, edits, or session start.
@@ -219,6 +201,3 @@ When explicitly requested:
 
 All reports write to docs/ as markdown, never chat-only. JSON alongside .md for structured outputs.
 
-## Project Overview
-
-Python/Streamlit (AIStock). Use pytest, Streamlit patterns, parallel agents for 50+ file exploration.

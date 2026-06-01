@@ -1,5 +1,7 @@
 import pandas as pd
 
+from utils import nan_safe  # noqa: F401 — re-exported for backward compat
+
 
 def fmt_market_cap(val) -> str:
     try:
@@ -15,14 +17,3 @@ def fmt_market_cap(val) -> str:
     if val >= 1_000_000:
         return f"${val/1_000_000:.1f}M"
     return f"${val:,}"
-
-
-def nan_safe(fn):
-    def _f(x):
-        try:
-            if x is None or (isinstance(x, float) and pd.isna(x)):
-                return "—"
-            return fn(x)
-        except (TypeError, ValueError):
-            return "—"
-    return _f

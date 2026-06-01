@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from pipeline.backends.selectors import _Registry
-from pipeline.base import StepContext
+from pipeline.base import RegisteredBackend, StepContext
 
 logger = logging.getLogger(__name__)
 
@@ -39,14 +39,8 @@ class FastEvaluation:
 FAST_EVALUATOR_REGISTRY = _Registry("fast_evaluator")
 
 
-class FastEvaluator(ABC):
+class FastEvaluator(RegisteredBackend):
     name: str = ""
-
-    def __init__(self):
-        if not self.name:
-            raise TypeError(
-                f"{type(self).__name__} must define a non-empty `name` class attribute"
-            )
 
     @abstractmethod
     def evaluate(self, tickers: list[str], ctx: StepContext) -> list[FastEvaluation]: ...

@@ -4,6 +4,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import logging
+import threading
 import traceback
 from contextlib import contextmanager
 from pathlib import Path
@@ -12,6 +13,7 @@ from typing import Any, Callable
 from models import PipelineRun
 from pipeline.base import (
     PipelineError,
+    PipelineStopped,
     PipelineStep,
     StepContext,
     StepResult,
@@ -81,6 +83,7 @@ class FullPipeline:
         resume_from: str | None = None,
         run_id: int | None = None,
         only: str | None = None,
+        stop_event: threading.Event | None = None,
     ):
         self.steps = steps
         self.cfg = cfg
@@ -92,6 +95,11 @@ class FullPipeline:
         if resume_from and run_id is None:
             raise ValueError("run_id is required when resume_from is specified")
         self.run_id = run_id
+        self.stop_event = stop_event
+
+    def _check_stop(self) -> None:
+        if self.stop_event is not None and self.stop_event.is_set():
+            raise PipelineStopped("Pipeline stopped by user")
 
     def run(self) -> int:
         run_id = self._init_run()
@@ -105,30 +113,40 @@ class FullPipeline:
             logger=self.logger,
             session_factory=self.session_factory,
             prior_results=self._load_prior_results(report_dir),
+            stop_event=self.stop_event,
         )
 
         steps_to_run = self._select_steps()
-        for step in steps_to_run:
-            self.logger.info("=== running step: %s ===", step.name)
-            try:
-                result = step.run(ctx)
-            except Exception as e:
-                tb = traceback.format_exc()
-                result = StepResult(
-                    step_name=step.name,
-                    status="failed",
-                    summary={},
-                    error=f"{type(e).__name__}: {e}\n{tb}",
-                )
-            self._write_step_report(report_dir, result)
-            ctx.prior_results[step.name] = result
+        try:
+            for step in steps_to_run:
+                self._check_stop()
+                self.logger.info("=== running step: %s ===", step.name)
+                try:
+                    result = step.run(ctx)
+                except PipelineStopped:
+                    raise
+                except Exception as e:
+                    tb = traceback.format_exc()
+                    result = StepResult(
+                        step_name=step.name,
+                        status="failed",
+                        summary={},
+                        error=f"{type(e).__name__}: {e}\n{tb}",
+                    )
+                self._write_step_report(report_dir, result)
+                self.logger.info("=== step complete: %s ===", step.name)
+                ctx.prior_results[step.name] = result
 
-            if result.status == "failed":
-                self._mark_run(run_id, status="failed")
-                self._write_summary(report_dir, ctx.prior_results, status="failed")
-                raise PipelineError(
-                    f"step {step.name!r} failed: {result.error}"
-                )
+                if result.status == "failed":
+                    self._mark_run(run_id, status="failed")
+                    self._write_summary(report_dir, ctx.prior_results, status="failed")
+                    raise PipelineError(
+                        f"step {step.name!r} failed: {result.error}"
+                    )
+        except PipelineStopped:
+            self._mark_run(run_id, status="stopped")
+            self._write_summary(report_dir, ctx.prior_results, status="stopped")
+            raise
 
         self._mark_run(run_id, status="success")
         self._write_summary(report_dir, ctx.prior_results, status="success")
