@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""Download stocks in a market index (e.g. S&P 500) and store in stocks_in_index table.
+"""Download stocks in a market index and store in stocks_in_index table.
 
 Usage:
     python scripts/fetch_index_stocks.py                    # default: S&P 500
     python scripts/fetch_index_stocks.py --index "S&P 500"
     python scripts/fetch_index_stocks.py --index "NASDAQ-100"
+    python scripts/fetch_index_stocks.py --index "Dow Jones"
+    python scripts/fetch_index_stocks.py --dry-run
 
-The S&P 500 list is scraped from Wikipedia.
-Other indices can be added by implementing their fetch functions.
+Supported indices:
+    - S&P 500     (Wikipedia: List of S&P 500 companies)
+    - NASDAQ-100  (Wikipedia: Nasdaq-100)
+    - Dow Jones   (Wikipedia: Dow Jones Industrial Average)
 """
 
 import argparse
@@ -33,10 +37,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger("fetch_index_stocks")
 
-# -- Wikipedia URL for S&P 500 ------------------------------------------------
-SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+HEADERS = {"User-Agent": "AIStock/1.0 (stock data collection; contact@example.com)"}
 
-# Column mapping: Wikipedia table column -> DB column
+# -- Wikipedia URLs -----------------------------------------------------------
+SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+NASDAQ100_URL = "https://en.wikipedia.org/wiki/Nasdaq-100"
+DJIA_URL = "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average"
+
+# -- Column mappings: Wikipedia column -> DB column ---------------------------
 SP500_COLUMN_MAP = {
     "Symbol": "symbol",
     "Security": "security",
@@ -48,28 +56,112 @@ SP500_COLUMN_MAP = {
     "Founded": "founded",
 }
 
+NASDAQ100_COLUMN_MAP = {
+    "Ticker": "symbol",
+    "Company": "security",
+    "ICB Industry": "gics_sector",
+    "ICB Subsector": "gics_sub_industry",
+}
 
-HEADERS = {"User-Agent": "AIStock/1.0 (stock data collection; contact@example.com)"}
+DJIA_COLUMN_MAP = {
+    "Symbol": "symbol",
+    "Company": "security",
+    "Exchange": "exchange",
+    "Sector": "gics_sector",
+    "Date added": "date_added",
+    "Notes": "notes",
+    "Index weighting": "index_weighting",
+}
 
+# -- Known stock symbols in the DB for symbol column (uppercase) --------------
+# DB daily_prices table has symbols without dots (BRKB not BRK.B).
+# Wikipedia S&P 500 / DJIA also use dots. Keep Wikipedia symbol as-is for
+# cross-referencing; the DB lookup can strip dots when needed.
+
+
+def _fetch_html(url: str) -> str:
+    """Fetch a Wikipedia page and return HTML text."""
+    resp = requests.get(url, headers=HEADERS, timeout=30)
+    resp.raise_for_status()
+    return resp.text
+
+
+def _find_table_by_columns(html: str, required_cols: list[str]) -> pd.DataFrame:
+    """Find the first <table> in HTML whose header row contains all required_cols.
+
+    Column headers are cleaned: footnote references like ``[14]`` are stripped
+    so that "ICB Industry[14]" matches "ICB Industry".
+    """
+    import re
+
+    tables = pd.read_html(io.StringIO(html))
+    for i, df in enumerate(tables):
+        headers_lower = {re.sub(r"\[.*", "", str(c).strip()).lower() for c in df.columns}
+        if all(rc.lower() in headers_lower for rc in required_cols):
+            logger.info("Matched table index %d (columns: %s)", i, list(df.columns))
+            return _strip_footnotes(df)
+    raise ValueError(
+        f"No table found with required columns: {required_cols}. "
+        f"Checked {len(tables)} tables."
+    )
+
+
+def _strip_footnotes(df: pd.DataFrame) -> pd.DataFrame:
+    """Remove Wikipedia footnote references like ``[14]`` from column names."""
+    import re
+
+    df = df.rename(columns=lambda c: re.sub(r"\[.*", "", str(c)).strip())
+    return df
+
+
+# -- Fetcher functions --------------------------------------------------------
 
 def fetch_sp500() -> pd.DataFrame:
     """Scrape the S&P 500 components table from Wikipedia."""
     logger.info("Fetching S&P 500 from Wikipedia...")
-    resp = requests.get(SP500_URL, headers=HEADERS, timeout=30)
-    resp.raise_for_status()
-    tables = pd.read_html(io.StringIO(resp.text))
-    # The first table (index 0) is the S&P 500 components table
-    df = tables[0]
+    html = _fetch_html(SP500_URL)
+    df = _find_table_by_columns(html, ["Symbol", "Security", "GICS Sector"])
     df = df.rename(columns=SP500_COLUMN_MAP)
     df["index_name"] = "S&P 500"
     logger.info("Fetched %d stocks from S&P 500 table", len(df))
     return df
 
 
+def fetch_nasdaq100() -> pd.DataFrame:
+    """Scrape the NASDAQ-100 components table from Wikipedia."""
+    logger.info("Fetching NASDAQ-100 from Wikipedia...")
+    html = _fetch_html(NASDAQ100_URL)
+    df = _find_table_by_columns(html, ["Ticker", "Company"])
+    df = df.rename(columns=NASDAQ100_COLUMN_MAP)
+    df["index_name"] = "NASDAQ-100"
+    logger.info("Fetched %d stocks from NASDAQ-100 table", len(df))
+    return df
+
+
+def fetch_djia() -> pd.DataFrame:
+    """Scrape the Dow Jones Industrial Average components from Wikipedia."""
+    logger.info("Fetching Dow Jones from Wikipedia...")
+    html = _fetch_html(DJIA_URL)
+    df = _find_table_by_columns(html, ["Symbol", "Company", "Sector"])
+    df = df.rename(columns=DJIA_COLUMN_MAP)
+    df["index_name"] = "Dow Jones"
+    logger.info("Fetched %d stocks from Dow Jones table", len(df))
+    return df
+
+
 # Registry of supported indices
 FETCHERS = {
     "S&P 500": fetch_sp500,
+    "NASDAQ-100": fetch_nasdaq100,
+    "Dow Jones": fetch_djia,
 }
+
+# All known DB columns (kept in sync with DDL below)
+_DB_COLUMNS = [
+    "index_name", "symbol", "security", "gics_sector", "gics_sub_industry",
+    "headquarters_location", "date_added", "cik", "founded",
+    "exchange", "notes", "index_weighting",
+]
 
 
 def create_table(engine) -> None:
@@ -86,6 +178,9 @@ def create_table(engine) -> None:
             date_added DATE,
             cik VARCHAR(20),
             founded VARCHAR(255),
+            exchange VARCHAR(50),
+            notes VARCHAR(255),
+            index_weighting VARCHAR(20),
             fetched_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             UNIQUE KEY uq_index_symbol (index_name, symbol),
             INDEX ix_index_name (index_name),
@@ -98,83 +193,80 @@ def create_table(engine) -> None:
     logger.info("Table stocks_in_index ready.")
 
 
+def _coerce_str(val) -> str | None:
+    """Safe string coercion for a DataFrame cell value."""
+    if pd.isna(val):
+        return None
+    s = str(val).strip()
+    return s if s else None
+
+
+def _coerce_date(val) -> datetime | None:
+    """Safe date coercion. Returns None on failure."""
+    if pd.isna(val):
+        return None
+    try:
+        return pd.Timestamp(val).date()
+    except Exception:
+        return None
+
+
 def upsert_stocks(engine, df: pd.DataFrame) -> int:
-    """Insert or update stocks in the stocks_in_index table. Returns row count."""
+    """Insert or update stocks in the stocks_in_index table. Returns row count.
+
+    Only columns present in *both* the DataFrame and the DB table are touched.
+    This allows different indices to contribute different subsets of fields.
+    """
     now = datetime.now()
+    # Only consider columns that exist in both the DataFrame and the DB schema
+    cols = [c for c in _DB_COLUMNS if c in df.columns]
 
     with Session(engine) as session:
         inserted = 0
         updated = 0
         for _, row in df.iterrows():
-            symbol = str(row["symbol"]).strip()
-            index_name = str(row["index_name"]).strip()
-            security = str(row.get("security", "")).strip() if pd.notna(row.get("security")) else None
-            gics_sector = str(row.get("gics_sector", "")).strip() if pd.notna(row.get("gics_sector")) else None
-            gics_sub_industry = str(row.get("gics_sub_industry", "")).strip() if pd.notna(row.get("gics_sub_industry")) else None
-            headquarters_location = str(row.get("headquarters_location", "")).strip() if pd.notna(row.get("headquarters_location")) else None
-            cik = str(row.get("cik", "")).strip() if pd.notna(row.get("cik")) else None
-            founded = str(row.get("founded", "")).strip() if pd.notna(row.get("founded")) else None
+            symbol = _coerce_str(row.get("symbol"))
+            index_name = _coerce_str(row.get("index_name"))
+            if not symbol or not index_name:
+                continue
 
-            # Parse date_added (format: YYYY-MM-DD)
-            date_added = None
-            raw_date = row.get("date_added")
-            if pd.notna(raw_date):
-                try:
-                    date_added = pd.Timestamp(raw_date).date()
-                except Exception:
-                    pass
+            # Build row values dict from available columns
+            values: dict[str, str | datetime | None] = {}
+            for col in cols:
+                if col == "date_added":
+                    values[col] = _coerce_date(row.get(col))
+                elif col in ("symbol", "index_name"):
+                    values[col] = _coerce_str(row.get(col))
+                else:
+                    values[col] = _coerce_str(row.get(col))
 
             # Check if row exists
             result = session.execute(
                 text(
-                    "SELECT id FROM stocks_in_index WHERE index_name = :idx AND symbol = :sym"
+                    "SELECT id FROM stocks_in_index "
+                    "WHERE index_name = :idx AND symbol = :sym"
                 ),
                 {"idx": index_name, "sym": symbol},
             ).fetchone()
 
             if result:
-                session.execute(
-                    text(
-                        """UPDATE stocks_in_index
-                           SET security = :sec, gics_sector = :gs, gics_sub_industry = :gsi,
-                               headquarters_location = :hl, date_added = :da, cik = :cik,
-                               founded = :fnd, fetched_at = :now
-                           WHERE id = :id"""
-                    ),
-                    {
-                        "sec": security,
-                        "gs": gics_sector,
-                        "gsi": gics_sub_industry,
-                        "hl": headquarters_location,
-                        "da": date_added,
-                        "cik": cik,
-                        "fnd": founded,
-                        "now": now,
-                        "id": result[0],
-                    },
-                )
+                # Build dynamic SET clause
+                set_parts = [f"{c} = :{c}" for c in cols if c not in ("symbol", "index_name")]
+                set_parts.append("fetched_at = :now")
+                sql = f"UPDATE stocks_in_index SET {', '.join(set_parts)} WHERE id = :id"
+                params = {c: values[c] for c in cols if c not in ("symbol", "index_name")}
+                params["now"] = now
+                params["id"] = result[0]
+                session.execute(text(sql), params)
                 updated += 1
             else:
-                session.execute(
-                    text(
-                        """INSERT INTO stocks_in_index
-                           (index_name, symbol, security, gics_sector, gics_sub_industry,
-                            headquarters_location, date_added, cik, founded, fetched_at)
-                           VALUES (:idx, :sym, :sec, :gs, :gsi, :hl, :da, :cik, :fnd, :now)"""
-                    ),
-                    {
-                        "idx": index_name,
-                        "sym": symbol,
-                        "sec": security,
-                        "gs": gics_sector,
-                        "gsi": gics_sub_industry,
-                        "hl": headquarters_location,
-                        "da": date_added,
-                        "cik": cik,
-                        "fnd": founded,
-                        "now": now,
-                    },
-                )
+                cols_with_now = cols + ["fetched_at"]
+                placeholders = ", ".join(f":{c}" for c in cols_with_now)
+                col_names = ", ".join(cols_with_now)
+                sql = f"INSERT INTO stocks_in_index ({col_names}) VALUES ({placeholders})"
+                params = {c: values[c] for c in cols}
+                params["fetched_at"] = now
+                session.execute(text(sql), params)
                 inserted += 1
 
         session.commit()
@@ -194,25 +286,39 @@ def main():
         help="Index to fetch (default: S&P 500)",
     )
     parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Fetch all supported indices",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print table without writing to database",
     )
     args = parser.parse_args()
 
-    fetch_fn = FETCHERS[args.index]
-    df = fetch_fn()
-
-    if args.dry_run:
-        print(df.to_string(index=False))
-        return
-
     cfg = load_config()
     engine = create_engine(cfg["database"]["url"])
-
     create_table(engine)
-    count = upsert_stocks(engine, df)
-    print(f"Done: {count} stocks for {args.index}")
+
+    if args.all:
+        indices = list(FETCHERS.keys())
+    else:
+        indices = [args.index]
+
+    for name in indices:
+        fetch_fn = FETCHERS[name]
+        logger.info("--- Processing %s ---", name)
+        df = fetch_fn()
+
+        if args.dry_run:
+            print(f"\n=== {name} ===")
+            print(df.to_string(index=False))
+            print()
+            continue
+
+        count = upsert_stocks(engine, df)
+        print(f"Done: {count} stocks for {name}")
 
 
 if __name__ == "__main__":
