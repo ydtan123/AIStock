@@ -17,24 +17,29 @@ def test_header_visible(app: Page) -> None:
     expect(app.locator("h1, h2").filter(has_text="Selected Stocks").first).to_be_visible()
 
 
+_CONTENT_LOCATOR = (
+    '[data-testid="stSelectbox"]:has-text("Pipeline Run"), '
+    ':text("No pipeline runs")'
+)
+
+
 def test_shows_run_selector_or_empty_state(app: Page) -> None:
-    """Page shows run selectbox (data) or info/empty message (no data)."""
-    run_selector = app.locator('[data-testid="stSelectbox"]').filter(has_text="Pipeline Run")
-    empty_state = app.locator('[data-testid="stAlert"]').filter(has_text="No pipeline runs")
-    assert run_selector.is_visible() or empty_state.is_visible(), \
-        "Neither run selector nor empty-state message found"
+    """Wait up to 10s for either the run selectbox or empty-state text to appear."""
+    expect(app.locator(_CONTENT_LOCATOR).first).to_be_visible(timeout=10_000)
+
+
+def _has_run_data(app: Page) -> bool:
+    return app.locator('[data-testid="stSelectbox"]:has-text("Pipeline Run")').is_visible()
 
 
 def test_top_n_filter_visible_when_data_present(app: Page) -> None:
-    run_selector = app.locator('[data-testid="stSelectbox"]').filter(has_text="Pipeline Run")
-    if not run_selector.is_visible():
+    if not _has_run_data(app):
         pytest.skip("No pipeline data")
     expect(app.locator('[data-testid="stNumberInput"]').first).to_be_visible()
 
 
 def test_stock_table_visible_when_data_present(app: Page) -> None:
-    run_selector = app.locator('[data-testid="stSelectbox"]').filter(has_text="Pipeline Run")
-    if not run_selector.is_visible():
+    if not _has_run_data(app):
         pytest.skip("No pipeline data")
     expect(app.locator('[data-testid="stDataFrame"]').first).to_be_visible()
 
