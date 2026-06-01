@@ -211,7 +211,6 @@ def sidebar_nav():
     return page
 
 
-@st.fragment
 def render_page_content(page, ctx):
     if page == "Full Pipeline":
         render_full_pipeline(ctx)
