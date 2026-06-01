@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import streamlit as st
 
+from pipeline.fast_evaluation import _format_reasoning
+
 
 _OPINION_EMOJI = {"bullish": "🟢", "bearish": "🔴", "neutral": "🟡"}
 
@@ -97,6 +99,6 @@ def render(ctx) -> None:
                 expanded=(opinion == "bullish" and a["confidence"] >= 70),
             ):
                 if a["reasoning"]:
-                    ctx.st.markdown(a["reasoning"])
+                    ctx.st.markdown("\n".join(_format_reasoning(a["analyst"], a["reasoning"])))
                 else:
                     ctx.st.caption("No reasoning provided.")
