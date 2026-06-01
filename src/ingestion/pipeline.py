@@ -31,22 +31,35 @@ def _last_trading_date() -> date:
     """Return the most recent NYSE trading day.
 
     Uses pandas_market_calendars for accurate holiday/weekend handling.
-    On a trading day before market close, returns the previous trading day
-    (today's data not yet available).
+    On a trading day before market open (9:30 AM ET), returns the previous
+    trading day — today's data not yet available.
     """
     import pandas_market_calendars as mcal
 
     nyse = mcal.get_calendar("NYSE")
-    today = pd.Timestamp.now(tz="America/New_York").normalize()
+    now = pd.Timestamp.now(tz="America/New_York")
+    today = now.normalize()
+    # schedule index is tz-naive — compare in tz-naive space
+    today_naive = today.tz_localize(None)
     # Get all trading sessions up to today
-    schedule = nyse.schedule(start_date=today - pd.Timedelta(days=14), end_date=today)
+    schedule = nyse.schedule(start_date=today_naive - pd.Timedelta(days=14), end_date=today_naive)
     valid_days = schedule.index.sort_values()
     if valid_days.empty:
         # Fallback: simple weekday check
         if today.dayofweek >= 5:
             return (today - pd.Timedelta(days=today.dayofweek - 4)).date()
         return today.date()
-    return valid_days[-1].date()
+
+    last_valid = valid_days[-1]
+    # If today is a valid trading day but the market hasn't opened yet,
+    # return the previous trading day instead.
+    if last_valid == today_naive and now < schedule.loc[today_naive, "market_open"]:
+        if len(valid_days) >= 2:
+            return valid_days[-2].date()
+        # Edge case: today is the only known valid day (shouldn't happen
+        # with 14-day lookback but guard anyway).
+        return (today - pd.Timedelta(days=1)).date()
+    return last_valid.date()
 
 # Export API keys from config BEFORE any tradingagents imports.
 # tradingagents.dataflows.google reads os.getenv("GOOGLE_API_KEY").
@@ -524,8 +537,7 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False,
         skip_ids: set[int] = prefetch.get("skip_stock_ids", set())
         stocks_to_process = [s for s in stocks if s.id not in skip_ids]
         skipped = len(stocks) - len(stocks_to_process)
-        if skipped:
-            logger.info(
+        logger.info(
                 "Skipping %d/%d stocks (already up-to-date), processing %d",
                 skipped, len(stocks), len(stocks_to_process),
             )
@@ -557,6 +569,7 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False,
 
         _batch_update_checkpoints(processed_ids)
         _refresh_snapshots()
+        _deactivate_stale_stocks()
 
     except Exception as e:
         logger.error("Pipeline failed: %s", e)
@@ -576,6 +589,63 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False,
 
     logger.info("Pipeline done. Processed=%d Errors=%d", summary["processed"], summary["errors"])
     return summary
+
+
+def _deactivate_stale_stocks(max_trading_days_behind: int = 3) -> int:
+    """Mark active stocks as inactive when price data lags beyond threshold.
+
+    Compares each active stock's max daily_prices.date against the last trading
+    date using the NYSE calendar.  Stocks with no price data at all are also
+    deactivated.
+    """
+    import pandas_market_calendars as mcal
+
+    ltd = _last_trading_date()
+    ltd_ts = pd.Timestamp(ltd)
+
+    nyse = mcal.get_calendar("NYSE")
+    schedule = nyse.schedule(start_date=ltd_ts - pd.Timedelta(days=90), end_date=ltd_ts)
+    valid = sorted(schedule.index)
+
+    session = get_session()
+    try:
+        rows = session.execute(
+            text(
+                "SELECT s.id, s.symbol, MAX(dp.date) "
+                "FROM stocks s "
+                "LEFT JOIN daily_prices dp ON dp.stock_id = s.id "
+                "WHERE s.is_active = 1 "
+                "GROUP BY s.id, s.symbol"
+            )
+        ).fetchall()
+
+        to_deactivate: list[tuple[int, str]] = []
+        for sid, symbol, max_date in rows:
+            if max_date is None:
+                to_deactivate.append((sid, symbol))
+                continue
+            md_ts = pd.Timestamp(max_date)
+            trading_days_behind = len([v for v in valid if v > md_ts])
+            if trading_days_behind > max_trading_days_behind:
+                to_deactivate.append((sid, symbol))
+
+        if to_deactivate:
+            ids = tuple(sid for sid, _ in to_deactivate)
+            session.execute(
+                text("UPDATE stocks SET is_active = 0 WHERE id IN :ids"),
+                {"ids": ids},
+            )
+            session.commit()
+            for sid, symbol in to_deactivate:
+                logger.info("Deactivated stale stock: %s (id=%d)", symbol, sid)
+            logger.info(
+                "Deactivated %d stale stocks (>%d trading days behind %s)",
+                len(to_deactivate), max_trading_days_behind, ltd,
+            )
+
+        return len(to_deactivate)
+    finally:
+        session.close()
 
 
 def run_bootstrap(fetcher: FetcherBase, auto_activate_criteria: Optional[dict] = None):
