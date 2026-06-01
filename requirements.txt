@@ -33,3 +33,6 @@ colorama==0.4.6
 questionary==2.1.1
 rich==15.0.0
 tabulate==0.10.0
+
+# E2E testing
+pytest-playwright>=0.5.0
