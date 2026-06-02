@@ -10,24 +10,27 @@ from typing import Any, Callable
 
 import streamlit as st
 
-from repository import StockRepository
-
-# Ensure AIStock src/ is FIRST in sys.path so its config.py shadows FinRL's
-# config package. FinRL src/ appended after — must NOT precede AIStock src.
+# ── sys.path hardening ────────────────────────────────────────────────────────
+# MUST come before ANY local import. FinRL's data_fetcher.py inserts its own
+# src/ at sys.path[0] on import, which shadows AIStock's config.py with
+# FinRL's empty config/ package.  Ensure AIStock src/ is always first.
 _src_dir = os.path.dirname(os.path.abspath(__file__))
 if _src_dir not in sys.path:
     sys.path.insert(0, _src_dir)
 
 _finrl_src = os.path.abspath(os.path.join(_src_dir, "..", "external", "FinRL-Trading", "src"))
-if _finrl_src not in sys.path:
-    sys.path.append(_finrl_src)
+if _finrl_src in sys.path:
+    sys.path.remove(_finrl_src)
+sys.path.append(_finrl_src)
 
-# Pre-import AIStock config module before ANY FinRL imports can shadow it.
-# database.py already imports config, but an explicit import here guarantees
-# sys.modules['config'] = AIStock's config.py regardless of import order edge cases.
-import config  # noqa: E402,F811
+# Cache AIStock's config in sys.modules before ANY other local import can
+# trigger FinRL's data_fetcher.py (which repoisons sys.path at runtime).
+import config  # noqa: E402
+import database  # noqa: E402
+import repository  # noqa: E402
+import models  # noqa: E402
 
-# Pipeline imports at module level
+from repository import StockRepository
 from database import get_session
 from pipeline.base import PipelineStopped
 from pipeline.config import ConfigLoader

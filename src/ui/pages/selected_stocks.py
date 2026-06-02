@@ -136,9 +136,18 @@ def render(ctx) -> None:
 
     # Top-N highlight config (pre-fill from config.yaml)
     try:
-        from config import load_config
-        cfg = load_config()
-        default_top_n = int(cfg.get("fast_evaluation", {}).get("top_n", 3))
+        import os as _os
+        import yaml as _yaml
+        _cfg_path = os.path.join(
+            os.path.dirname(__file__), "..", "..", "..", "config.yaml",
+        )
+        _cfg_path = os.path.abspath(_cfg_path)
+        if os.path.exists(_cfg_path):
+            with open(_cfg_path) as _f:
+                _cfg = _yaml.safe_load(_f) or {}
+            default_top_n = int(_cfg.get("fast_evaluation", {}).get("top_n", 3))
+        else:
+            default_top_n = 3
     except Exception:
         default_top_n = 3
 
