@@ -55,6 +55,21 @@ def _flatten_config(cfg: dict, prefix: str = "") -> dict[str, object]:
     return out
 
 
+# ── dynamic option resolvers ──────────────────────────────────────────────────
+
+_ALL_ACTIVE = "All Active Stocks"
+
+def _get_universe_options() -> list[str]:
+    """Return available universe options: 'All Active Stocks' + index names."""
+    try:
+        from repository import StockRepository
+        repo = StockRepository()
+        indices = repo.get_index_names()
+        return [_ALL_ACTIVE] + indices
+    except Exception:
+        return [_ALL_ACTIVE]
+
+
 # ── step definitions ─────────────────────────────────────────────────────────
 
 _STEPS = [
@@ -233,21 +248,6 @@ _STEPS = [
         },
     },
 ]
-
-
-# ── dynamic option resolvers ──────────────────────────────────────────────────
-
-_ALL_ACTIVE = "All Active Stocks"
-
-def _get_universe_options() -> list[str]:
-    """Return available universe options: 'All Active Stocks' + index names."""
-    try:
-        from repository import StockRepository
-        repo = StockRepository()
-        indices = repo.get_index_names()
-        return [_ALL_ACTIVE] + indices
-    except Exception:
-        return [_ALL_ACTIVE]
 
 
 # ── render helpers ───────────────────────────────────────────────────────────
