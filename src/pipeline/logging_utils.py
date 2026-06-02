@@ -3,8 +3,11 @@ from __future__ import annotations
 
 import logging
 import queue
+import re
 import sys
 from typing import Any
+
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
 
 
 class QueueHandler(logging.Handler):
@@ -21,7 +24,8 @@ class QueueHandler(logging.Handler):
             if self.log_queue.qsize() >= self.max_size:
                 self._dropped += 1
                 return
-            self.log_queue.put_nowait(self.format(record))
+            msg = _ANSI_RE.sub("", self.format(record))
+            self.log_queue.put_nowait(msg)
         except queue.Full:
             self._dropped += 1
 
@@ -35,10 +39,12 @@ class StdoutToQueue:
         self._buf = ""
 
     def write(self, text: str) -> int:
+        # Strip ANSI escape codes (tqdm progress bars, colored output, etc.)
+        text = _ANSI_RE.sub("", text)
         self._buf += text
         while "\n" in self._buf:
             line, self._buf = self._buf.split("\n", 1)
-            if line:
+            if line.strip():
                 try:
                     self._q.put_nowait(line)
                 except Exception:
@@ -47,10 +53,12 @@ class StdoutToQueue:
 
     def flush(self) -> None:
         if self._buf:
-            try:
-                self._q.put_nowait(self._buf)
-            except Exception:
-                pass
+            cleaned = _ANSI_RE.sub("", self._buf).strip()
+            if cleaned:
+                try:
+                    self._q.put_nowait(cleaned)
+                except Exception:
+                    pass
             self._buf = ""
 
     def __getattr__(self, name: str) -> Any:
