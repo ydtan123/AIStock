@@ -22,8 +22,12 @@ _finrl_src = os.path.abspath(os.path.join(_src_dir, "..", "external", "FinRL-Tra
 if _finrl_src not in sys.path:
     sys.path.append(_finrl_src)
 
-# Pipeline imports at module level — sys.path is set above so AIStock config
-# is already cached before any FinRL sub-imports can shadow it.
+# Pre-import AIStock config module before ANY FinRL imports can shadow it.
+# database.py already imports config, but an explicit import here guarantees
+# sys.modules['config'] = AIStock's config.py regardless of import order edge cases.
+import config  # noqa: E402,F811
+
+# Pipeline imports at module level
 from database import get_session
 from pipeline.base import PipelineStopped
 from pipeline.config import ConfigLoader
