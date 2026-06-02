@@ -42,12 +42,18 @@ import database  # noqa: F401
 import repository  # noqa: F401
 
 
-def run_pipeline_and_save_report(cfg_overrides: dict[str, Any]) -> tuple[str, list[dict]]:
+def run_pipeline_and_save_report(cfg_overrides: dict[str, Any],
+                                 universe_index: str | None = None) -> tuple[str, list[dict]]:
     """Run the ML stock selection pipeline and save results to DATA_DIR.
 
     Returns (report_csv_path, selected_stocks_info) where selected_stocks_info
     is a list of dicts: {ticker, bucket, ml_score, model_name, weight}.
     Empty list on fallback/error.
+
+    Args:
+        cfg_overrides: ML pipeline configuration overrides.
+        universe_index: If set, restrict the stock universe to symbols in
+            *universe_index* from the ``stocks_in_index`` table (e.g. "S&P 500").
     """
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -71,6 +77,24 @@ def run_pipeline_and_save_report(cfg_overrides: dict[str, Any]) -> tuple[str, li
     if tickers_df.empty:
         raise RuntimeError("No tickers returned from data source.")
     logger.info("  %d tickers loaded.", len(tickers_df))
+
+    if universe_index:
+        repo = repository.StockRepository()
+        index_syms = set(repo.list_stocks_in_index(universe_index))
+        if index_syms:
+            before = len(tickers_df)
+            tickers_df = tickers_df[tickers_df["tickers"].isin(index_syms)]
+            logger.info(
+                "  Universe '%s': filtered %d → %d tickers (%d in index, %d active)",
+                universe_index, before, len(tickers_df),
+                len(index_syms), len(tickers_df),
+            )
+        else:
+            logger.warning(
+                "  Universe '%s' returned 0 active symbols. "
+                "Index may be empty or not yet populated. Proceeding unfiltered.",
+                universe_index,
+            )
 
     logger.info("Step 3/4: Fetching fundamental data (%s → %s)...", start_date, end_date)
     fund_df = data_source.get_fundamental_data(tickers_df, start_date, end_date)

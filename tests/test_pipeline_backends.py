@@ -76,10 +76,12 @@ def test_finrl_stock_selector_uses_run_pipeline(monkeypatch, tmp_path):
     ]
     captured = {}
 
-    def fake_run(cfg_overrides):
+    def fake_run(cfg_overrides, universe_index=None):
         captured["cfg_overrides"] = cfg_overrides
+        captured["universe_index"] = universe_index
+        return {"csv_path": "/tmp/test.csv", "selected_stocks": None}
 
-    monkeypatch.setattr(sel_mod, "_run_finrl_pipeline", fake_run)
+    monkeypatch.setattr(sel_mod, "_run_finrl_runner", fake_run)
 
     class FakeRepo:
         def get_latest_selected_stocks(self):

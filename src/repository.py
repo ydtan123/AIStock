@@ -332,6 +332,35 @@ class StockRepository:
             ]
         return self._with_session(_query)
 
+    # -- index universe ---------------------------------------------------------
+
+    def list_stocks_in_index(self, index_name: str) -> list[str]:
+        """Return active stock symbols that belong to *index_name* in stocks_in_index table."""
+        def _query(s):
+            rows = s.execute(
+                text(
+                    "SELECT s.symbol FROM stocks_in_index si "
+                    "JOIN stocks s ON ("
+                    "  s.symbol = si.symbol COLLATE utf8mb4_0900_ai_ci "
+                    "  OR s.symbol = REPLACE(si.symbol, :dot, :dash) "
+                    "    COLLATE utf8mb4_0900_ai_ci"
+                    ") "
+                    "WHERE si.index_name = :idx AND s.is_active = 1"
+                ),
+                {"idx": index_name, "dot": ".", "dash": "-"},
+            ).fetchall()
+            return [r[0] for r in rows]
+        return self._with_session(_query)
+
+    def get_index_names(self) -> list[str]:
+        """Return distinct index names from stocks_in_index table."""
+        def _query(s):
+            rows = s.execute(
+                text("SELECT DISTINCT index_name FROM stocks_in_index ORDER BY index_name")
+            ).fetchall()
+            return [r[0] for r in rows]
+        return self._with_session(_query)
+
     # -- pipeline run queries --------------------------------------------------
 
     def get_recent_pipeline_runs(self, limit: int = 20) -> list[dict]:

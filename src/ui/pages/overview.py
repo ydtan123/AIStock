@@ -75,6 +75,11 @@ _STEPS = [
         "label": "2. Stock Selection",
         "help": "ML-based stock ranking using FinRL pipeline.",
         "params": {
+            "stock_selection.universe": {
+                "label": "Stock Universe",
+                "type": "select",
+                "callable": _get_universe_options,
+            },
             "stock_selection.backend": {
                 "label": "Backend", "type": "select", "options": ["finrl"],
             },
@@ -230,6 +235,21 @@ _STEPS = [
 ]
 
 
+# ── dynamic option resolvers ──────────────────────────────────────────────────
+
+_ALL_ACTIVE = "All Active Stocks"
+
+def _get_universe_options() -> list[str]:
+    """Return available universe options: 'All Active Stocks' + index names."""
+    try:
+        from repository import StockRepository
+        repo = StockRepository()
+        indices = repo.get_index_names()
+        return [_ALL_ACTIVE] + indices
+    except Exception:
+        return [_ALL_ACTIVE]
+
+
 # ── render helpers ───────────────────────────────────────────────────────────
 
 def _render_param(key: str, meta: dict, defaults: dict, session_key: str) -> None:
@@ -238,8 +258,17 @@ def _render_param(key: str, meta: dict, defaults: dict, session_key: str) -> Non
     ptype = meta.get("type", "text")
 
     if ptype == "select":
-        options = meta.get("options", [])
-        idx = options.index(default_val) if default_val in options else 0
+        options_callable = meta.get("callable")
+        if options_callable:
+            options = options_callable()
+        else:
+            options = meta.get("options", [])
+        if default_val is not None and default_val in options:
+            idx = options.index(default_val)
+        elif "" in options:
+            idx = options.index("")
+        else:
+            idx = 0
         st.session_state[session_key] = st.selectbox(
             meta["label"], options, key=f"fp_{session_key}", index=idx,
         )

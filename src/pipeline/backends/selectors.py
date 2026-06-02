@@ -76,7 +76,7 @@ from repository import StockRepository
 logger = logging.getLogger(__name__)
 
 
-def _run_finrl_runner(cfg_overrides: dict) -> dict:
+def _run_finrl_runner(cfg_overrides: dict, universe_index: str | None = None) -> dict:
     """Indirection seam — tests monkeypatch this."""
     import config  # noqa: F401
     import database  # noqa: F401
@@ -85,7 +85,9 @@ def _run_finrl_runner(cfg_overrides: dict) -> dict:
 
     from finrl_runner import run_pipeline_and_save_report
 
-    csv_path, selected_stocks = run_pipeline_and_save_report(cfg_overrides)
+    csv_path, selected_stocks = run_pipeline_and_save_report(
+        cfg_overrides, universe_index=universe_index,
+    )
     return {"csv_path": str(csv_path), "selected_stocks": selected_stocks}
 
 
@@ -98,8 +100,14 @@ class FinrlStockSelector(StockSelector):
 
     def select(self, ctx: StepContext) -> list[ScoredTicker]:
         sub_cfg = self.cfg or ctx.cfg.get("stock_selection", {}).get("finrl", {})
-        ctx.logger.info("FinrlStockSelector starting with cfg=%s", sub_cfg)
-        result = _run_finrl_runner(sub_cfg)
+        universe = ctx.cfg.get("stock_selection", {}).get("universe")
+        # Treat None / empty / "All Active Stocks" as "no filter"
+        if universe and str(universe).strip() in ("", "All Active Stocks", "None"):
+            universe = None
+        ctx.logger.info(
+            "FinrlStockSelector starting with cfg=%s universe=%s", sub_cfg, universe,
+        )
+        result = _run_finrl_runner(sub_cfg, universe_index=universe)
         selected_stocks = result.get("selected_stocks") or []
 
         if selected_stocks:
