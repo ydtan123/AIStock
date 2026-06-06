@@ -32,6 +32,7 @@ import models  # noqa: E402
 
 from repository import StockRepository
 from database import get_session
+from pipeline.backtest import BacktestStep
 from pipeline.base import PipelineStopped
 from pipeline.config import ConfigLoader
 from pipeline.data_update import DataUpdateStep
@@ -40,12 +41,15 @@ from pipeline.fast_evaluation import FastEvaluationStep
 from pipeline.logging_utils import attach_queue_logging, detach_queue_logging
 from pipeline.orchestrator import FullPipeline
 from pipeline.stock_selection import StockSelectionStep
+from pipeline.trading import TradingStep
 
 _STEP_CLASSES: dict[str, type] = {
     "data_update": DataUpdateStep,
     "stock_selection": StockSelectionStep,
     "fast_evaluation": FastEvaluationStep,
     "deep_evaluation": DeepEvaluationStep,
+    "backtest": BacktestStep,
+    "trading": TradingStep,
 }
 
 # ── Page config (exactly once) ────────────────────────────────────────────────

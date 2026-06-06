@@ -16,6 +16,7 @@ import database  # noqa: F401
 import models  # noqa: F401
 import repository  # noqa: F401
 
+from pipeline.backtest import BacktestStep
 from pipeline.base import PipelineError
 from pipeline.config import ConfigLoader
 from pipeline.data_update import DataUpdateStep
@@ -23,6 +24,7 @@ from pipeline.deep_evaluation import DeepEvaluationStep
 from pipeline.fast_evaluation import FastEvaluationStep
 from pipeline.orchestrator import FullPipeline
 from pipeline.stock_selection import StockSelectionStep
+from pipeline.trading import TradingStep
 
 
 STEPS_ORDER = [
@@ -30,7 +32,11 @@ STEPS_ORDER = [
     StockSelectionStep,
     FastEvaluationStep,
     DeepEvaluationStep,
+    BacktestStep,
+    TradingStep,
 ]
+
+_STEP_NAMES = [c.name for c in STEPS_ORDER]
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -42,14 +48,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     p.add_argument(
         "--resume-from", default=None,
-        choices=[None, "data_update", "stock_selection",
-                 "fast_evaluation", "deep_evaluation"],
+        choices=[None] + _STEP_NAMES,
     )
     p.add_argument("--run-id", type=int, default=None)
     p.add_argument(
         "--only", default=None,
-        choices=[None, "data_update", "stock_selection",
-                 "fast_evaluation", "deep_evaluation"],
+        choices=[None] + _STEP_NAMES,
     )
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--log-level", default="INFO")

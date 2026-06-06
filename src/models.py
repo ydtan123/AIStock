@@ -200,6 +200,12 @@ class PipelineRun(Base):
     deep_evaluation_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     deep_evaluation_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     deep_evaluation_finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    backtest_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    backtest_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    backtest_finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    trading_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    trading_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    trading_finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
 
 class QuarterlyFundamentals(Base):
@@ -432,6 +438,61 @@ class DeepEvaluationRow(Base):
         Index("ix_de_ticker", "ticker"),
         Index("ix_de_run", "pipeline_run_id"),
     )
+
+
+class BacktestResult(Base):
+    """Per-run backtest metrics persisted for cross-run comparison."""
+
+    __tablename__ = "backtest_results"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    pipeline_run_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("pipeline_runs.id"), nullable=False
+    )
+    annual_return: Mapped[Optional[float]] = mapped_column(Float)
+    sharpe_ratio: Mapped[Optional[float]] = mapped_column(Float)
+    sortino_ratio: Mapped[Optional[float]] = mapped_column(Float)
+    max_drawdown: Mapped[Optional[float]] = mapped_column(Float)
+    volatility: Mapped[Optional[float]] = mapped_column(Float)
+    calmar_ratio: Mapped[Optional[float]] = mapped_column(Float)
+    start_date: Mapped[Optional[str]] = mapped_column(String(20))
+    end_date: Mapped[Optional[str]] = mapped_column(String(20))
+    initial_capital: Mapped[Optional[float]] = mapped_column(Float)
+    final_value: Mapped[Optional[float]] = mapped_column(Float)
+    num_tickers: Mapped[Optional[int]] = mapped_column(Integer)
+    benchmark_metrics: Mapped[Optional[str]] = mapped_column(Text)  # JSON blob
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
+
+    __table_args__ = (Index("ix_br_run", "pipeline_run_id"),)
+
+
+class TradingResult(Base):
+    """Per-run trading execution record."""
+
+    __tablename__ = "trading_results"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    pipeline_run_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("pipeline_runs.id"), nullable=False
+    )
+    execution_mode: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="dry_run"
+    )  # "dry_run" | "submitted"
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="pending"
+    )  # "pending" | "executed" | "failed"
+    buys: Mapped[Optional[int]] = mapped_column(Integer)
+    sells: Mapped[Optional[int]] = mapped_column(Integer)
+    orders_json: Mapped[Optional[str]] = mapped_column(Text)  # JSON blob
+    portfolio_before_json: Mapped[Optional[str]] = mapped_column(Text)
+    error_message: Mapped[Optional[str]] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
+
+    __table_args__ = (Index("ix_tr_run", "pipeline_run_id"),)
 
 
 class SchemaMigration(Base):

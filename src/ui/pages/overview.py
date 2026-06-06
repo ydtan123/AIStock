@@ -249,6 +249,41 @@ _STEPS = [
             },
         },
     },
+    {
+        "name": "backtest",
+        "label": "5. Backtest",
+        "help": "Historical backtest of ML-selected portfolio vs benchmarks (SPY, QQQ).",
+        "params": {
+            "backtest.backend": {
+                "label": "Backend", "type": "select", "options": ["finrl_bt"],
+            },
+            "backtest.window": {
+                "label": "Backtest Window", "type": "select",
+                "options": ["latest", "full"],
+            },
+            "backtest.finrl_bt.initial_capital": {
+                "label": "Initial Capital ($)", "type": "number",
+                "min": 10000, "step": 10000,
+            },
+            "backtest.finrl_bt.benchmarks": {
+                "label": "Benchmarks", "type": "multiselect",
+                "options": ["SPY", "QQQ", "DIA", "IWM", "VTI"],
+            },
+        },
+    },
+    {
+        "name": "trading",
+        "label": "6. Trading",
+        "help": "Generate Alpaca rebalance plan (dry-run) or auto-submit orders.",
+        "params": {
+            "trading.backend": {
+                "label": "Backend", "type": "select", "options": ["alpaca"],
+            },
+            "trading.auto_submit": {
+                "label": "Auto-submit orders", "type": "checkbox",
+            },
+        },
+    },
 ]
 
 

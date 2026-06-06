@@ -32,7 +32,48 @@ def _create_schema(engine):
                 fast_evaluation_finished_at TEXT,
                 deep_evaluation_status TEXT,
                 deep_evaluation_started_at TEXT,
-                deep_evaluation_finished_at TEXT
+                deep_evaluation_finished_at TEXT,
+                backtest_status TEXT,
+                backtest_started_at TEXT,
+                backtest_finished_at TEXT,
+                trading_status TEXT,
+                trading_started_at TEXT,
+                trading_finished_at TEXT
+            )
+        """))
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS backtest_results (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                pipeline_run_id INTEGER NOT NULL,
+                annual_return REAL,
+                sharpe_ratio REAL,
+                sortino_ratio REAL,
+                max_drawdown REAL,
+                volatility REAL,
+                calmar_ratio REAL,
+                start_date TEXT,
+                end_date TEXT,
+                initial_capital REAL,
+                final_value REAL,
+                num_tickers INTEGER,
+                benchmark_metrics TEXT,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (pipeline_run_id) REFERENCES pipeline_runs(id)
+            )
+        """))
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS trading_results (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                pipeline_run_id INTEGER NOT NULL,
+                execution_mode TEXT NOT NULL DEFAULT 'dry_run',
+                status TEXT NOT NULL DEFAULT 'pending',
+                buys INTEGER,
+                sells INTEGER,
+                orders_json TEXT,
+                portfolio_before_json TEXT,
+                error_message TEXT,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (pipeline_run_id) REFERENCES pipeline_runs(id)
             )
         """))
         conn.commit()
@@ -330,11 +371,15 @@ def test_multiple_steps_all_tracked(engine_factory, tmp_path):
 
 
 def test_full_pipeline_all_steps_success(engine_factory, tmp_path):
-    """All 4 tracked steps complete → overall status = 'success'."""
+    """All 6 tracked steps complete → overall status = 'success'."""
     engine, factory = engine_factory
 
+    _TRACKED = (
+        "data_update", "stock_selection", "fast_evaluation", "deep_evaluation",
+        "backtest", "trading",
+    )
     steps: list[PipelineStep] = []
-    for name in ("data_update", "stock_selection", "fast_evaluation", "deep_evaluation"):
+    for name in _TRACKED:
         step = _StockSelectionOk()
         step.name = name  # override to match each tracked step
         steps.append(step)
@@ -350,14 +395,13 @@ def test_full_pipeline_all_steps_success(engine_factory, tmp_path):
     with factory() as s:
         row = s.execute(text(
             "SELECT data_update_status, stock_selection_status, "
-            "fast_evaluation_status, deep_evaluation_status, status "
+            "fast_evaluation_status, deep_evaluation_status, "
+            "backtest_status, trading_status, status "
             "FROM pipeline_runs WHERE id = :rid"
         ), {"rid": run_id}).fetchone()
-        assert row[0] == "completed"
-        assert row[1] == "completed"
-        assert row[2] == "completed"
-        assert row[3] == "completed"
-        assert row[4] == "success"
+        for i in range(6):
+            assert row[i] == "completed", f"step {i} should be completed"
+        assert row[6] == "success"
 
 
 def test_only_runs_single_step(engine_factory, tmp_path):

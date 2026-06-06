@@ -23,6 +23,7 @@ from pipeline.base import (
 # _sync_overall_status() reads all 4 columns to derive the overall status.
 _STEP_STATUS_TRACKED = (
     "data_update", "stock_selection", "fast_evaluation", "deep_evaluation",
+    "backtest", "trading",
 )
 
 

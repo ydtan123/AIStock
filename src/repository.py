@@ -89,6 +89,25 @@ class StockRepository:
             )
         return self._with_session(_query)
 
+    def get_daily_prices_by_ticker(
+        self, ticker: str, start: str, end: str,
+    ) -> list[dict]:
+        """Return daily price rows for *ticker* as list of dicts (date, close, ...)."""
+        def _query(s):
+            rows = s.execute(
+                text(
+                    "SELECT dp.date, dp.close, dp.adj_close, dp.volume "
+                    "FROM daily_prices dp "
+                    "JOIN stocks s ON s.id = dp.stock_id "
+                    "WHERE s.symbol = :ticker "
+                    "AND dp.date >= :start AND dp.date <= :end "
+                    "ORDER BY dp.date"
+                ),
+                {"ticker": ticker.upper(), "start": start, "end": end},
+            ).fetchall()
+            return [{"date": r[0], "close": float(r[1]), "adj_close": float(r[2] or r[1]), "volume": r[3]} for r in rows]
+        return self._with_session(_query)
+
     def get_prices_batch(self, stocks: list[tuple[int, date, date]]) -> dict[int, pd.DataFrame]:
         """Fetch prices for multiple stocks in one query. Returns {stock_id: DataFrame}."""
         if not stocks:
