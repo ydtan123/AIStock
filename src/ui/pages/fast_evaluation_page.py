@@ -4,6 +4,7 @@ from __future__ import annotations
 import streamlit as st
 
 from pipeline.fast_evaluation import _format_reasoning
+from repository import format_run_label
 
 
 _OPINION_EMOJI = {"bullish": "🟢", "bearish": "🔴", "neutral": "🟡"}
@@ -18,13 +19,7 @@ def render(ctx) -> None:
         ctx.st.info("No pipeline runs found. Run the Full Pipeline first.")
         return
 
-    run_labels = {
-        r["id"]: (
-            f"Run #{r['id']}  {r['started_at'].strftime('%Y-%m-%d %H:%M')}  "
-            f"[{r.get('fast_evaluation_status') or '—'}/{r['status']}]"
-        )
-        for r in runs
-    }
+    run_labels = {r["id"]: format_run_label(r, "fast_evaluation") for r in runs}
     col1, col2 = ctx.st.columns([2, 2])
     with col1:
         run_id = ctx.st.selectbox(

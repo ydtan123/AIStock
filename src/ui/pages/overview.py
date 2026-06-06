@@ -30,20 +30,11 @@ def _render_log(st_ctx, log_text: str) -> None:
 # ── config defaults from config.yaml (API keys excluded) ─────────────────────
 
 def _load_yaml_defaults() -> dict:
-    """Load config.yaml directly, bypassing the 'config' module import.
-
-    Avoids the sys.path hazard where FinRL's data_fetcher.py shadows
-    AIStock's config.py with FinRL's empty config/ package.
-    """
     try:
-        import yaml
-        config_path = Path(__file__).parent.parent.parent.parent / "config.yaml"
-        if config_path.exists():
-            with open(config_path) as f:
-                return yaml.safe_load(f) or {}
+        from config import load_config
+        return load_config()
     except Exception:
-        pass
-    return {}
+        return {}
 
 
 def _flatten_config(cfg: dict, prefix: str = "") -> dict[str, object]:

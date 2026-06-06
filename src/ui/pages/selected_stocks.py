@@ -7,6 +7,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from repository import format_run_label
+
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -121,13 +123,7 @@ def render(ctx) -> None:
         ctx.st.info("No pipeline runs found. Run the Full Pipeline first.")
         return
 
-    run_labels = {
-        r["id"]: (
-            f"Run #{r['id']}  {r['started_at'].strftime('%Y-%m-%d %H:%M')}  "
-            f"[{r.get('stock_selection_status') or '—'}/{r['status']}]"
-        )
-        for r in runs
-    }
+    run_labels = {r["id"]: format_run_label(r, "stock_selection") for r in runs}
     selected_run_id = ctx.st.selectbox(
         "Pipeline run",
         options=list(run_labels.keys()),
@@ -137,18 +133,9 @@ def render(ctx) -> None:
 
     # Top-N highlight config (pre-fill from config.yaml)
     try:
-        import os as _os
-        import yaml as _yaml
-        _cfg_path = os.path.join(
-            os.path.dirname(__file__), "..", "..", "..", "config.yaml",
-        )
-        _cfg_path = os.path.abspath(_cfg_path)
-        if os.path.exists(_cfg_path):
-            with open(_cfg_path) as _f:
-                _cfg = _yaml.safe_load(_f) or {}
-            default_top_n = int(_cfg.get("fast_evaluation", {}).get("top_n", 3))
-        else:
-            default_top_n = 3
+        from config import load_config
+        cfg = load_config()
+        default_top_n = int(cfg.get("fast_evaluation", {}).get("top_n", 3))
     except Exception:
         default_top_n = 3
 

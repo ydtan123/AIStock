@@ -201,19 +201,17 @@ class FullPipeline:
             run = s.query(PipelineRun).filter_by(id=run_id).one()
             statuses = [getattr(run, f"{sn}_status") for sn in _STEP_STATUS_TRACKED]
 
-        if any(st == "failed" for st in statuses):
-            derived = "failed"
-        elif any(st == "running" for st in statuses):
-            derived = "running"
-        elif all(st == "completed" for st in statuses):
-            derived = "success"
-        elif any(st == "completed" for st in statuses):
-            derived = "partial"
-        else:
-            derived = fallback  # no tracked step ever ran
+            if any(st == "failed" for st in statuses):
+                derived = "failed"
+            elif any(st == "running" for st in statuses):
+                derived = "running"
+            elif all(st == "completed" for st in statuses):
+                derived = "success"
+            elif any(st == "completed" for st in statuses):
+                derived = "partial"
+            else:
+                derived = fallback  # no tracked step ever ran
 
-        with _open_session(self.session_factory) as s:
-            run = s.query(PipelineRun).filter_by(id=run_id).one()
             run.status = derived
             if derived in ("success", "failed", "partial"):
                 run.finished_at = dt.datetime.utcnow()

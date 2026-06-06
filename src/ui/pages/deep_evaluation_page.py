@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import streamlit as st
 
+from repository import format_run_label
+
 
 _DECISION_STYLE = {
     "BUY":  ("#1a4a1a", "#7fff7f", "🟢 BUY"),
@@ -21,13 +23,7 @@ def render(ctx) -> None:
         ctx.st.info("No pipeline runs found. Run the Full Pipeline first.")
         return
 
-    run_labels = {
-        r["id"]: (
-            f"Run #{r['id']}  {r['started_at'].strftime('%Y-%m-%d %H:%M')}  "
-            f"[{r.get('deep_evaluation_status') or '—'}/{r['status']}]"
-        )
-        for r in runs
-    }
+    run_labels = {r["id"]: format_run_label(r, "deep_evaluation") for r in runs}
     col1, col2 = ctx.st.columns([2, 2])
     with col1:
         run_id = ctx.st.selectbox(

@@ -2,6 +2,15 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Optional
 
+
+def format_run_label(run: dict, step_name: str) -> str:
+    """Format a pipeline run dropdown label with per-step and overall status."""
+    step_status = run.get(f"{step_name}_status") or "—"
+    return (
+        f"Run #{run['id']}  {run['started_at'].strftime('%Y-%m-%d %H:%M')}  "
+        f"[{step_status}/{run['status']}]"
+    )
+
 import pandas as pd
 from sqlalchemy import text
 
