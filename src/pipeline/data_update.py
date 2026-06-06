@@ -33,6 +33,13 @@ def _run_pipeline(source: str, step_cfg: dict, full_cfg: dict) -> dict:
             symbols = sorted(universe_syms)
             universe_label = ", ".join(universe_list)
 
+    # Always fetch SPY + QQQ for benchmark use (backtest, comparison).
+    # They are not in any stock universe so append explicitly when scoped.
+    if symbols is not None:
+        for bt in ("SPY", "QQQ"):
+            if bt not in symbols:
+                symbols.append(bt)
+
     result = run_daily_pipeline(
         fetcher, symbols=symbols, universe_label=universe_label,
     )

@@ -29,7 +29,7 @@ class TradingBackend(RegisteredBackend):
 
 
 def _import_alpaca():
-    """Lazy import with sys.path guard (same pattern as selectors+fast_evaluators)."""
+    """Lazy import with sys.path guard (same pattern as backtest_backends)."""
     import config  # noqa: F401
     import database  # noqa: F401
     import repository  # noqa: F401
@@ -39,11 +39,17 @@ def _import_alpaca():
     from pathlib import Path
     _finrl_root = str(Path(__file__).resolve().parents[3] / "external" / "FinRL-Trading")
     _finrl_src = _finrl_root + "/src"
+    _aistock_src = str(Path(__file__).resolve().parents[1])
+    saved_path = list(sys.path)
     for p in (_finrl_src, _finrl_root):
-        if p not in sys.path:
-            sys.path.insert(0, p)
+        if p in saved_path:
+            saved_path.remove(p)
+    sys.path[:] = [_finrl_src, _finrl_root] + [p for p in saved_path if p != _aistock_src] + ([_aistock_src] if _aistock_src in saved_path else [])
 
-    from trading.trade_executor import create_trade_executor_from_env
+    try:
+        from trading.trade_executor import create_trade_executor_from_env
+    finally:
+        sys.path[:] = saved_path
     return create_trade_executor_from_env
 
 
