@@ -9,7 +9,8 @@ from database import get_session
 from models import (
     DailyPrice, DeepEvaluationRow, FastEvaluationAnalyst,
     FastEvaluationConclusion, PipelineRun, ScheduledJobRun,
-    SelectedStock, Stock, StockIndicator, StockSnapshot, TechnicalIndicator,
+    SelectedStock, Stock, StockIndicator, StockNews, StockSnapshot,
+    TechnicalIndicator,
 )
 
 
@@ -359,6 +360,31 @@ class StockRepository:
                 text("SELECT DISTINCT index_name FROM stocks_in_index ORDER BY index_name")
             ).fetchall()
             return [r[0] for r in rows]
+        return self._with_session(_query)
+
+    # -- news ------------------------------------------------------------------
+
+    def get_news_for_ticker(self, ticker: str, limit: int = 50) -> list[dict]:
+        """Return news rows for *ticker* from stock_news, newest first."""
+        def _query(s):
+            rows = (
+                s.query(StockNews)
+                .filter(StockNews.ticker == ticker.upper())
+                .order_by(StockNews.fetched_at.desc())
+                .limit(limit)
+                .all()
+            )
+            return [
+                {
+                    "tool_name": r.tool_name,
+                    "ticker": r.ticker,
+                    "start_date": r.start_date,
+                    "end_date": r.end_date,
+                    "result": r.result,
+                    "fetched_at": r.fetched_at,
+                }
+                for r in rows
+            ]
         return self._with_session(_query)
 
     # -- pipeline run queries --------------------------------------------------

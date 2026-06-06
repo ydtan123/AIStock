@@ -4,6 +4,7 @@ from ui.pages.stock_lookup import render as render_stock_lookup
 from ui.pages.stock_technical import render as render_stock_technical
 from ui.pages.stock_screener import render as render_stock_screener
 from ui.pages.stock_manager import render as render_stock_manager
+from ui.pages.stock_news import render as render_stock_news
 from ui.pages.overview import render as render_full_pipeline
 from ui.pages.live_trading import render as render_live_trading
 from ui.pages.portfolio import render as render_portfolio
@@ -21,6 +22,7 @@ __all__ = [
     "render_stock_technical",
     "render_stock_screener",
     "render_stock_manager",
+    "render_stock_news",
     "render_full_pipeline",
     "render_live_trading",
     "render_portfolio",

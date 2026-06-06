@@ -172,7 +172,7 @@ from ui.pages import (  # noqa: E402 — imports after sys.path setup
     render_full_pipeline, render_paper_trading, render_portfolio,
     render_deep_evaluation, render_fast_evaluation, render_selected_stocks,
     render_settings, render_stock_lookup,
-    render_stock_manager, render_stock_screener, render_stock_technical,
+    render_stock_manager, render_stock_news, render_stock_screener, render_stock_technical,
     render_strategy_backtest,
 )
 
@@ -180,8 +180,8 @@ from ui.pages import (  # noqa: E402 — imports after sys.path setup
 def page_stock_data(ctx: PageContext) -> None:
     """Stock Data page: tab routing to individual stock sub-pages."""
     ctx.st.header("Stock Data")
-    t1, t2, t3, t4 = ctx.st.tabs([
-        "Lookup", "Technical Analysis", "Screener", "Manager"
+    t1, t2, t3, t4, t5 = ctx.st.tabs([
+        "Lookup", "Technical Analysis", "Screener", "Manager", "News",
     ])
     with t1:
         render_stock_lookup(ctx)
@@ -191,6 +191,8 @@ def page_stock_data(ctx: PageContext) -> None:
         render_stock_screener(ctx)
     with t4:
         render_stock_manager(ctx)
+    with t5:
+        render_stock_news(ctx)
 
 
 def _build_ctx() -> PageContext:
