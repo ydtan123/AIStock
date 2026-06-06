@@ -123,7 +123,8 @@ def render(ctx) -> None:
 
     run_labels = {
         r["id"]: (
-            f"Run #{r['id']}  {r['started_at'].strftime('%Y-%m-%d %H:%M')}  [{r['status']}]"
+            f"Run #{r['id']}  {r['started_at'].strftime('%Y-%m-%d %H:%M')}  "
+            f"[{r.get('stock_selection_status') or '—'}/{r['status']}]"
         )
         for r in runs
     }

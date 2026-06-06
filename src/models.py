@@ -187,6 +187,20 @@ class PipelineRun(Base):
     errors_count: Mapped[int] = mapped_column(Integer, default=0)
     status: Mapped[str] = mapped_column(String(30), default="running")
 
+    # -- per-step status tracking (added 2026-06-06) --------------------------
+    data_update_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    data_update_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    data_update_finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    stock_selection_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    stock_selection_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    stock_selection_finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    fast_evaluation_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    fast_evaluation_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    fast_evaluation_finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    deep_evaluation_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    deep_evaluation_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    deep_evaluation_finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
 
 class QuarterlyFundamentals(Base):
     """Quarterly fundamental data for S&P 500 stocks, sourced from Alpha Vantage.

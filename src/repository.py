@@ -377,6 +377,10 @@ class StockRepository:
                     "started_at": r.started_at,
                     "finished_at": r.finished_at,
                     "status": r.status,
+                    "data_update_status": r.data_update_status,
+                    "stock_selection_status": r.stock_selection_status,
+                    "fast_evaluation_status": r.fast_evaluation_status,
+                    "deep_evaluation_status": r.deep_evaluation_status,
                 }
                 for r in rows
             ]

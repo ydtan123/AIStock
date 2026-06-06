@@ -20,7 +20,19 @@ def _create_schema(engine):
                 finished_at TEXT,
                 symbols_processed INTEGER DEFAULT 0,
                 errors_count INTEGER DEFAULT 0,
-                status TEXT DEFAULT 'running'
+                status TEXT DEFAULT 'running',
+                data_update_status TEXT,
+                data_update_started_at TEXT,
+                data_update_finished_at TEXT,
+                stock_selection_status TEXT,
+                stock_selection_started_at TEXT,
+                stock_selection_finished_at TEXT,
+                fast_evaluation_status TEXT,
+                fast_evaluation_started_at TEXT,
+                fast_evaluation_finished_at TEXT,
+                deep_evaluation_status TEXT,
+                deep_evaluation_started_at TEXT,
+                deep_evaluation_finished_at TEXT
             )
         """))
         conn.commit()
@@ -199,6 +211,121 @@ def test_resume_without_run_id_rejected(engine_factory, tmp_path):
             resume_from="ok_step",
             run_id=None,
         )
+
+
+# --- Step classes with names in the guard set (real pipeline step names) -----
+
+
+class _StockSelectionOk(PipelineStep):
+    name = "stock_selection"
+
+    def run(self, ctx):
+        return StepResult(step_name=self.name, status="success",
+                          summary={}, payload={})
+
+
+class _FastEvalFail(PipelineStep):
+    name = "fast_evaluation"
+
+    def run(self, ctx):
+        return StepResult(step_name=self.name, status="failed",
+                          summary={}, error="boom")
+
+
+class _DeepEvalOk(PipelineStep):
+    name = "deep_evaluation"
+
+    def run(self, ctx):
+        return StepResult(step_name=self.name, status="success",
+                          summary={}, payload={})
+
+
+# --- Per-step status tracking tests -------------------------------------------
+
+
+def test_step_status_tracked_on_success(engine_factory, tmp_path):
+    """Step in guard set gets status='completed' + timestamps on success."""
+    engine, factory = engine_factory
+    pipeline = FullPipeline(
+        steps=[_StockSelectionOk()],
+        cfg={},
+        session_factory=lambda: factory().__enter__(),
+        report_root=tmp_path,
+        logger=logging.getLogger("test"),
+    )
+    run_id = pipeline.run()
+    with factory() as s:
+        row = s.execute(text(
+            "SELECT stock_selection_status, stock_selection_started_at, "
+            "stock_selection_finished_at FROM pipeline_runs WHERE id = :rid"
+        ), {"rid": run_id}).fetchone()
+        assert row is not None
+        assert row[0] == "completed"
+        assert row[1] is not None  # started_at filled
+        assert row[2] is not None  # finished_at filled
+
+
+def test_step_status_tracked_on_failure(engine_factory, tmp_path):
+    """Step in guard set gets status='failed' + finished_at on failure."""
+    engine, factory = engine_factory
+    pipeline = FullPipeline(
+        steps=[_FastEvalFail()],
+        cfg={},
+        session_factory=lambda: factory().__enter__(),
+        report_root=tmp_path,
+        logger=logging.getLogger("test"),
+    )
+    with pytest.raises(PipelineError):
+        pipeline.run()
+    with factory() as s:
+        row = s.execute(text(
+            "SELECT fast_evaluation_status, fast_evaluation_finished_at "
+            "FROM pipeline_runs WHERE id = (SELECT MAX(id) FROM pipeline_runs)"
+        )).fetchone()
+        assert row[0] == "failed"
+        assert row[1] is not None
+
+
+def test_arbitrary_step_not_tracked(engine_factory, tmp_path):
+    """Steps outside the guard set are silently not tracked (columns stay NULL)."""
+    engine, factory = engine_factory
+    pipeline = FullPipeline(
+        steps=[_OkStep()],
+        cfg={},
+        session_factory=lambda: factory().__enter__(),
+        report_root=tmp_path,
+        logger=logging.getLogger("test"),
+    )
+    run_id = pipeline.run()
+    with factory() as s:
+        row = s.execute(text(
+            "SELECT stock_selection_status FROM pipeline_runs WHERE id = :rid"
+        ), {"rid": run_id}).fetchone()
+        assert row[0] is None  # never touched
+
+
+def test_multiple_steps_all_tracked(engine_factory, tmp_path):
+    """All steps in guard set get recorded correctly in sequence."""
+    engine, factory = engine_factory
+    pipeline = FullPipeline(
+        steps=[_StockSelectionOk(), _DeepEvalOk()],
+        cfg={},
+        session_factory=lambda: factory().__enter__(),
+        report_root=tmp_path,
+        logger=logging.getLogger("test"),
+    )
+    run_id = pipeline.run()
+    with factory() as s:
+        row = s.execute(text(
+            "SELECT stock_selection_status, stock_selection_finished_at, "
+            "deep_evaluation_status, deep_evaluation_finished_at, status "
+            "FROM pipeline_runs WHERE id = :rid"
+        ), {"rid": run_id}).fetchone()
+        assert row[0] == "completed"  # stock_selection
+        assert row[1] is not None
+        assert row[2] == "completed"  # deep_evaluation
+        assert row[3] is not None
+        assert row[4] == "success"    # overall
 
 
 def test_only_runs_single_step(engine_factory, tmp_path):

@@ -19,7 +19,10 @@ def render(ctx) -> None:
         return
 
     run_labels = {
-        r["id"]: f"Run #{r['id']}  {r['started_at'].strftime('%Y-%m-%d %H:%M')}  [{r['status']}]"
+        r["id"]: (
+            f"Run #{r['id']}  {r['started_at'].strftime('%Y-%m-%d %H:%M')}  "
+            f"[{r.get('fast_evaluation_status') or '—'}/{r['status']}]"
+        )
         for r in runs
     }
     col1, col2 = ctx.st.columns([2, 2])

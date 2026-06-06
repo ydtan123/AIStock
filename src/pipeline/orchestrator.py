@@ -19,6 +19,12 @@ from pipeline.base import (
     StepResult,
 )
 
+# Step names that get per-step status tracking in pipeline_runs table.
+# Tests with arbitrary step names are silently excluded (guard set is tight).
+_STEP_STATUS_TRACKED = frozenset({
+    "data_update", "stock_selection", "fast_evaluation", "deep_evaluation",
+})
+
 
 @contextmanager
 def _open_session(factory):
@@ -121,9 +127,11 @@ class FullPipeline:
             for step in steps_to_run:
                 self._check_stop()
                 self.logger.info("=== running step: %s ===", step.name)
+                self._mark_step_start(run_id, step.name)
                 try:
                     result = step.run(ctx)
                 except PipelineStopped:
+                    self._mark_step_end(run_id, step.name, "failed")
                     raise
                 except Exception as e:
                     tb = traceback.format_exc()
@@ -138,11 +146,14 @@ class FullPipeline:
                 ctx.prior_results[step.name] = result
 
                 if result.status == "failed":
+                    self._mark_step_end(run_id, step.name, "failed")
                     self._mark_run(run_id, status="failed")
                     self._write_summary(report_dir, ctx.prior_results, status="failed")
                     raise PipelineError(
                         f"step {step.name!r} failed: {result.error}"
                     )
+                else:
+                    self._mark_step_end(run_id, step.name, "completed")
         except PipelineStopped:
             self._mark_run(run_id, status="stopped")
             self._write_summary(report_dir, ctx.prior_results, status="stopped")
@@ -176,6 +187,29 @@ class FullPipeline:
             run = s.query(PipelineRun).filter_by(id=run_id).one()
             run.status = status
             run.finished_at = dt.datetime.utcnow()
+            s.commit()
+
+    def _mark_step_start(self, run_id: int, step_name: str) -> None:
+        """Atomically record step start in the DB (own session + commit)."""
+        if step_name not in _STEP_STATUS_TRACKED:
+            return
+        with _open_session(self.session_factory) as s:
+            run = s.query(PipelineRun).filter_by(id=run_id).one()
+            setattr(run, f"{step_name}_status", "running")
+            setattr(run, f"{step_name}_started_at", dt.datetime.utcnow())
+            s.commit()
+
+    def _mark_step_end(self, run_id: int, step_name: str, step_status: str) -> None:
+        """Atomically record step completion in the DB (own session + commit).
+
+        step_status: ``"completed"`` | ``"failed"``
+        """
+        if step_name not in _STEP_STATUS_TRACKED:
+            return
+        with _open_session(self.session_factory) as s:
+            run = s.query(PipelineRun).filter_by(id=run_id).one()
+            setattr(run, f"{step_name}_status", step_status)
+            setattr(run, f"{step_name}_finished_at", dt.datetime.utcnow())
             s.commit()
 
     def _select_steps(self) -> list[PipelineStep]:
