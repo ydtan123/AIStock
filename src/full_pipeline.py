@@ -8,7 +8,6 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from pathlib import Path
 
 # Pre-import AIStock modules BEFORE any pipeline.backends import touches
 # external/* paths — preserves the sys.path hazard discipline.
@@ -75,9 +74,9 @@ def _setup_logging(level: str) -> logging.Logger:
     console = logging.StreamHandler()
     console.setFormatter(fmt)
 
-    # File handler — logs/fullpipeline_YYYYMMDDHHMM.log
-    log_dir = Path("logs")
-    log_dir.mkdir(parents=True, exist_ok=True)
+    # File handler — <output>/logs/fullpipeline_YYYYMMDDHHMM.log
+    from config import get_logs_dir
+    log_dir = get_logs_dir()
     log_file = log_dir / f"fullpipeline_{datetime.now():%Y%m%d%H%M}.log"
     fh = logging.FileHandler(str(log_file), encoding="utf-8")
     fh.setFormatter(fmt)
@@ -110,8 +109,9 @@ def main(argv: list[str] | None = None) -> int:
         cfg.setdefault("pipeline", {})["symbols"] = symbols
         logger.info("Filtering to %d symbols: %s", len(symbols), symbols)
 
-    report_root = Path("reports/full_pipeline")
-    report_root.mkdir(parents=True, exist_ok=True)
+    from config import get_reports_dir
+
+    report_root = get_reports_dir("full_pipeline")
 
     steps = [cls() for cls in STEPS_ORDER]
     pipeline = FullPipeline(
@@ -133,7 +133,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         run_id = pipeline.run()
         loader.write_effective(
-            Path("reports/full_pipeline") / str(run_id) / "effective_config.yaml"
+            report_root / str(run_id) / "effective_config.yaml"
         )
         logger.info("pipeline run %d completed successfully", run_id)
         return 0

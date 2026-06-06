@@ -129,8 +129,9 @@ def _full_pipeline_thread_target(
                 cfg_part = cfg_part.setdefault(part, {})
             cfg_part[parts[-1]] = value
 
-        report_root = _Path("reports/full_pipeline")
-        report_root.mkdir(parents=True, exist_ok=True)
+        from config import get_reports_dir
+
+        report_root = get_reports_dir("full_pipeline")
 
         pipeline = FullPipeline(
             steps=steps,

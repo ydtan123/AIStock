@@ -57,6 +57,8 @@ def _flatten_config(cfg: dict, prefix: str = "") -> dict[str, object]:
 
 # ── dynamic option resolvers ──────────────────────────────────────────────────
 
+_UNIVERSE_OPTIONS = ["S&P 500", "NASDAQ 100", "Large cap+", "Mid cap", "Small cap"]
+
 _ALL_ACTIVE = "All Active Stocks"
 
 def _get_universe_options() -> list[str]:
@@ -419,6 +421,23 @@ def render(ctx) -> None:
     yaml_cfg = _load_yaml_defaults()
     flat_defaults = _flatten_config(yaml_cfg)
 
+    # ── page-level universe multiselect ──────────────────────────────────
+    universe_key = "fp_cfg_pipeline.universe"
+    if universe_key not in st.session_state:
+        st.session_state[universe_key] = flat_defaults.get("pipeline.universe") or []
+    selected_universes = st.multiselect(
+        "Stock Universe (applies to all steps)",
+        options=_UNIVERSE_OPTIONS,
+        default=st.session_state[universe_key],
+        key="fp_universe_multiselect",
+        help="Select one or more stock universes. "
+             "Index-based (S&P 500, NASDAQ 100) filter by index membership. "
+             "Market-cap-based (Large cap+ ≥ $10B, Mid cap $2B–$10B, Small cap < $2B) "
+             "filter by latest market cap. Select none = all active stocks.",
+    )
+    st.session_state[universe_key] = selected_universes
+    ctx.st.divider()
+
     # ── step checkboxes ──────────────────────────────────────────────────
     col_steps = ctx.st.columns(len(_STEPS))
     selected_steps: list[str] = []
@@ -434,6 +453,11 @@ def render(ctx) -> None:
 
     # ── per-step config expanders ────────────────────────────────────────
     overrides: dict[str, object] = {}
+
+    # Include page-level universe selection
+    if selected_universes:
+        overrides["pipeline.universe"] = selected_universes
+
     for step_def in _STEPS:
         if step_def["name"] not in selected_steps:
             continue

@@ -371,6 +371,38 @@ class StockRepository:
             return [r[0] for r in rows]
         return self._with_session(_query)
 
+    # -- market cap universe ----------------------------------------------------
+
+    _MARKET_CAP_RANGES: dict[str, tuple[int | None, int | None]] = {
+        "Large cap+": (10_000_000_000, None),      # >= $10B
+        "Mid cap":    (2_000_000_000, 10_000_000_000),  # $2B–$10B
+        "Small cap":  (None, 2_000_000_000),       # < $2B
+    }
+
+    def get_stocks_by_market_cap(
+        self, min_cap: int | None, max_cap: int | None,
+    ) -> list[str]:
+        """Return active stock symbols filtered by market cap range."""
+        def _query(s):
+            clauses = ["s.is_active = 1"]
+            params: dict = {}
+            if min_cap is not None:
+                clauses.append("si.market_cap >= :min_cap")
+                params["min_cap"] = min_cap
+            if max_cap is not None:
+                clauses.append("si.market_cap < :max_cap")
+                params["max_cap"] = max_cap
+            rows = s.execute(
+                text(
+                    "SELECT DISTINCT s.symbol FROM stocks s "
+                    "JOIN stock_indicators si ON si.stock_id = s.id "
+                    "WHERE " + " AND ".join(clauses)
+                ),
+                params,
+            ).fetchall()
+            return [r[0] for r in rows]
+        return self._with_session(_query)
+
     # -- news ------------------------------------------------------------------
 
     def get_news_for_ticker(self, ticker: str, limit: int = 50) -> list[dict]:

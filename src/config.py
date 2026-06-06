@@ -28,3 +28,24 @@ def load_config(force: bool = False) -> dict:
     loader = ConfigLoader(config_path)
     _config = loader.load()
     return _config
+
+
+def get_output_dir() -> Path:
+    """Return the configured output directory, expanding ~ and defaults."""
+    cfg = load_config()
+    raw = cfg.get("output", "~/projects/AIStock_output")
+    return Path(raw).expanduser().resolve()
+
+
+def get_reports_dir(subpath: str = "") -> Path:
+    """Return ``<output>/reports/<subpath>``, creating directories."""
+    d = get_output_dir() / "reports" / subpath
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def get_logs_dir() -> Path:
+    """Return ``<output>/logs``, creating directories."""
+    d = get_output_dir() / "logs"
+    d.mkdir(parents=True, exist_ok=True)
+    return d

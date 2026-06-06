@@ -76,7 +76,11 @@ from repository import StockRepository
 logger = logging.getLogger(__name__)
 
 
-def _run_finrl_runner(cfg_overrides: dict, universe_index: str | None = None) -> dict:
+def _run_finrl_runner(
+    cfg_overrides: dict,
+    universe_index: str | None = None,
+    universe_list: list[str] | None = None,
+) -> dict:
     """Indirection seam — tests monkeypatch this."""
     import config  # noqa: F401
     import database  # noqa: F401
@@ -86,7 +90,9 @@ def _run_finrl_runner(cfg_overrides: dict, universe_index: str | None = None) ->
     from finrl_runner import run_pipeline_and_save_report
 
     csv_path, selected_stocks = run_pipeline_and_save_report(
-        cfg_overrides, universe_index=universe_index,
+        cfg_overrides,
+        universe_index=universe_index,
+        universe_list=universe_list,
     )
     return {"csv_path": str(csv_path), "selected_stocks": selected_stocks}
 
@@ -100,14 +106,26 @@ class FinrlStockSelector(StockSelector):
 
     def select(self, ctx: StepContext) -> list[ScoredTicker]:
         sub_cfg = self.cfg or ctx.cfg.get("stock_selection", {}).get("finrl", {})
-        universe = ctx.cfg.get("stock_selection", {}).get("universe")
-        # Treat None / empty / "All Active Stocks" as "no filter"
-        if universe and str(universe).strip() in ("", "All Active Stocks", "None"):
-            universe = None
+
+        # Page-level universe multiselect (list) takes precedence
+        pipeline_universe = ctx.cfg.get("pipeline", {}).get("universe")
+        if pipeline_universe and isinstance(pipeline_universe, list):
+            universe_list = pipeline_universe
+            universe_index = None  # single-index path is subsumed
+        else:
+            universe_list = None
+            universe = ctx.cfg.get("stock_selection", {}).get("universe")
+            if universe and str(universe).strip() in ("", "All Active Stocks", "None"):
+                universe = None
+            universe_index = universe
+
         ctx.logger.info(
-            "FinrlStockSelector starting with cfg=%s universe=%s", sub_cfg, universe,
+            "FinrlStockSelector starting with cfg=%s universe_index=%s universe_list=%s",
+            sub_cfg, universe_index, universe_list,
         )
-        result = _run_finrl_runner(sub_cfg, universe_index=universe)
+        result = _run_finrl_runner(
+            sub_cfg, universe_index=universe_index, universe_list=universe_list,
+        )
         selected_stocks = result.get("selected_stocks") or []
 
         if selected_stocks:

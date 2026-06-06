@@ -43,7 +43,8 @@ import repository  # noqa: F401
 
 
 def run_pipeline_and_save_report(cfg_overrides: dict[str, Any],
-                                 universe_index: str | None = None) -> tuple[str, list[dict]]:
+                                 universe_index: str | None = None,
+                                 universe_list: list[str] | None = None) -> tuple[str, list[dict]]:
     """Run the ML stock selection pipeline and save results to DATA_DIR.
 
     Returns (report_csv_path, selected_stocks_info) where selected_stocks_info
@@ -52,8 +53,9 @@ def run_pipeline_and_save_report(cfg_overrides: dict[str, Any],
 
     Args:
         cfg_overrides: ML pipeline configuration overrides.
-        universe_index: If set, restrict the stock universe to symbols in
-            *universe_index* from the ``stocks_in_index`` table (e.g. "S&P 500").
+        universe_index: (deprecated) single index name.
+        universe_list: List of universe names — index names ("S&P 500") or
+            market-cap labels ("Large cap+", "Mid cap", "Small cap").
     """
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -78,22 +80,50 @@ def run_pipeline_and_save_report(cfg_overrides: dict[str, Any],
         raise RuntimeError("No tickers returned from data source.")
     logger.info("  %d tickers loaded.", len(tickers_df))
 
-    if universe_index:
+    # --- universe filtering ---------------------------------------------------
+    universes: list[str] = universe_list or []
+    if universe_index and universe_index not in universes:
+        universes = [universe_index] + universes  # backward compat
+
+    if universes:
         repo = repository.StockRepository()
-        index_syms = set(repo.list_stocks_in_index(universe_index))
-        if index_syms:
+        _INDEX_NAMES = {"S&P 500", "NASDAQ 100", "NASDAQ-100", "Dow Jones"}
+        _MC_LABELS = set(repo._MARKET_CAP_RANGES.keys())
+        all_syms: set[str] = set()
+        for u in universes:
+            u_clean = u.strip()
+            if u_clean in _MC_LABELS:
+                min_cap, max_cap = repo._MARKET_CAP_RANGES[u_clean]
+                syms = set(repo.get_stocks_by_market_cap(min_cap, max_cap))
+                logger.info(
+                    "  Universe '%s': %d symbols (market cap filter)", u_clean, len(syms),
+                )
+                all_syms |= syms
+            elif u_clean in _INDEX_NAMES or u_clean:
+                # Normalize "NASDAQ-100" ↔ "NASDAQ 100"
+                lookup = u_clean.replace("-", " ")
+                syms = set(repo.list_stocks_in_index(lookup))
+                if not syms:
+                    syms = set(repo.list_stocks_in_index(u_clean))
+                logger.info(
+                    "  Universe '%s': %d symbols in index", u_clean, len(syms),
+                )
+                all_syms |= syms
+            else:
+                logger.warning("  Universe '%s': unrecognised — skipped", u_clean)
+
+        if all_syms:
             before = len(tickers_df)
-            tickers_df = tickers_df[tickers_df["tickers"].isin(index_syms)]
+            tickers_df = tickers_df[tickers_df["tickers"].isin(all_syms)]
             logger.info(
-                "  Universe '%s': filtered %d → %d tickers (%d in index, %d active)",
-                universe_index, before, len(tickers_df),
-                len(index_syms), len(tickers_df),
+                "  Combined %d universes → %d unique symbols; "
+                "filtered %d → %d active tickers",
+                len(universes), len(all_syms), before, len(tickers_df),
             )
         else:
             logger.warning(
-                "  Universe '%s' returned 0 active symbols. "
-                "Index may be empty or not yet populated. Proceeding unfiltered.",
-                universe_index,
+                "  Universe list %s returned 0 active symbols. Proceeding unfiltered.",
+                universes,
             )
 
     logger.info("Step 3/4: Fetching fundamental data (%s → %s)...", start_date, end_date)

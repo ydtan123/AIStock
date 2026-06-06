@@ -22,4 +22,4 @@ default_activation_criteria:
     - NASDAQ
     - NYSE
 
-log_dir: "logs"                 # relative to project root, or absolute path
+output: "~/projects/AIStock_output"  # reports/ and logs/ are created under this path

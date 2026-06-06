@@ -21,7 +21,17 @@ from pathlib import Path
 
 # ── path setup: TradingAgents root must be importable ────────────────────────
 _TA_ROOT = Path(__file__).parent.parent / "external" / "TradingAgents"
-_REPORTS_DIR = _TA_ROOT.parent.parent / "reports"
+
+# Resolve reports dir from config.yaml output, falling back to project root
+def _resolve_reports_dir() -> Path:
+    try:
+        from config import get_reports_dir
+        return get_reports_dir()
+    except Exception:
+        return Path(__file__).parent.parent / "reports"
+
+
+_REPORTS_DIR = _resolve_reports_dir()
 if str(_TA_ROOT) not in sys.path:
     sys.path.insert(0, str(_TA_ROOT))
 

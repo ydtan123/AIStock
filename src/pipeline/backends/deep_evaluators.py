@@ -15,6 +15,15 @@ from pipeline.base import RegisteredBackend, StepContext
 logger = logging.getLogger(__name__)
 
 
+def _resolve_results_dir() -> str:
+    """Resolve default results_dir from config.yaml output path."""
+    try:
+        from config import get_reports_dir
+        return str(get_reports_dir("tradingagents"))
+    except Exception:
+        return "reports/tradingagents"
+
+
 @dataclass
 class DeepEvaluation:
     ticker: str
@@ -133,7 +142,7 @@ class TradingAgentsDeepEvaluator(DeepEvaluator):
             "deep_think_llm": deep_model,
             "quick_think_llm": sub.get("quick_model") or deep_model,
             "data_cache_dir": sub.get("data_cache_dir", "data/tradingagents_cache"),
-            "results_dir": sub.get("results_dir", "reports/tradingagents"),
+            "results_dir": sub.get("results_dir") or _resolve_results_dir(),
             "max_debate_rounds": sub.get("max_debate_rounds", 1),
             "max_risk_discuss_rounds": sub.get("max_risk_discuss_rounds", 1),
             "checkpoint_enabled": sub.get("checkpoint_enabled", False),
