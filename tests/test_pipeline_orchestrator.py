@@ -76,14 +76,15 @@ class _RaiseStep(PipelineStep):
 
 def test_orchestrator_runs_all_steps(engine_factory, tmp_path):
     engine, factory = engine_factory
+    s1 = _StockSelectionOk()
+    s2 = _DeepEvalOk()
     pipeline = FullPipeline(
-        steps=[_OkStep(), _OkStep()],
+        steps=[s1, s2],
         cfg={},
         session_factory=lambda: factory().__enter__(),
         report_root=tmp_path,
         logger=logging.getLogger("test"),
     )
-    pipeline.steps[1].name = "ok_step_2"
     run_id = pipeline.run()
     assert run_id is not None
     with factory() as s:
@@ -91,10 +92,10 @@ def test_orchestrator_runs_all_steps(engine_factory, tmp_path):
             text("SELECT status FROM pipeline_runs WHERE id = :rid"),
             {"rid": run_id},
         ).fetchone()
-        assert run[0] == "success"
+        assert run[0] == "partial"  # only 2 of 4 steps ran
     rep_dir = tmp_path / str(run_id)
-    assert (rep_dir / "ok_step.json").exists()
-    assert (rep_dir / "ok_step_2.json").exists()
+    assert (rep_dir / "stock_selection.json").exists()
+    assert (rep_dir / "deep_evaluation.json").exists()
     assert (rep_dir / "summary.json").exists()
 
 
@@ -325,7 +326,38 @@ def test_multiple_steps_all_tracked(engine_factory, tmp_path):
         assert row[1] is not None
         assert row[2] == "completed"  # deep_evaluation
         assert row[3] is not None
-        assert row[4] == "success"    # overall
+        assert row[4] == "partial"  # only 2 of 4 steps → partial
+
+
+def test_full_pipeline_all_steps_success(engine_factory, tmp_path):
+    """All 4 tracked steps complete → overall status = 'success'."""
+    engine, factory = engine_factory
+
+    steps: list[PipelineStep] = []
+    for name in ("data_update", "stock_selection", "fast_evaluation", "deep_evaluation"):
+        step = _StockSelectionOk()
+        step.name = name  # override to match each tracked step
+        steps.append(step)
+
+    pipeline = FullPipeline(
+        steps=steps,
+        cfg={},
+        session_factory=lambda: factory().__enter__(),
+        report_root=tmp_path,
+        logger=logging.getLogger("test"),
+    )
+    run_id = pipeline.run()
+    with factory() as s:
+        row = s.execute(text(
+            "SELECT data_update_status, stock_selection_status, "
+            "fast_evaluation_status, deep_evaluation_status, status "
+            "FROM pipeline_runs WHERE id = :rid"
+        ), {"rid": run_id}).fetchone()
+        assert row[0] == "completed"
+        assert row[1] == "completed"
+        assert row[2] == "completed"
+        assert row[3] == "completed"
+        assert row[4] == "success"
 
 
 def test_only_runs_single_step(engine_factory, tmp_path):

@@ -19,11 +19,11 @@ from pipeline.base import (
     StepResult,
 )
 
-# Step names that get per-step status tracking in pipeline_runs table.
-# Tests with arbitrary step names are silently excluded (guard set is tight).
-_STEP_STATUS_TRACKED = frozenset({
+# Canonical ordered list of pipeline steps for per-step tracking.
+# _sync_overall_status() reads all 4 columns to derive the overall status.
+_STEP_STATUS_TRACKED = (
     "data_update", "stock_selection", "fast_evaluation", "deep_evaluation",
-})
+)
 
 
 @contextmanager
@@ -132,6 +132,7 @@ class FullPipeline:
                     result = step.run(ctx)
                 except PipelineStopped:
                     self._mark_step_end(run_id, step.name, "failed")
+                    self._sync_overall_status(run_id)
                     raise
                 except Exception as e:
                     tb = traceback.format_exc()
@@ -147,20 +148,20 @@ class FullPipeline:
 
                 if result.status == "failed":
                     self._mark_step_end(run_id, step.name, "failed")
-                    self._mark_run(run_id, status="failed")
-                    self._write_summary(report_dir, ctx.prior_results, status="failed")
+                    overall = self._sync_overall_status(run_id, fallback="failed")
+                    self._write_summary(report_dir, ctx.prior_results, status=overall)
                     raise PipelineError(
                         f"step {step.name!r} failed: {result.error}"
                     )
                 else:
                     self._mark_step_end(run_id, step.name, "completed")
         except PipelineStopped:
-            self._mark_run(run_id, status="stopped")
-            self._write_summary(report_dir, ctx.prior_results, status="stopped")
+            overall = self._sync_overall_status(run_id, fallback="partial")
+            self._write_summary(report_dir, ctx.prior_results, status=overall)
             raise
 
-        self._mark_run(run_id, status="success")
-        self._write_summary(report_dir, ctx.prior_results, status="success")
+        overall = self._sync_overall_status(run_id, fallback="success")
+        self._write_summary(report_dir, ctx.prior_results, status=overall)
         return run_id
 
     # --- run lifecycle helpers ----------------------------------------------
@@ -182,12 +183,42 @@ class FullPipeline:
             s.commit()
             return run.id
 
-    def _mark_run(self, run_id: int, status: str) -> None:
+    def _sync_overall_status(self, run_id: int, fallback: str = "running") -> str:
+        """Derive overall status from per-step columns and persist it.
+
+        When at least one tracked step has a non-NULL status the result is
+        fully derived.  Otherwise *fallback* is used (so tests with untracked
+        step names still get the right overall status).
+
+        Returns one of: ``"running"`` | ``"failed"`` | ``"partial"`` | ``"success"``.
+
+        - **running** — at least one step is still ``"running"`` and none have failed
+        - **failed**  — at least one step is ``"failed"``
+        - **partial** — some steps ``"completed"``, others untouched (NULL); none running/failed
+        - **success** — ALL four steps are ``"completed"``
+        """
         with _open_session(self.session_factory) as s:
             run = s.query(PipelineRun).filter_by(id=run_id).one()
-            run.status = status
-            run.finished_at = dt.datetime.utcnow()
+            statuses = [getattr(run, f"{sn}_status") for sn in _STEP_STATUS_TRACKED]
+
+        if any(st == "failed" for st in statuses):
+            derived = "failed"
+        elif any(st == "running" for st in statuses):
+            derived = "running"
+        elif all(st == "completed" for st in statuses):
+            derived = "success"
+        elif any(st == "completed" for st in statuses):
+            derived = "partial"
+        else:
+            derived = fallback  # no tracked step ever ran
+
+        with _open_session(self.session_factory) as s:
+            run = s.query(PipelineRun).filter_by(id=run_id).one()
+            run.status = derived
+            if derived in ("success", "failed", "partial"):
+                run.finished_at = dt.datetime.utcnow()
             s.commit()
+        return derived
 
     def _mark_step_start(self, run_id: int, step_name: str) -> None:
         """Atomically record step start in the DB (own session + commit)."""
