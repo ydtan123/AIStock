@@ -19,8 +19,23 @@ def _run_pipeline(source: str, step_cfg: dict, full_cfg: dict) -> dict:
         if key in step_cfg and key not in cfg:
             cfg[key] = step_cfg[key]
     fetcher = create_fetcher(cfg)
-    symbols = full_cfg.get("pipeline", {}).get("symbols") or None
-    result = run_daily_pipeline(fetcher, symbols=symbols)
+
+    pipeline_cfg = full_cfg.get("pipeline", {})
+    # --symbols takes precedence over --universe
+    symbols = pipeline_cfg.get("symbols") or None
+    universe_label = None
+    if not symbols:
+        universe_list = pipeline_cfg.get("universe")
+        if universe_list:
+            from repository import StockRepository
+            repo = StockRepository()
+            universe_syms, _ = repo.resolve_universe_to_symbols(universe_list)
+            symbols = sorted(universe_syms)
+            universe_label = ", ".join(universe_list)
+
+    result = run_daily_pipeline(
+        fetcher, symbols=symbols, universe_label=universe_label,
+    )
     symbols = result.get("symbols", [])
     failed_symbols = [s["symbol"] for s in symbols if s.get("error")]
     return {

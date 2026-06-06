@@ -499,10 +499,12 @@ def _process_symbol(fetcher: FetcherBase, stock: Stock, force: bool,
 
 
 def run_daily_pipeline(fetcher: FetcherBase, force: bool = False,
-                        symbols: list[str] | None = None) -> dict:
+                        symbols: list[str] | None = None,
+                        universe_label: str | None = None) -> dict:
     """Run the daily pipeline: prices, fundamentals, indicators, snapshots. Returns summary dict.
 
     When *symbols* is provided, only those tickers are processed (case-insensitive).
+    When *universe_label* is provided, it is included in the startup log.
     """
     session = get_session()
     run = PipelineRun(started_at=datetime.utcnow(), status="running")
@@ -529,7 +531,13 @@ def run_daily_pipeline(fetcher: FetcherBase, force: bool = False,
             logger.info("Filtering to %d specified symbols", len(symbols))
         stocks = q.order_by(StockIndicator.market_cap.desc()).all()
         session.close()
-        logger.info("Pipeline starting: %d active symbols", len(stocks))
+        if universe_label:
+            logger.info(
+                "Pipeline starting: %d active symbols in universe [%s]",
+                len(stocks), universe_label,
+            )
+        else:
+            logger.info("Pipeline starting: %d active symbols", len(stocks))
 
         prefetch = _prefetch_stock_dates([s.id for s in stocks])
 

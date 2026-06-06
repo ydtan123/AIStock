@@ -4,6 +4,7 @@ from __future__ import annotations
 import ast
 import datetime as dt
 import json
+import numbers
 import traceback
 
 from sqlalchemy import desc
@@ -15,6 +16,18 @@ from models import (
 )
 from pipeline.backends.fast_evaluators import FAST_EVALUATOR_REGISTRY
 from pipeline.base import PipelineStep, StepContext, StepResult, open_session
+
+
+def _safe_real(value: float | complex | None, default: float = 0.0) -> float:
+    """Return a real float from *value*, handling complex/NaN/None safely."""
+    if value is None:
+        return default
+    if isinstance(value, numbers.Complex):
+        return float(value.real) if abs(value.imag) < 0.01 else float(value.real)
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
 
 
 def _try_parse_dict(text: str) -> dict | None:
@@ -166,7 +179,7 @@ def _write_report(evaluations, report_dir, backend_name):
 
         sorted_ops = sorted(ev.opinions, key=lambda o: (
             {"bullish": 0, "bearish": 1, "neutral": 2}.get(o.opinion, 3),
-            -o.confidence
+            -_safe_real(o.confidence)
         ))
 
         ticker_lines = [
@@ -340,7 +353,9 @@ class FastEvaluationStep(PipelineStep):
             session.commit()
 
             conclusions_sorted = sorted(
-                conclusions, key=lambda c: c.consensus_score, reverse=True
+                conclusions,
+                key=lambda c: _safe_real(c.consensus_score),
+                reverse=True,
             )
             for c in conclusions_sorted:
                 ranked.append({

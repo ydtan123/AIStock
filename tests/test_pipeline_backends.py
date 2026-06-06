@@ -76,7 +76,7 @@ def test_finrl_stock_selector_uses_run_pipeline(monkeypatch, tmp_path):
     ]
     captured = {}
 
-    def fake_run(cfg_overrides, universe_index=None):
+    def fake_run(cfg_overrides, universe_index=None, universe_list=None):
         captured["cfg_overrides"] = cfg_overrides
         captured["universe_index"] = universe_index
         return {"csv_path": "/tmp/test.csv", "selected_stocks": None}

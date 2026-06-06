@@ -112,11 +112,18 @@ _SIGN_BY_OPINION = {"bullish": 1, "bearish": -1, "neutral": 0}
 
 
 def _compute_consensus(opinions: list[AnalystOpinion]) -> float:
-    total_conf = sum(o.confidence for o in opinions if o.confidence > 0)
+    # Guard against numpy complex / NaN leaking from LLM responses
+    confs = [
+        float(o.confidence.real) if hasattr(o.confidence, 'real')
+        else float(o.confidence or 0.0)
+        for o in opinions
+    ]
+    total_conf = sum(c for c in confs if c > 0)
     if total_conf <= 0:
         return 0.0
     weighted = sum(
-        _SIGN_BY_OPINION.get(o.opinion, 0) * o.confidence for o in opinions
+        _SIGN_BY_OPINION.get(o.opinion, 0) * c
+        for o, c in zip(opinions, confs)
     )
     return weighted / total_conf
 
@@ -172,7 +179,11 @@ class AIHedgeFundFastEvaluator(FastEvaluator):
                 if not sig:
                     continue
                 opinion = str(sig.get("signal", "neutral")).lower()
-                confidence = float(sig.get("confidence", 0.0))
+                raw_conf = sig.get("confidence", 0.0)
+                try:
+                    confidence = float(raw_conf.real if hasattr(raw_conf, 'real') else raw_conf)
+                except (TypeError, ValueError):
+                    confidence = 0.0
                 reasoning = str(sig.get("reasoning", ""))
                 opinions.append(
                     AnalystOpinion(

@@ -59,6 +59,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Only process these symbols (comma/space separated). "
              "stock_selection skips; data/fast/deep evaluation filter to these tickers.",
     )
+    p.add_argument(
+        "--universe", nargs="*", default=["SP500"],
+        choices=["SP500", "NASDAQ100", "large", "mid", "small"],
+        metavar="UNIVERSE",
+        help="Restrict stock universe. Options: SP500, NASDAQ100, "
+             "large (Large cap+), mid (Mid cap), small (Small cap). "
+             "Applies to all steps. Repeatable: --universe SP500 large",
+    )
     return p.parse_args(argv)
 
 
@@ -108,6 +116,25 @@ def main(argv: list[str] | None = None) -> int:
         symbols = [s.strip().upper() for s in args.symbols if s.strip()]
         cfg.setdefault("pipeline", {})["symbols"] = symbols
         logger.info("Filtering to %d symbols: %s", len(symbols), symbols)
+
+    # --universe CLI option → pipeline.universe config key
+    _UNIVERSE_MAP = {
+        "SP500": "S&P 500",
+        "NASDAQ100": "NASDAQ 100",
+        "large": "Large cap+",
+        "mid": "Mid cap",
+        "small": "Small cap",
+    }
+    if args.universe:
+        universe_list = [_UNIVERSE_MAP[u] for u in args.universe]
+        cfg.setdefault("pipeline", {})["universe"] = universe_list
+        # Resolve universe → symbol count for startup log
+        from repository import StockRepository
+        _, sym_count = StockRepository().resolve_universe_to_symbols(universe_list)
+        logger.info(
+            "Pipeline starting: %d active symbols in universe %s",
+            sym_count, universe_list,
+        )
 
     from config import get_reports_dir
 

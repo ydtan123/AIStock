@@ -87,38 +87,15 @@ def run_pipeline_and_save_report(cfg_overrides: dict[str, Any],
 
     if universes:
         repo = repository.StockRepository()
-        _INDEX_NAMES = {"S&P 500", "NASDAQ 100", "NASDAQ-100", "Dow Jones"}
-        _MC_LABELS = set(repo._MARKET_CAP_RANGES.keys())
-        all_syms: set[str] = set()
-        for u in universes:
-            u_clean = u.strip()
-            if u_clean in _MC_LABELS:
-                min_cap, max_cap = repo._MARKET_CAP_RANGES[u_clean]
-                syms = set(repo.get_stocks_by_market_cap(min_cap, max_cap))
-                logger.info(
-                    "  Universe '%s': %d symbols (market cap filter)", u_clean, len(syms),
-                )
-                all_syms |= syms
-            elif u_clean in _INDEX_NAMES or u_clean:
-                # Normalize "NASDAQ-100" ↔ "NASDAQ 100"
-                lookup = u_clean.replace("-", " ")
-                syms = set(repo.list_stocks_in_index(lookup))
-                if not syms:
-                    syms = set(repo.list_stocks_in_index(u_clean))
-                logger.info(
-                    "  Universe '%s': %d symbols in index", u_clean, len(syms),
-                )
-                all_syms |= syms
-            else:
-                logger.warning("  Universe '%s': unrecognised — skipped", u_clean)
-
+        all_syms, sym_count = repo.resolve_universe_to_symbols(universes)
+        logger.info(
+            "  Universe %s: %d symbols resolved", universes, sym_count,
+        )
         if all_syms:
             before = len(tickers_df)
             tickers_df = tickers_df[tickers_df["tickers"].isin(all_syms)]
             logger.info(
-                "  Combined %d universes → %d unique symbols; "
-                "filtered %d → %d active tickers",
-                len(universes), len(all_syms), before, len(tickers_df),
+                "  Filtered %d → %d active tickers", before, len(tickers_df),
             )
         else:
             logger.warning(

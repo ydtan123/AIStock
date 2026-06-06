@@ -320,10 +320,13 @@ def _render_param(key: str, meta: dict, defaults: dict, session_key: str) -> Non
 # ── pipeline log fragment (module-level so it is never re-decorated inside ────
 # ── a running @st.fragment — nested fragment definitions break Streamlit) ─────
 
-@st.fragment(run_every=2)
-def _pipeline_log_fragment(ctx) -> None:
+
+def _drain_log_queue(ctx) -> None:
+    """Pull all pending lines from the log queue into session state."""
     fp_queue = ctx.session_state.get("fp_log_queue")
-    while fp_queue is not None:
+    if fp_queue is None:
+        return
+    while True:
         try:
             line = fp_queue.get_nowait()
         except queue.Empty:
@@ -364,7 +367,11 @@ def _pipeline_log_fragment(ctx) -> None:
                     ctx.session_state.fp_completed_steps = done
             ctx.session_state.fp_log_lines.append(line)
 
+
+def _render_pipeline_status(ctx) -> None:
+    """Render step progress + log output from current session state (idempotent)."""
     current_status = ctx.session_state.get("fp_status", "Idle")
+
     if current_status == "Running":
         elapsed = time.time() - ctx.session_state.get("fp_start_time", time.time())
         ctx.st.info(f"Running...  Elapsed: {elapsed:.0f}s")
@@ -384,18 +391,18 @@ def _pipeline_log_fragment(ctx) -> None:
                     else:
                         ctx.st.markdown(f"⬜ {sdef['label']}")
 
-        ctx.st.subheader("Log Output")
-        if ctx.session_state.fp_log_lines:
-            log_text = "\n".join(ctx.session_state.fp_log_lines)
-            _render_log(ctx.st, log_text)
-        else:
-            ctx.st.info("Pipeline starting...")
+    ctx.st.subheader("Log Output")
+    log_lines = ctx.session_state.get("fp_log_lines")
+    if log_lines:
+        _render_log(ctx.st, "\n".join(log_lines))
+    elif current_status == "Running":
+        ctx.st.info("Pipeline starting...")
+    else:
+        ctx.st.info("No output yet. Click 'Run Pipeline' to start.")
 
+    # Reports after completion
     fp_report = ctx.session_state.get("fp_report_path")
     if current_status == "Complete" and fp_report:
-        ctx.st.subheader("Log Output")
-        log_text = "\n".join(ctx.session_state.fp_log_lines)
-        _render_log(ctx.st, log_text)
         report_dir = Path(fp_report)
         if report_dir.exists():
             ctx.st.subheader("Reports")
@@ -412,6 +419,18 @@ def _pipeline_log_fragment(ctx) -> None:
                                 ctx.st.markdown(f.read())
 
 
+@st.fragment(run_every=2)
+def _pipeline_log_fragment(ctx) -> None:
+    """Live-updating fragment: drains queue + renders status.
+
+    The fragment handles continuous updates while the user stays on the page.
+    ``render()`` also calls ``_render_pipeline_status()`` directly so state is
+    visible immediately on page load / after switching back.
+    """
+    _drain_log_queue(ctx)
+    _render_pipeline_status(ctx)
+
+
 # ── main render ──────────────────────────────────────────────────────────────
 
 def render(ctx) -> None:
@@ -424,7 +443,7 @@ def render(ctx) -> None:
     # ── page-level universe multiselect ──────────────────────────────────
     universe_key = "fp_cfg_pipeline.universe"
     if universe_key not in st.session_state:
-        st.session_state[universe_key] = flat_defaults.get("pipeline.universe") or []
+        st.session_state[universe_key] = flat_defaults.get("pipeline.universe") or ["S&P 500"]
     selected_universes = st.multiselect(
         "Stock Universe (applies to all steps)",
         options=_UNIVERSE_OPTIONS,
@@ -523,6 +542,12 @@ def render(ctx) -> None:
         ctx.session_state.fp_stop_event.set()
         ctx.session_state.fp_status = "Idle"
         ctx.st.rerun()
+
+    # ── drain queue immediately (visible on page load / switch back) ─────
+    _drain_log_queue(ctx)
+
+    # ── status + log always rendered, even if fragment timer hasn't fired ──
+    _render_pipeline_status(ctx)
 
     # ── real-time log + results fragment ─────────────────────────────────
     _pipeline_log_fragment(ctx)

@@ -403,6 +403,33 @@ class StockRepository:
             return [r[0] for r in rows]
         return self._with_session(_query)
 
+    # -- universe resolution ---------------------------------------------------
+
+    def resolve_universe_to_symbols(
+        self, universe_list: list[str],
+    ) -> tuple[set[str], int]:
+        """Resolve a list of universe labels → set of active ticker symbols.
+
+        Returns (symbols, count) where *symbols* is the union of all matching
+        stocks across index-based and market-cap-based universes, and *count*
+        is the total number of distinct active symbols in the union.
+        """
+        _MC_LABELS = set(self._MARKET_CAP_RANGES.keys())
+        all_syms: set[str] = set()
+        for u in universe_list:
+            u_clean = u.strip()
+            if u_clean in _MC_LABELS:
+                min_cap, max_cap = self._MARKET_CAP_RANGES[u_clean]
+                syms = set(self.get_stocks_by_market_cap(min_cap, max_cap))
+                all_syms |= syms
+            else:
+                lookup = u_clean.replace("-", " ")
+                syms = set(self.list_stocks_in_index(lookup))
+                if not syms:
+                    syms = set(self.list_stocks_in_index(u_clean))
+                all_syms |= syms
+        return all_syms, len(all_syms)
+
     # -- news ------------------------------------------------------------------
 
     def get_news_for_ticker(self, ticker: str, limit: int = 50) -> list[dict]:
