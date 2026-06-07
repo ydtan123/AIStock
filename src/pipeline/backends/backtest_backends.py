@@ -91,7 +91,21 @@ class FinrlBacktestBackend(BacktestBackend):
         import repository  # noqa: F401
         import models  # noqa: F401
 
-        from backtest.backtest_engine import BacktestConfig, BacktestEngine
+        import sys
+        from pathlib import Path
+        _finrl_root = str(Path(__file__).resolve().parents[3] / "external" / "FinRL-Trading")
+        _finrl_src = _finrl_root + "/src"
+
+        saved = list(sys.path)
+        for p in (_finrl_src, _finrl_root):
+            if p in sys.path:
+                sys.path.remove(p)
+            sys.path.insert(0, p)
+
+        try:
+            from backtest.backtest_engine import BacktestConfig, BacktestEngine
+        finally:
+            sys.path[:] = saved
         return BacktestConfig, BacktestEngine
 
     def run_backtest(

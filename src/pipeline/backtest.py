@@ -22,14 +22,25 @@ class BacktestStep(PipelineStep):
         backend_cls = BACKTEST_REGISTRY.get(backend_name)
         backend = backend_cls(sub)
 
-        # Read selected stocks + weights from DB (latest run)
-        tickers, weights = _load_weights_from_db(ctx)
+        # Read weights from configured source
+        source_cfg = sub.get("stock_source", {})
+        source_type = source_cfg.get("type", "stock_selection")
+        if source_type == "fast_evaluation":
+            min_consensus = float(source_cfg.get("min_consensus", 0.0))
+            tickers, weights = _load_from_fast_eval(ctx, min_consensus)
+        elif source_type == "deep_evaluation":
+            decision = source_cfg.get("decision", "BUY")
+            tickers, weights = _load_from_deep_eval(ctx, decision)
+        else:
+            tickers, weights = _load_weights_from_db(ctx)
+
         if not tickers:
             return StepResult(
                 step_name=self.name,
                 status="skipped",
-                summary={"reason": "no selected stocks with weights found"},
+                summary={"reason": f"no stocks found from source={source_type}"},
             )
+        ctx.logger.info("Backtest source=%s: %d tickers", source_type, len(tickers))
 
         window = sub.get("window", _DEFAULT_WINDOW)
         if window == "latest":
@@ -76,6 +87,52 @@ class BacktestStep(PipelineStep):
 
 
 # -- helpers ------------------------------------------------------------------
+
+
+def _load_from_fast_eval(ctx: StepContext, min_consensus: float) -> tuple[list[str], dict[str, float]]:
+    """Return tickers with bullish consensus from fast_evaluation_conclusion."""
+    with open_session(ctx) as s:
+        from models import FastEvaluationConclusion
+        rows = (
+            s.query(FastEvaluationConclusion)
+            .filter_by(pipeline_run_id=ctx.run_id)
+            .filter(FastEvaluationConclusion.consensus_score >= min_consensus)
+            .all()
+        )
+        if not rows:
+            ctx.logger.warning(
+                "No stocks with consensus >= %s in fast_evaluation for run %d",
+                min_consensus, ctx.run_id,
+            )
+            return [], {}
+        tickers = [r.ticker for r in rows]
+        # Equal weight
+        w = 1.0 / len(tickers)
+        return tickers, {t: w for t in tickers}
+
+
+def _load_from_deep_eval(ctx: StepContext, decision: str) -> tuple[list[str], dict[str, float]]:
+    """Return tickers whose final_decision contains *decision* (case-insensitive)."""
+    with open_session(ctx) as s:
+        from models import DeepEvaluationRow
+        rows = (
+            s.query(DeepEvaluationRow)
+            .filter_by(pipeline_run_id=ctx.run_id)
+            .all()
+        )
+        matches = [
+            r for r in rows
+            if r.final_decision and decision.lower() in r.final_decision.lower()
+        ]
+        if not matches:
+            ctx.logger.warning(
+                "No stocks with decision containing '%s' in deep_evaluation for run %d",
+                decision, ctx.run_id,
+            )
+            return [], {}
+        tickers = [r.ticker for r in matches]
+        w = 1.0 / len(tickers)
+        return tickers, {t: w for t in tickers}
 
 
 def _load_weights_from_db(ctx: StepContext) -> tuple[list[str], dict[str, float]]:

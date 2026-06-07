@@ -29,13 +29,27 @@ class TradingBackend(RegisteredBackend):
 
 
 def _import_alpaca():
-    """Lazy import with FinRL project root already in sys.path (set by full_pipeline.py)."""
+    """Lazy import with temporary FinRL path insertion."""
     import config  # noqa: F401
     import database  # noqa: F401
     import repository  # noqa: F401
     import models  # noqa: F401
 
-    from trading.trade_executor import create_trade_executor_from_env
+    import sys
+    from pathlib import Path
+    _finrl_root = str(Path(__file__).resolve().parents[3] / "external" / "FinRL-Trading")
+    _finrl_src = _finrl_root + "/src"
+
+    saved = list(sys.path)
+    for p in (_finrl_src, _finrl_root):
+        if p in sys.path:
+            sys.path.remove(p)
+        sys.path.insert(0, p)
+
+    try:
+        from trading.trade_executor import create_trade_executor_from_env
+    finally:
+        sys.path[:] = saved
     return create_trade_executor_from_env
 
 

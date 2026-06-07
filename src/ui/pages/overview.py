@@ -257,6 +257,10 @@ _STEPS = [
             "backtest.backend": {
                 "label": "Backend", "type": "select", "options": ["finrl_bt"],
             },
+            "backtest.stock_source.type": {
+                "label": "Stock Source", "type": "select",
+                "options": ["stock_selection", "fast_evaluation", "deep_evaluation"],
+            },
             "backtest.window": {
                 "label": "Backtest Window", "type": "select",
                 "options": ["latest", "full"],
