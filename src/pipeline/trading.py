@@ -61,7 +61,7 @@ class TradingStep(PipelineStep):
         _save_transactions(ctx, result.get("orders_plan", {}), cash_before, execution_mode)
 
         # Save portfolio snapshot
-        _save_portfolio(ctx, account_info, weights, execution_mode)
+        _save_portfolio(ctx, account_info)
 
         # Persist aggregate TradingResult
         _persist_result(
@@ -127,8 +127,7 @@ def _ensure_portfolio_initialized(backend, ctx: StepContext) -> None:
 
     ctx.logger.info("Portfolio table empty — initialising from Alpaca")
     try:
-        result = backend.execute({}, dry_run=True, ctx=ctx)
-        acct = result.get("account_info", {})
+        acct = backend.fetch_account_snapshot(ctx)
     except Exception:
         ctx.logger.warning("Could not initialise portfolio from Alpaca: %s", traceback.format_exc())
         return
@@ -171,9 +170,11 @@ def _save_transactions(
         for side in ("sell", "buy"):
             for order in orders_plan.get(side, []):
                 ticker = order.get("symbol", "?")
-                price = float(order.get("notional", 0)) / max(float(order.get("qty", 1)), 1) if order.get("notional") else 0.0
                 qty = float(order.get("qty", 0))
-                notional = float(order.get("notional", 0)) or qty * price
+                notional = float(order.get("notional", 0))
+                if notional <= 0 and qty > 0:
+                    notional = 0.0  # dry-run may omit notional; price becomes 0
+                price = notional / qty if qty > 0 else 0.0
                 action = side.upper()
 
                 if action == "SELL":
@@ -200,10 +201,8 @@ def _save_transactions(
 def _save_portfolio(
     ctx: StepContext,
     account_info: dict,
-    target_weights: dict[str, float],
-    mode: str,
 ) -> None:
-    """Save projected (dry_run) or actual (submitted) portfolio snapshot."""
+    """Save portfolio snapshot from *account_info* (positions + cash + equity)."""
     cash = float(account_info.get("cash", 0))
     equity = float(account_info.get("equity", 0))
     positions = account_info.get("positions", [])

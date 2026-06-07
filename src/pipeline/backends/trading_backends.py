@@ -60,22 +60,13 @@ class AlpacaTradingBackend(TradingBackend):
     def __init__(self, cfg: dict | None = None):
         self.cfg = cfg or {}
 
-    def execute(
-        self,
-        target_weights: dict[str, float],
-        dry_run: bool,
-        ctx: StepContext,
-    ) -> dict:
+    def fetch_account_snapshot(self, ctx: StepContext) -> dict:
+        """Return current Alpaca account state without generating a rebalance plan."""
         factory = _import_alpaca()
         executor = factory()
-
-        ctx.logger.info("Alpaca executor initialised — accounts: %s",
-                        executor.alpaca.get_available_accounts())
-
-        # Snapshot account state BEFORE rebalance
         acct = executor.alpaca.get_account_info("default")
         positions = executor.alpaca.get_positions("default")
-        account_info = {
+        return {
             "cash": float(acct.get("cash", 0)),
             "equity": float(acct.get("portfolio_value", 0)),
             "buying_power": float(acct.get("buying_power", 0)),
@@ -89,6 +80,21 @@ class AlpacaTradingBackend(TradingBackend):
                 for p in positions
             ],
         }
+
+    def execute(
+        self,
+        target_weights: dict[str, float],
+        dry_run: bool,
+        ctx: StepContext,
+    ) -> dict:
+        factory = _import_alpaca()
+        executor = factory()
+
+        ctx.logger.info("Alpaca executor initialised — accounts: %s",
+                        executor.alpaca.get_available_accounts())
+
+        # Snapshot account state BEFORE rebalance (shared with execute)
+        account_info = self.fetch_account_snapshot(ctx)
 
         plan = executor.alpaca.execute_portfolio_rebalance(
             target_weights,
