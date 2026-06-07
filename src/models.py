@@ -495,6 +495,55 @@ class TradingResult(Base):
     __table_args__ = (Index("ix_tr_run", "pipeline_run_id"),)
 
 
+class OnlineTransaction(Base):
+    """Individual BUY/SELL order event within a trading run."""
+
+    __tablename__ = "online_transaction"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    pipeline_run_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("pipeline_runs.id"), nullable=False
+    )
+    ticker: Mapped[str] = mapped_column(String(10), nullable=False)
+    action: Mapped[str] = mapped_column(String(4), nullable=False)  # BUY / SELL
+    shares: Mapped[float] = mapped_column(DECIMAL(15, 6), nullable=False)
+    price: Mapped[float] = mapped_column(DECIMAL(15, 4), nullable=False)
+    total_amount: Mapped[float] = mapped_column(DECIMAL(20, 2), nullable=False)
+    remaining_cash: Mapped[float] = mapped_column(DECIMAL(20, 2), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(10), nullable=False, default="planned"
+    )  # planned | submitted | filled
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
+
+    __table_args__ = (
+        Index("ix_ot_run", "pipeline_run_id"),
+        Index("ix_ot_ticker", "ticker"),
+    )
+
+
+class Portfolio(Base):
+    """Per-run, per-ticker portfolio snapshot after rebalancing."""
+
+    __tablename__ = "portfolio"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    pipeline_run_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("pipeline_runs.id"), nullable=False
+    )
+    ticker: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    shares: Mapped[Optional[float]] = mapped_column(DECIMAL(15, 6), nullable=True)
+    avg_cost: Mapped[Optional[float]] = mapped_column(DECIMAL(15, 4), nullable=True)
+    cash: Mapped[float] = mapped_column(DECIMAL(20, 2), nullable=False, default=0)
+    equity: Mapped[float] = mapped_column(DECIMAL(20, 2), nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
+
+    __table_args__ = (Index("ix_pf_run", "pipeline_run_id"),)
+
+
 class SchemaMigration(Base):
     """Tracks applied schema migrations so the migration runner can be idempotent."""
 

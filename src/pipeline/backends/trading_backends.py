@@ -72,6 +72,24 @@ class AlpacaTradingBackend(TradingBackend):
         ctx.logger.info("Alpaca executor initialised — accounts: %s",
                         executor.alpaca.get_available_accounts())
 
+        # Snapshot account state BEFORE rebalance
+        acct = executor.alpaca.get_account_info("default")
+        positions = executor.alpaca.get_positions("default")
+        account_info = {
+            "cash": float(acct.get("cash", 0)),
+            "equity": float(acct.get("portfolio_value", 0)),
+            "buying_power": float(acct.get("buying_power", 0)),
+            "positions": [
+                {
+                    "symbol": p["symbol"],
+                    "qty": float(p["qty"]),
+                    "market_value": float(p["market_value"]),
+                    "avg_entry_price": float(p["avg_entry_price"]),
+                }
+                for p in positions
+            ],
+        }
+
         plan = executor.alpaca.execute_portfolio_rebalance(
             target_weights,
             account_name="default",
@@ -88,4 +106,5 @@ class AlpacaTradingBackend(TradingBackend):
             "buys": buys,
             "sells": sells,
             "orders_plan": plan.get("orders_plan", {}),
+            "account_info": account_info,
         }
