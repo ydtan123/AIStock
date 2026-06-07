@@ -16,7 +16,7 @@ class TradingStep(PipelineStep):
         sub = self.step_config(ctx)
 
         auto_submit = sub.get("auto_submit", False)
-        if not _inject_alpaca_env(ctx.cfg):
+        if not _has_alpaca_keys(ctx.cfg, sub):
             return StepResult(
                 step_name=self.name,
                 status="failed" if auto_submit else "skipped",
@@ -109,41 +109,16 @@ def _load_weights_from_db(ctx: StepContext) -> dict[str, float]:
         return weights
 
 
-def _inject_alpaca_env(cfg: dict) -> bool:
-    """Inject Alpaca credentials from config into env if not already set.
-
-    Reads ``trading.alpaca_api_key_<mode>`` / ``trading.alpaca_api_secret_<mode>`` /
-    ``trading.alpaca_base_url_<mode>`` based on ``trading.alpaca_mode`` (paper | live).
-    Falls back to ``trading.alpaca_api_key`` / ``trading.alpaca_api_secret``
-    without mode suffix.  Also respects pre-existing env vars.
-    """
+def _has_alpaca_keys(cfg: dict, sub: dict) -> bool:
+    """Check if Alpaca credentials are configured (trading config or env vars)."""
     import os
-    trading_cfg = cfg.get("trading", {})
-    mode = trading_cfg.get("alpaca_mode", "paper")
-
-    # Mode-specific keys take precedence, then generic keys
+    mode = sub.get("alpaca_mode", "paper")
     api_key = (
-        trading_cfg.get(f"alpaca_api_key_{mode}")
-        or trading_cfg.get("alpaca_api_key")
+        sub.get(f"alpaca_api_key_{mode}")
+        or sub.get("alpaca_api_key")
+        or os.environ.get("APCA_API_KEY")
     )
-    api_secret = (
-        trading_cfg.get(f"alpaca_api_secret_{mode}")
-        or trading_cfg.get("alpaca_api_secret")
-    )
-    base_url = (
-        trading_cfg.get(f"alpaca_base_url_{mode}")
-        or trading_cfg.get("alpaca_base_url")
-        or "https://paper-api.alpaca.markets/v2"
-    )
-
-    if api_key and not os.environ.get("APCA_API_KEY"):
-        os.environ["APCA_API_KEY"] = str(api_key)
-    if api_secret and not os.environ.get("APCA_API_SECRET"):
-        os.environ["APCA_API_SECRET"] = str(api_secret)
-    if not os.environ.get("APCA_BASE_URL"):
-        os.environ["APCA_BASE_URL"] = base_url
-
-    return bool(os.environ.get("APCA_API_KEY"))
+    return bool(api_key)
 
 
 # -- portfolio initialisation -------------------------------------------------
@@ -166,11 +141,11 @@ def _ensure_portfolio_initialized(backend, ctx: StepContext) -> None:
         cash = float(acct.get("cash", 0))
         equity = float(acct.get("equity", 0))
         # Cash-only row
-        s.add(Portfolio(pipeline_run_id=0, ticker=None, cash=cash, equity=equity))
+        s.add(Portfolio(pipeline_run_id=ctx.run_id, ticker=None, cash=cash, equity=equity))
         # Position rows
         for pos in acct.get("positions", []):
             s.add(Portfolio(
-                pipeline_run_id=0,
+                pipeline_run_id=ctx.run_id,
                 ticker=pos["symbol"],
                 shares=float(pos["qty"]),
                 avg_cost=float(pos["avg_entry_price"]),
