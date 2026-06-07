@@ -91,26 +91,7 @@ class FinrlBacktestBackend(BacktestBackend):
         import repository  # noqa: F401
         import models  # noqa: F401
 
-        import sys
-        from pathlib import Path
-        _finrl_root = str(Path(__file__).resolve().parents[3] / "external" / "FinRL-Trading")
-        _finrl_src = _finrl_root + "/src"
-
-        # AIStock's ``src/`` package is already cached in sys.modules and
-        # shadows FinRL's own ``src/``.  Swap in FinRL's version temporarily.
-        saved_path = list(sys.path)
-        saved_src = sys.modules.pop("src", None)
-        for p in (_finrl_src, _finrl_root):
-            if p in saved_path:
-                saved_path.remove(p)
-        sys.path[:] = [_finrl_src, _finrl_root] + saved_path
-
-        try:
-            from backtest.backtest_engine import BacktestConfig, BacktestEngine
-        finally:
-            sys.path[:] = saved_path
-            if saved_src is not None:
-                sys.modules["src"] = saved_src
+        from backtest.backtest_engine import BacktestConfig, BacktestEngine
         return BacktestConfig, BacktestEngine
 
     def run_backtest(

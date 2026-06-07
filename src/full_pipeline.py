@@ -16,6 +16,17 @@ import database  # noqa: F401
 import models  # noqa: F401
 import repository  # noqa: F401
 
+# Ensure FinRL-Trading project root is in sys.path EARLY so that
+# ``from src.data.data_fetcher import ...`` inside backtest_engine.py
+# resolves correctly (FinRL's ``src/`` package, not AIStock's CWD).
+import sys as _sys
+from pathlib import Path as _Path
+_finrl_project = str(_Path(__file__).resolve().parent.parent / "external" / "FinRL-Trading")
+_finrl_src_early = _finrl_project + "/src"
+for _p in (_finrl_src_early, _finrl_project):
+    if _p not in _sys.path:
+        _sys.path.insert(0, _p)
+
 from pipeline.backtest import BacktestStep
 from pipeline.base import PipelineError
 from pipeline.config import ConfigLoader
